@@ -18,18 +18,16 @@
 #*     run as ./bin/mg5  filename                           *
 #*                                                          *
 #************************************************************
-import model sm
+import model cf
 # Define multiparticle labels
-define p = g u c d s u~ c~ d~ s~
-define j = g u c d s u~ c~ d~ s~
-define l+ = e+ mu+
-define l- = e- mu-
-define vl = ve vm vt
-define vl~ = ve~ vm~ vt~
+define e- = el- er-
+define e+ = el+ er+
+define mu- = mul- mur-
+define mu+ = mul+ mur+
 # Specify process(es) to run
-generate p p > e- ve~ @1
-add process p p > e- ve~ j @2
-add process p p > t t~ @3
+##generate p p > e- ve~ @1
+#add process p p > e- ve~ j @2
+#add process p p > t t~ @3
 # Output processes to MadEvent directory
 output 
 # This will create a directory PROC_$MODELNAME_$X

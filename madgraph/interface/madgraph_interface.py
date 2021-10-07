@@ -3026,9 +3026,9 @@ class MadGraphCmd(HelpToCmd, CheckValidForCmd, CompleteForCmd, CmdExtended):
         if madgraph.ReadWrite: # prevent on read-only disk
             self.do_install('update --mode=mg5_start')
 
-        # By default, load the UFO Standard Model
-        logger.info("Loading default model: sm")
-        self.exec_cmd('import model sm', printcmd=False, precmd=True)
+        # By default, load the UFO Chirality Flow Model
+        logger.info("Loading default model: cf")
+        self.exec_cmd('import model cf', printcmd=False, precmd=True)
 
         # preloop mother
         CmdExtended.preloop(self)

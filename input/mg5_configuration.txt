@@ -230,3 +230,7 @@
 # pineappl = pineappl
 
 
+auto_convert_model = True 
+
+# MG5 MAIN DIRECTORY
+mg5_path = /home/zenny/ChiralityFlowMG
