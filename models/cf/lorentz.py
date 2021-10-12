@@ -66,12 +66,15 @@ FFV6 = Lorentz(name = 'FFV6',
                
 FFV7 = Lorentz(name = 'FFV7',
                spins = [ 2, 2, 3 ],
-               structure = 'ProjM(-1,1)')
+               structure = 'ProjM(1,2)' )
               
 FFV8 = Lorentz(name = 'FFV8',
                spins = [ 2, 2, 3],
-               structure = 'ProjP(-1,1)')
+               structure = 'ProjP(1,2)' )
 
+NSSSS1 = Lorentz(name = 'NSSSS1',
+                 spins = [ 1, 1, 1, 1],
+                 structure = '1')
 
 VSS1 = Lorentz(name = 'VSS1',
                spins = [ 3, 1, 1 ],
