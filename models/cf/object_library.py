@@ -68,13 +68,14 @@ class Particle(UFOBaseClass):
 
     require_args=['pdg_code', 'name', 'antiname', 'spin', 'color', 'mass', 'width', 'texname', 'antitexname', 'charge']
 
-    require_args_all = ['pdg_code', 'name', 'antiname', 'spin', 'color', 'mass', 'width', 'texname', 'antitexname', 'charge', 'line', 'propagating', 'goldstoneboson']
+    require_args_all = ['pdg_code', 'name', 'antiname', 'spin', 'color', 'mass', 'width', 'texname', 'antitexname', 'charge', 'line', 'propagating', 'goldstoneboson', 'leftchirality', 'rightchirality']
 
     def __init__(self, pdg_code, name, antiname, spin, color, mass, width, texname,
-                 antitexname, charge , line=None, propagating=True, goldstoneboson=False, **options):
+                 antitexname, charge , line=None, propagating=True, goldstoneboson=False, 
+                 leftchirality=int(0), rightchirality=int(0), **options):
 
         args= (pdg_code, name, antiname, spin, color, mass, width, texname,
-                 antitexname, float(charge))
+                 antitexname, float(charge), leftchirality, rightchirality)
 
         UFOBaseClass.__init__(self, *args,  **options)
 
@@ -83,6 +84,8 @@ class Particle(UFOBaseClass):
 
         self.propagating = propagating
         self.goldstoneboson= goldstoneboson
+        self.leftchirality = leftchirality
+        self.rightchirality = rightchirality
 
         self.selfconjugate = (name == antiname)
         if 1: #not line:
@@ -137,7 +140,8 @@ class Particle(UFOBaseClass):
             newcolor = -self.color
                 
         return Particle(-self.pdg_code, self.antiname, self.name, self.spin, newcolor, self.mass, self.width,
-                        self.antitexname, self.texname, -self.charge, self.line, self.propagating, self.goldstoneboson, **outdic)
+                        self.antitexname, self.texname, -self.charge, self.line, self.propagating, self.goldstoneboson, 
+                        -self.leftchirality, -self.rightchirality, **outdic)
 
 
 
