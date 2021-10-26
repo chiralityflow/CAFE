@@ -2,3 +2,6 @@ models/RS/.DS_Store
 help
 ./tests/input_files/my_smallsm
 input/mg5_configuration.txt
+models/smcomp
+models/cf/py3_model.pkl
+Template/LO/Source/make_opts

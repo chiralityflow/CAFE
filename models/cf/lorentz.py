@@ -26,7 +26,7 @@ SSS1 = Lorentz(name = 'SSS1',
 
 SSS2 = Lorentz(name = 'SSS2',
                spins = [ 1, 1, 1, ],
-               structure = 'P(1,1) + P(1,2)')
+               structure = 'P(1,1) + P(1,3)')
 
 FFS1 = Lorentz(name = 'FFS1',
                spins = [ 2, 2, 1 ],
@@ -76,10 +76,6 @@ FFV8 = Lorentz(name = 'FFV8',
                spins = [ 2, 2, 3],
                structure = 'ProjP(1,2)' )
 
-NSSSS1 = Lorentz(name = 'NSSSS1',
-                 spins = [ 1, 1, 1, 1],
-                 structure = '1')
-
 VSS1 = Lorentz(name = 'VSS1',
                spins = [ 3, 1, 1 ],
                structure = 'P(1,2) - P(1,3)')
@@ -99,6 +95,10 @@ VVV1 = Lorentz(name = 'VVV1',
 SSSS1 = Lorentz(name = 'SSSS1',
                 spins = [ 1, 1, 1, 1 ],
                 structure = '1')
+
+SSSS2 = Lorentz(name = 'SSSS2',
+                spins = [ 1, 1, 1, 1 ],
+                structure = 'P(1,1) + P(1,4)')
 
 VVSS1 = Lorentz(name = 'VVSS1',
                 spins = [ 3, 3, 1, 1 ],
