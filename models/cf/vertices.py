@@ -33,15 +33,15 @@ V_4 = Vertex(name = 'V_4',
               couplings = {(0,0):C.GC_3})
 
 V_5 = Vertex(name = 'V_5',
-              particles = [ P.eRs__plus__, P.aS, P.eLs__minus__ ],
+              particles = [P.eLs__minus__  , P.aS, P.eRs__plus__],
               color = [ '1' ],
-              lorentz = [ L.SSS2 ],
+              lorentz = [ L.SSS1 ],
               couplings = {(0,0):C.GC_3})
 
 V_6 = Vertex(name = 'V_6',
               particles = [ P.eLs__plus__, P.aS, P.eRs__minus__ ],
               color = [ '1' ],
-              lorentz = [ L.SSS2 ],
+              lorentz = [ L.SSS1 ],
               couplings = {(0,0):C.GC_3})
 
 V_7 = Vertex(name = 'V_7',

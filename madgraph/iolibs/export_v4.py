@@ -2682,6 +2682,9 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         # Extract helas calls
         helas_calls = fortran_model.get_matrix_element_calls(\
                     matrix_element)
+        helas_calls_2 = self.mg_to_chirality_flow_calls(helas_calls, matrix_element)
+        misc.sprint(helas_calls)
+        print('hello world')
 
         replace_dict['helas_calls'] = "\n".join(helas_calls)
 
@@ -2853,6 +2856,34 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
             writer.writelines(check_sa_content % replace_dict)
         else:
             return replace_dict
+
+    #===========================================================================
+    # mg_to_chirality_flow_calls
+    #===========================================================================
+    def mg_to_chirality_flow_calls(self, helas_calls, matrix_element):
+        """Change helas_calls to give chirality-flow helas objects"""  
+        print('hello world') 
+        helas_calls_copy = copy.copy(helas_calls)
+        misc.sprint(helas_calls_copy)
+        # get process
+        process_lines = self.get_process_info_lines(matrix_element)
+        misc.sprint(process_lines)
+        # for particle in process, get chirality flow charge
+
+
+        # change the external wavefuntions
+        (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
+        misc.sprint(nexternal)
+        for i in range(nexternal):
+            misc.sprint(i, helas_calls_copy[i], helas_calls_copy[i][0])
+
+
+        # change the vertex functions??
+
+ 
+
+
+        return
 
 class ProcessExporterFortranMatchBox(ProcessExporterFortranSA):
     """class to take care of exporting a set of matrix element for the Matchbox
