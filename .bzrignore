@@ -5,3 +5,6 @@ input/mg5_configuration.txt
 models/smcomp
 models/cf/py3_model.pkl
 Template/LO/Source/make_opts
+bin/nsqso_born.inc
+bin/py.py
+models/sm/py3_model.pkl

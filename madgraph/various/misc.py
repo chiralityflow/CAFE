@@ -1440,8 +1440,8 @@ class OptionParser(optparse.OptionParser):
 def sprint(*args, **opt):
     """Returns the current line number in our program."""
     
-    if not __debug__:
-        return
+    #if not __debug__:
+    #    return
     
 
     import inspect
@@ -1507,7 +1507,36 @@ def sprint(*args, **opt):
     elif 'sleep' in opt:
         time.sleep(int(opt['sleep']))
 
-    return 
+    return
+
+def get_symbols(words,symbols):
+    """Finds the positions where a substring appears in a string"""
+    start_pos = 0
+    pos_list = []
+    for i in range(len(words)):
+        if words[i] == symbols:
+            pos_list.append(i)
+    return pos_list
+
+def get_particles(interaction):
+    "Determines which particles are included in a given interaction, using the get_process_info_lines() convention"
+    linebreaks = get_symbols(interaction,'\n')
+    # We only take the first interaction in a given list of interactions. Need to distinguish the formatting if there are several interactions or only one
+    if len(linebreaks) == 0:
+        r = interaction.find('WEIGHTED')
+        first_interac = interaction[11:r]
+    else:
+        first_interac = interaction[11:linebreaks[0]]
+    interac_break = first_interac.find('>')
+    all_parts = first_interac[:interac_break-1] + first_interac[interac_break+1:]
+    part_list = []
+    k = 0
+    for i in range(len(all_parts)):
+        if (all_parts[i] == ' '):
+            part_list.append(all_parts[k:i])
+            k = i+1
+    return(part_list)
+
 
 class misc(object):
     @staticmethod

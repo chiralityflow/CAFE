@@ -141,7 +141,7 @@ class Particle(UFOBaseClass):
                 
         return Particle(-self.pdg_code, self.antiname, self.name, self.spin, newcolor, self.mass, self.width,
                         self.antitexname, self.texname, -self.charge, self.line, self.propagating, self.goldstoneboson, 
-                        -self.leftchirality, -self.rightchirality, **outdic)
+                        self.rightchirality, self.leftchirality, **outdic)
 
 
 

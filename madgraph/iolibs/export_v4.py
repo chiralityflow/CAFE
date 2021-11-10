@@ -2682,9 +2682,10 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         # Extract helas calls
         helas_calls = fortran_model.get_matrix_element_calls(\
                     matrix_element)
-        helas_calls_2 = self.mg_to_chirality_flow_calls(helas_calls, matrix_element)
-        misc.sprint(helas_calls)
-        print('hello world')
+        #Replace scalar helas calls with corresponding fermions
+        helas_calls_2 = self.mg_to_chirality_flow_calls(helas_calls, matrix_element) #Comment out this line to get the actual input interaction
+        helas_calls = helas_calls_2
+
 
         replace_dict['helas_calls'] = "\n".join(helas_calls)
 
@@ -2862,28 +2863,54 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
     #===========================================================================
     def mg_to_chirality_flow_calls(self, helas_calls, matrix_element):
         """Change helas_calls to give chirality-flow helas objects"""  
-        print('hello world') 
         helas_calls_copy = copy.copy(helas_calls)
-        misc.sprint(helas_calls_copy)
         # get process
         process_lines = self.get_process_info_lines(matrix_element)
-        misc.sprint(process_lines)
+        # get list of particles in process
+        parts_list = misc.get_particles(process_lines)
         # for particle in process, get chirality flow charge
-
+        # here, x_list[i] = 0 means the particle has no x-charge,
+        # x_list[i] = 1 means the particle has x-charge and has positive electric charge,
+        # and x_list[i] = -1 means the particle has x-charge and has negative electric charge
+        left_list = []
+        right_list = []
+        for i in range(len(parts_list)):
+            left_list.append(0)
+            right_list.append(0)
+            if (parts_list[i][-3] == 'l'):
+                left_list[i] = 1
+            elif (parts_list[i][-3] == 'r'):
+                right_list[i] = 1
+            if ((parts_list[i][-1] == '-')):
+                left_list[i] = -1*left_list[i]
+                right_list[i] = -1*right_list[i]
 
         # change the external wavefuntions
+        # treat incoming and outgoing particles independently, since an incoming fermion is equivalent
+        # with an outgoing anti-fermion and vice versa
         (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
-        misc.sprint(nexternal)
-        for i in range(nexternal):
-            misc.sprint(i, helas_calls_copy[i], helas_calls_copy[i][0])
-
-
+        for i in range(ninitial):
+            if ((left_list[i] == 1) and (right_list[i] == 0)):
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + 'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
+            elif ((left_list[i] == 0) and (right_list[i] == 1)):
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:19] + 'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
+            elif ((left_list[i] == -1) and (right_list[i] == 0)):
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ILH' + helas_calls_copy[i][8:19] + 'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
+            elif ((left_list[i] == 0) and (right_list[i] == -1)):
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:19] + 'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
+        for i in range(ninitial,nexternal):
+            if ((left_list[i] == -1) and (right_list[i] == 0)):
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + 'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
+            elif ((left_list[i] == 0) and (right_list[i] == -1)):
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:19] + 'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
+            elif ((left_list[i] == 1) and (right_list[i] == 0)):
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ILH' + helas_calls_copy[i][8:19] + 'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
+            elif ((left_list[i] == 0) and (right_list[i] == 1)):
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:19] + 'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
+        
         # change the vertex functions??
 
- 
-
-
-        return
+        return(helas_calls_copy)
 
 class ProcessExporterFortranMatchBox(ProcessExporterFortranSA):
     """class to take care of exporting a set of matrix element for the Matchbox
@@ -6331,7 +6358,7 @@ class UFO_model_to_mg4(object):
             if str(part.get('mass')) in to_change:
                 part.set('mass', rep_pattern.sub(replace, str(part.get('mass'))))
             if str(part.get('width')) in to_change:
-                part.set('width', rep_pattern.sub(replace, str(part.get('width'))))                
+                part.set('width', rep_pattern.sub(replace, str(part.get('width'))))       
                 
     def refactorize(self, wanted_couplings = []):    
         """modify the couplings to fit with MG4 convention """

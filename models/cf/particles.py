@@ -20,24 +20,24 @@ a = Particle(pdg_code = 90022,
              GhostNumber = 0,
              LeptonNumber = 0,
              line='double',
-             leftchirality = -1,
+             leftchirality = 1,
              rightchirality = 1,
              Y = 0)
 
-aS = Particle(pdg_code = 90122,
-             name = 'aS',
-             antiname = 'aS',
+avS0 = Particle(pdg_code = 90122,
+             name = 'avS0',
+             antiname = 'avS0',
              spin = 1,
              color = 1,
              mass = Param.ZERO,
              width = Param.ZERO,
-             texname = 'aS',
-             antitexname = 'aS',
+             texname = 'avS0',
+             antitexname = 'avS0',
              charge = 0,
              GhostNumber = 0,
              LeptonNumber = 0,
              line='double',
-             leftchirality = -1,
+             leftchirality = 1,
              rightchirality = 1,
              Y = 0)
 
@@ -134,7 +134,7 @@ eL__minus__ = Particle(pdg_code = 90001,
                       GhostNumber = 0,
                       LeptonNumber = 1,
                       line='dotted',
-                      leftchirality = -1,
+                      leftchirality = 1,
                       Y = 0)
 
 eR__plus__ = eL__minus__.anti()
@@ -152,7 +152,7 @@ eR__minus__ = Particle(pdg_code = 90003,
                       GhostNumber = 0,
                       LeptonNumber = 1,
                       line='straight',
-                      rightchirality = -1,
+                      rightchirality = 1,
                       Y = 0)
 
 eL__plus__ = eR__minus__.anti()
@@ -170,7 +170,7 @@ muL__minus__ = Particle(pdg_code = 90005,
                        GhostNumber = 0,
                        LeptonNumber = 1,
                        line='dotted',
-                       leftchirality = -1,
+                       leftchirality = 1,
                        Y = 0)
                        
 muR__plus__ = muL__minus__.anti()
@@ -188,7 +188,7 @@ muR__minus__ = Particle(pdg_code = 90007,
                        GhostNumber = 0,
                        LeptonNumber = 1,
                        line='straight',
-                       rightchirality = -1,
+                       rightchirality = 1,
                        Y = 0)
 
 muL__plus__ = muR__minus__.anti()
@@ -202,11 +202,11 @@ eLs__minus__ = Particle(pdg_code = 90101,
                       width = Param.ZERO,
                       texname = 'eLs-',
                       antitexname = 'eRr+',
-                      charge = 0,
+                      charge = -1,
                       GhostNumber = 0,
                       LeptonNumber = 1,
                       line='dotted',
-                      lefthirality = -1,
+                      lefthirality = 1,
                       Y = 0)
 
 eRs__plus__ = eLs__minus__.anti()
@@ -220,11 +220,11 @@ eRs__minus__ = Particle(pdg_code = 90103,
                       width = Param.ZERO,
                       texname = 'eLs-',
                       antitexname = 'eRs+',
-                      charge = 0,
+                      charge = -1,
                       GhostNumber = 0,
                       LeptonNumber = 1,
                       line='straight',
-                      rightchirality = -1,
+                      rightchirality = 1,
                       Y = 0)
 
 eLs__plus__ = eRs__minus__.anti()
@@ -238,11 +238,11 @@ muLs__minus__ = Particle(pdg_code = 90105,
                        width = Param.ZERO,
                        texname = 'muLs-',
                        antitexname = 'muRs+',
-                       charge = 0,
+                       charge = -1,
                        GhostNumber = 0,
                        LeptonNumber = 1,
                        line='dotted',
-                       leftchirality = -1,
+                       leftchirality = 1,
                        Y = 0)
                        
 muRs__plus__ = muLs__minus__.anti()
@@ -256,11 +256,11 @@ muRs__minus__ = Particle(pdg_code = 90107,
                        width = Param.ZERO,
                        texname = 'muRs-',
                        antitexname = 'muLs+',
-                       charge = 0,
+                       charge = -1,
                        GhostNumber = 0,
                        LeptonNumber = 1,
                        line='straight',
-                       rightchirality = -1,
+                       rightchirality = 1,
                        Y = 0)
 
 muLs__plus__ = muRs__minus__.anti()
