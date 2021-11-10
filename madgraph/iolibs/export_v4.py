@@ -2877,13 +2877,14 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         for i in range(len(parts_list)):
             left_list.append(0)
             right_list.append(0)
-            if (parts_list[i][-3] == 'l'):
-                left_list[i] = 1
-            elif (parts_list[i][-3] == 'r'):
-                right_list[i] = 1
-            if ((parts_list[i][-1] == '-')):
-                left_list[i] = -1*left_list[i]
-                right_list[i] = -1*right_list[i]
+            if (parts_list[i][-2] == 's'):
+                if (parts_list[i][-3] == 'l'):
+                    left_list[i] = 1
+                elif (parts_list[i][-3] == 'r'):
+                    right_list[i] = 1
+                if ((parts_list[i][-1] == '-')):
+                    left_list[i] = -1*left_list[i]
+                    right_list[i] = -1*right_list[i]
 
         # change the external wavefuntions
         # treat incoming and outgoing particles independently, since an incoming fermion is equivalent
