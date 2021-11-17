@@ -2684,6 +2684,7 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
                     matrix_element)
         #Replace scalar helas calls with corresponding fermions
         helas_calls_2 = self.mg_to_chirality_flow_calls(helas_calls, matrix_element) #Comment out this line to get the actual input interaction
+        #misc.sprint(helas_calls, helas_calls_2)
         helas_calls = helas_calls_2
 
 
@@ -2877,7 +2878,9 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         for i in range(len(parts_list)):
             left_list.append(0)
             right_list.append(0)
-            if (parts_list[i][-2] == 's'):
+            # checks whether the particle is a scalar that should be exchanged in our notation,
+            # where the last 3 characters denote chiral charge, scalar status, and electric charge
+            if (parts_list[i][-2] == 'f'):
                 if (parts_list[i][-3] == 'l'):
                     left_list[i] = 1
                 elif (parts_list[i][-3] == 'r'):
@@ -2885,6 +2888,11 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
                 if ((parts_list[i][-1] == '-')):
                     left_list[i] = -1*left_list[i]
                     right_list[i] = -1*right_list[i]
+        fermionic_list_left = [i for i, e in enumerate(left_list) if e != 0]
+        fermionic_list_right = [i for i, e in enumerate(right_list) if e != 0]
+        fermionic_change = True
+        if (len(fermionic_list_left) == 0) and (len(fermionic_list_right) == 0):
+            fermionic_change = False
 
         # change the external wavefuntions
         # treat incoming and outgoing particles independently, since an incoming fermion is equivalent
@@ -2892,26 +2900,59 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
         for i in range(ninitial):
             if ((left_list[i] == 1) and (right_list[i] == 0)):
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + 'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
+                # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:19] + \
+                'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
             elif ((left_list[i] == 0) and (right_list[i] == 1)):
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:19] + 'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
+                # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:19] + \
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:19] + \
+                'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
             elif ((left_list[i] == -1) and (right_list[i] == 0)):
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ILH' + helas_calls_copy[i][8:19] + 'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
+                #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ILH' + helas_calls_copy[i][8:19] + \
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:19] + \
+                'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
             elif ((left_list[i] == 0) and (right_list[i] == -1)):
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:19] + 'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
+                #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:19] + \
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:19] + \
+                'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
         for i in range(ninitial,nexternal):
             if ((left_list[i] == -1) and (right_list[i] == 0)):
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + 'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
+                #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:19] + \
+                'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
             elif ((left_list[i] == 0) and (right_list[i] == -1)):
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:19] + 'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
+                #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:19] + \
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:19] + \
+                'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
             elif ((left_list[i] == 1) and (right_list[i] == 0)):
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ILH' + helas_calls_copy[i][8:19] + 'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
+                #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ILH' + helas_calls_copy[i][8:19] + \
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:19] + \
+                'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
             elif ((left_list[i] == 0) and (right_list[i] == 1)):
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:19] + 'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
-        
+                #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:19] + \
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:19] + \
+                'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
+        # generate er- el+ > mul- mur+
+        # 'CALL FFV6P0_3(W(1,1),W(1,2),GC_3,ZERO,ZERO,W(1,5))', '# Amplitude(s) for diagram number 1', 'CALL FFV2_0(W(1,4),W(1,3),W(1,5),GC_3,AMP(1))'
+        # 'SSS3_3(W(1,1),W(1,2),GC_3,ZERO,ZERO,W(1,5))', 'SSS2_0(W(1,4),W(1,3),W(1,5),GC_3,AMP(1))'
         # change the vertex functions??
-
-        return(helas_calls_copy)
+        helas_calls_2py = helas_calls_copy
+        if fermionic_change == True:
+            vertex_info = misc.get_vertices(helas_calls, matrix_element)
+            for i in range(len(vertex_info[1])):
+                if vertex_info[0][i].startswith("SSS2"):
+                    helas_calls_2py[vertex_info[1][i]] = helas_calls_copy[vertex_info[1][i]][:5]\
+                         + 'FFV2' + helas_calls_copy[vertex_info[1][i]][9:]
+                elif vertex_info[0][i].startswith("SSS3"):
+                    helas_calls_2py[vertex_info[1][i]] = helas_calls_copy[vertex_info[1][i]][:5]\
+                         + 'FFV6' + helas_calls_copy[vertex_info[1][i]][9:]
+                commas = misc.get_symbols(vertex_info[0][i],',')
+                if vertex_info[0][i][commas[-2]+1].startswith("W"):
+                    parentheses = misc.get_symbols(helas_calls_2py[vertex_info[1][i]],'(')
+                    helas_calls_2py[vertex_info[1][i]] = helas_calls_2py[vertex_info[1][i]][:parentheses[0] - 2]\
+                         + "P0" + helas_calls_2py[vertex_info[1][i]][parentheses[0] - 2:]
+                    
+        return(helas_calls_2py)
 
 class ProcessExporterFortranMatchBox(ProcessExporterFortranSA):
     """class to take care of exporting a set of matrix element for the Matchbox

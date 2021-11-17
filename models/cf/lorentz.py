@@ -26,7 +26,11 @@ SSS1 = Lorentz(name = 'SSS1',
 
 SSS2 = Lorentz(name = 'SSS2',
                spins = [ 1, 1, 1, ],
-               structure = 'P(1,1) + P(1,3)')
+               structure = '1')
+
+SSS3 = Lorentz(name = 'SSS3',
+               spins = [ 1, 1, 1, ],
+               structure = '1')
 
 FFS1 = Lorentz(name = 'FFS1',
                spins = [ 2, 2, 1 ],

@@ -105,6 +105,7 @@ class AbstractRoutine(object):
         if aloha.mp_precision and 'MP' not in self.tag:
             self.tag.append('MP')
             text += self.write(output_dir, language, mode, **opt)
+        #misc.sprint(text)
         return text
     
     def get_info(self, info):
@@ -279,7 +280,17 @@ in presence of majorana particle/flow violation"""
         if (outgoing + 1) // 2 in self.conjg:
             #flip the outgoing tag if in conjugate
             outgoing = outgoing + outgoing % 2 - (outgoing +1) % 2
-        
+        if (self.name.startswith("SSS2") or self.name.startswith("SSS3")):
+            self.spins = [2, 2, 3]
+            if (self.outgoing != 0):
+                self.tag.append('P0')
+        if (self.name == "SSS2"):
+            self.name = "FFV2"
+            self.lorentz_expr = "Gamma(3,2,-1)*ProjM(-1,1)"
+        if (self.name == "SSS3"):
+            self.name = "FFV6"
+            self.lorentz_expr = "Gamma(3,2,-1)*ProjP(-1,1)"
+        attribs = vars(self)
         if not self.routine_kernel:
             AbstractRoutineBuilder.counter += 1
             if self.tag == []:
@@ -288,7 +299,7 @@ in presence of majorana particle/flow violation"""
                 logger.debug('aloha creates %s set of routines with options: %s' \
                             % (self.name, ','.join(self.tag)) )
             try:
-                lorentz = self.parse_expression()  
+                lorentz = self.parse_expression()
                 self.routine_kernel = lorentz
                 lorentz = eval(lorentz)
             except NameError as error:

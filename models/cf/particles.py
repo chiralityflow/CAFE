@@ -1,6 +1,13 @@
 # This file was automatically created by FeynRules 1.7.69
 # Mathematica version: 8.0 for Mac OS X x86 (64-bit) (November 6, 2010)
 # Date: Mon 1 Oct 2012 14:58:25
+# UFO files for the chiF formalism for the CAFE extension for MG5
+# Naming convention for any new particles is as follows:
+# The particle musc be denoted as a scalar in the UFO files
+# and the final 3 symbols of its name should be xyz, with
+# x denoting the chiral charge: L for left, R for right, and 0 for a scalar or vector (usually)
+# y denoting the type of particle it should actually be: s for scalar, f for fermion, and v for vector
+# z denoting electric charge: + for +1, - for -1, and 0 for 0
 
 
 from __future__ import division
@@ -24,15 +31,15 @@ a = Particle(pdg_code = 90022,
              rightchirality = 1,
              Y = 0)
 
-avS0 = Particle(pdg_code = 90122,
-             name = 'avS0',
-             antiname = 'avS0',
+a0v0 = Particle(pdg_code = 90122,
+             name = 'a0v0',
+             antiname = 'a0v0',
              spin = 1,
              color = 1,
              mass = Param.ZERO,
              width = Param.ZERO,
-             texname = 'avS0',
-             antitexname = 'avS0',
+             texname = 'a0v0',
+             antitexname = 'a0v0',
              charge = 0,
              GhostNumber = 0,
              LeptonNumber = 0,
@@ -193,15 +200,15 @@ muR__minus__ = Particle(pdg_code = 90007,
 
 muL__plus__ = muR__minus__.anti()
 
-eLs__minus__ = Particle(pdg_code = 90101,
-                      name = 'eLs-',
-                      antiname = 'eRs+',
+eLf__minus__ = Particle(pdg_code = 90101,
+                      name = 'eLf-',
+                      antiname = 'eRf+',
                       spin = 1,
                       color = 1,
                       mass = Param.Me,
                       width = Param.ZERO,
-                      texname = 'eLs-',
-                      antitexname = 'eRr+',
+                      texname = 'eLf-',
+                      antitexname = 'eRf+',
                       charge = -1,
                       GhostNumber = 0,
                       LeptonNumber = 1,
@@ -209,17 +216,17 @@ eLs__minus__ = Particle(pdg_code = 90101,
                       lefthirality = 1,
                       Y = 0)
 
-eRs__plus__ = eLs__minus__.anti()
+eRf__plus__ = eLf__minus__.anti()
                        
-eRs__minus__ = Particle(pdg_code = 90103,
-                      name = 'eRs-',
-                      antiname = 'eLs+',
+eRf__minus__ = Particle(pdg_code = 90103,
+                      name = 'eRf-',
+                      antiname = 'eLf+',
                       spin = 1,
                       color = 1,
                       mass = Param.Me,
                       width = Param.ZERO,
-                      texname = 'eLs-',
-                      antitexname = 'eRs+',
+                      texname = 'eLf-',
+                      antitexname = 'eRf+',
                       charge = -1,
                       GhostNumber = 0,
                       LeptonNumber = 1,
@@ -227,17 +234,17 @@ eRs__minus__ = Particle(pdg_code = 90103,
                       rightchirality = 1,
                       Y = 0)
 
-eLs__plus__ = eRs__minus__.anti()
+eLf__plus__ = eRf__minus__.anti()
 
-muLs__minus__ = Particle(pdg_code = 90105,
-                       name = 'muLs-',
-                       antiname = 'muRs+',
+muLf__minus__ = Particle(pdg_code = 90105,
+                       name = 'muLf-',
+                       antiname = 'muRf+',
                        spin = 1,
                        color = 1,
                        mass = Param.MM,
                        width = Param.ZERO,
-                       texname = 'muLs-',
-                       antitexname = 'muRs+',
+                       texname = 'muLf-',
+                       antitexname = 'muRf+',
                        charge = -1,
                        GhostNumber = 0,
                        LeptonNumber = 1,
@@ -245,17 +252,17 @@ muLs__minus__ = Particle(pdg_code = 90105,
                        leftchirality = 1,
                        Y = 0)
                        
-muRs__plus__ = muLs__minus__.anti()
+muRf__plus__ = muLf__minus__.anti()
 
-muRs__minus__ = Particle(pdg_code = 90107,
-                       name = 'muRs-',
-                       antiname = 'muLs+',
+muRf__minus__ = Particle(pdg_code = 90107,
+                       name = 'muRf-',
+                       antiname = 'muLf+',
                        spin = 1,
                        color = 1,
                        mass = Param.MM,
                        width = Param.ZERO,
-                       texname = 'muRs-',
-                       antitexname = 'muLs+',
+                       texname = 'muRf-',
+                       antitexname = 'muLf+',
                        charge = -1,
                        GhostNumber = 0,
                        LeptonNumber = 1,
@@ -263,6 +270,6 @@ muRs__minus__ = Particle(pdg_code = 90107,
                        rightchirality = 1,
                        Y = 0)
 
-muLs__plus__ = muRs__minus__.anti()
+muLf__plus__ = muRf__minus__.anti()
 
 

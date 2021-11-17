@@ -33,27 +33,27 @@ V_4 = Vertex(name = 'V_4',
               couplings = {(0,0):C.GC_3})
 
 V_5 = Vertex(name = 'V_5',
-              particles = [P.eLs__minus__  , P.avS0, P.eRs__plus__],
+              particles = [P.eLf__minus__, P.eRf__plus__, P.a0v0 ],
               color = [ '1' ],
-              lorentz = [ L.SSS1 ],
+              lorentz = [ L.SSS2 ],
               couplings = {(0,0):C.GC_3})
 
 V_6 = Vertex(name = 'V_6',
-              particles = [ P.eLs__plus__, P.avS0, P.eRs__minus__ ],
+              particles = [ P.eLf__plus__, P.eRf__minus__, P.a0v0],
               color = [ '1' ],
-              lorentz = [ L.SSS1 ],
+              lorentz = [ L.SSS3 ],
               couplings = {(0,0):C.GC_3})
 
 V_7 = Vertex(name = 'V_7',
-              particles = [ P.muRs__plus__, P.avS0, P.muLs__minus__ ],
+              particles = [ P.muRf__plus__, P.muLf__minus__, P.a0v0 ],
               color = [ '1' ],
-              lorentz = [ L.SSS1 ],
+              lorentz = [ L.SSS2 ],
               couplings = {(0,0):C.GC_3})
 
 V_8 = Vertex(name = 'V_8',
-              particles = [ P.muLs__plus__, P.avS0, P.muRs__minus__ ],
+              particles = [ P.muLf__plus__, P.muRf__minus__, P.a0v0 ],
               color = [ '1' ],
-              lorentz = [ L.SSS1 ],
+              lorentz = [ L.SSS3 ],
               couplings = {(0,0):C.GC_3})
 
 

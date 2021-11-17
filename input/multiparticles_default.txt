@@ -12,10 +12,10 @@
 #
 ################################################################################
 # Syntax: label = particles (separated by spaces)
-es- = eLs- eRs-
-es+ = eLs+ eRs+
-mus- = muLs- muRs-
-mus+ = muLs+ muRs+
+es- = eLf- eRf-
+es+ = eLf+ eRf+
+mus- = muLf- muRf-
+mus+ = muLf+ muRf+
 e- = el- er-
 e+ = el+ er+
 mu- = mul- mur-

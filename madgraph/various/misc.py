@@ -1521,7 +1521,8 @@ def get_symbols(words,symbols):
 def get_particles(interaction):
     "Determines which particles are included in a given interaction, using the get_process_info_lines() convention"
     linebreaks = get_symbols(interaction,'\n')
-    # We only take the first interaction in a given list of interactions. Need to distinguish the formatting if there are several interactions or only one
+    # We only take the first interaction in a given list of interactions. 
+    # Need to distinguish the formatting if there are several interactions or only one
     if len(linebreaks) == 0:
         r = interaction.find('WEIGHTED')
         first_interac = interaction[11:r]
@@ -1536,6 +1537,20 @@ def get_particles(interaction):
             part_list.append(all_parts[k:i])
             k = i+1
     return(part_list)
+
+def get_vertices(interaction, matrix_element):
+    "Determines which vertices are included in a given interaction, using the helas_calls convention"
+    helas = interaction.copy()
+    (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
+    vertex_info = []
+    vertex_pos = []
+    for i in range(nexternal,len(helas)):
+        if (helas[i][0] != '#'):
+            vertex_info.append(helas[i][5:])
+            vertex_pos.append(i)
+
+    return [vertex_info,vertex_pos]
+
 
 
 class misc(object):
