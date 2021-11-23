@@ -105,7 +105,6 @@ class AbstractRoutine(object):
         if aloha.mp_precision and 'MP' not in self.tag:
             self.tag.append('MP')
             text += self.write(output_dir, language, mode, **opt)
-        #misc.sprint(text)
         return text
     
     def get_info(self, info):
@@ -1318,7 +1317,6 @@ def write_aloha_file_inc(aloha_dir,file_ext, comp_ext):
     text="ALOHARoutine = "
     text += ' '.join(aloha_files)
     text +='\n'
-    
 
     open(os.path.join(aloha_dir, 'aloha_file.inc'), 'w').write(text) 
 

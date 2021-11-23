@@ -284,7 +284,7 @@ c output:
 c       complex fi(6)          : fermion wavefunction               |fi>
 c
       implicit none
-      double complex fi(6),chi(2)
+      double complex fi(4),chi(2)
       double precision p(0:3),sf(2),sfomeg(2),omega(2),fmass,
      &     pp,pp3,sqp0p3,sqm(0:1)
       integer nhel,nsf,ip,im,nh
@@ -347,8 +347,6 @@ c#endif
 
             fi(3) = ip     * sqm(ip)
             fi(4) = im*nsf * sqm(ip)
-            fi(5) = ip*nsf * sqm(im)
-            fi(6) = im     * sqm(im)
 
          else
 
@@ -370,8 +368,6 @@ c#endif
 
             fi(3) = sfomeg(1)*chi(im)
             fi(4) = sfomeg(1)*chi(ip)
-            fi(5) = sfomeg(2)*chi(im)
-            fi(6) = sfomeg(2)*chi(ip)
 
          endif
 
@@ -391,13 +387,9 @@ c#endif
          if ( nh.eq.1 ) then
             fi(3) = dcmplx( rZero )
             fi(4) = dcmplx( rZero )
-            fi(5) = chi(1)
-            fi(6) = chi(2)
          else
             fi(3) = chi(2)
             fi(4) = chi(1)
-            fi(5) = dcmplx( rZero )
-            fi(6) = dcmplx( rZero )
          endif
       endif
 c
@@ -419,7 +411,7 @@ c output:
 c       complex fi(6)          : fermion wavefunction               |fi>
 c
       implicit none
-      double complex fi(6),chi(2)
+      double complex fi(4),chi(2)
       double precision p(0:3),sf(2),sfomeg(2),omega(2),fmass,
      &     pp,pp3,sqp0p3,sqm(0:1)
       integer nhel,nsf,ip,im,nh
@@ -480,10 +472,8 @@ c#endif
             ip = (1+nh)/2
             im = (1-nh)/2
 
-            fi(3) = ip     * sqm(ip)
-            fi(4) = im*nsf * sqm(ip)
-            fi(5) = ip*nsf * sqm(im)
-            fi(6) = im     * sqm(im)
+            fi(3) = ip*nsf * sqm(im)
+            fi(4) = im     * sqm(im)
 
          else
 
@@ -503,10 +493,8 @@ c#endif
                chi(2) = dcmplx( nh*p(1) , p(2) )/dsqrt(rTwo*pp*pp3)
             endif
 
-            fi(3) = sfomeg(1)*chi(im)
-            fi(4) = sfomeg(1)*chi(ip)
-            fi(5) = sfomeg(2)*chi(im)
-            fi(6) = sfomeg(2)*chi(ip)
+            fi(3) = sfomeg(2)*chi(im)
+            fi(4) = sfomeg(2)*chi(ip)
 
          endif
 
@@ -524,15 +512,11 @@ c#endif
             chi(2) = dcmplx( nh*p(1), p(2) )/sqp0p3
          endif
          if ( nh.eq.1 ) then
+            fi(3) = chi(1)
+            fi(4) = chi(2)
+         else
             fi(3) = dcmplx( rZero )
             fi(4) = dcmplx( rZero )
-            fi(5) = chi(1)
-            fi(6) = chi(2)
-         else
-            fi(3) = chi(2)
-            fi(4) = chi(1)
-            fi(5) = dcmplx( rZero )
-            fi(6) = dcmplx( rZero )
          endif
       endif
 c
@@ -815,7 +799,7 @@ c output:
 c       complex fo(6)          : fermion wavefunction               <fo|
 c
       implicit none
-      double complex fo(6),chi(2)
+      double complex fo(4),chi(2)
       double precision p(0:3),sf(2),sfomeg(2),omega(2),fmass,
      &     pp,pp3,sqp0p3,sqm(0:1)
       integer nhel,nsf,nh,ip,im
@@ -877,8 +861,6 @@ c#endif
             ip = nhel * -1 * ((1-nh)/2)
             fo(3) = im     * sqm(abs(ip))
             fo(4) = ip*nsf * sqm(abs(ip))
-            fo(5) = im*nsf * sqm(abs(im))
-            fo(6) = ip     * sqm(abs(im))
          else
 
             pp = min(p(0),dsqrt(p(1)**2+p(2)**2+p(3)**2))
@@ -900,8 +882,6 @@ c#endif
 
             fo(3) = sfomeg(2)*chi(im)
             fo(4) = sfomeg(2)*chi(ip)
-            fo(5) = sfomeg(1)*chi(im)
-            fo(6) = sfomeg(1)*chi(ip)
 
          endif
 
@@ -921,13 +901,9 @@ c#endif
          if ( nh.eq.1 ) then
             fo(3) = chi(1)
             fo(4) = chi(2)
-            fo(5) = dcmplx( rZero )
-            fo(6) = dcmplx( rZero )
          else
             fo(3) = dcmplx( rZero )
             fo(4) = dcmplx( rZero )
-            fo(5) = chi(2)
-            fo(6) = chi(1)
          endif
 
       endif
@@ -949,7 +925,7 @@ c output:
 c       complex fo(6)          : fermion wavefunction               <fo|
 c
       implicit none
-      double complex fo(6),chi(2)
+      double complex fo(4),chi(2)
       double precision p(0:3),sf(2),sfomeg(2),omega(2),fmass,
      &     pp,pp3,sqp0p3,sqm(0:1)
       integer nhel,nsf,nh,ip,im
@@ -1009,10 +985,8 @@ c#endif
             sqm(1) = sign(sqm(0),fmass) ! possibility of negative fermion masses
             im = nhel * (1+nh)/2
             ip = nhel * -1 * ((1-nh)/2)
-            fo(3) = im     * sqm(abs(ip))
-            fo(4) = ip*nsf * sqm(abs(ip))
-            fo(5) = im*nsf * sqm(abs(im))
-            fo(6) = ip     * sqm(abs(im))
+            fo(3) = im*nsf * sqm(abs(im))
+            fo(4) = ip     * sqm(abs(im))
          else
 
             pp = min(p(0),dsqrt(p(1)**2+p(2)**2+p(3)**2))
@@ -1032,10 +1006,8 @@ c#endif
                chi(2) = dcmplx( nh*p(1) , -p(2) )/dsqrt(rTwo*pp*pp3)
             endif
 
-            fo(3) = sfomeg(2)*chi(im)
-            fo(4) = sfomeg(2)*chi(ip)
-            fo(5) = sfomeg(1)*chi(im)
-            fo(6) = sfomeg(1)*chi(ip)
+            fo(3) = sfomeg(1)*chi(im)
+            fo(4) = sfomeg(1)*chi(ip)
 
          endif
 
@@ -1053,15 +1025,11 @@ c#endif
             chi(2) = dcmplx( nh*p(1), -p(2) )/sqp0p3
          endif
          if ( nh.eq.1 ) then
-            fo(3) = chi(1)
-            fo(4) = chi(2)
-            fo(5) = dcmplx( rZero )
-            fo(6) = dcmplx( rZero )
-         else
             fo(3) = dcmplx( rZero )
             fo(4) = dcmplx( rZero )
-            fo(5) = chi(2)
-            fo(6) = chi(1)
+         else
+            fo(3) = chi(2)
+            fo(4) = chi(1)
          endif
 
       endif

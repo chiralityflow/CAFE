@@ -1551,6 +1551,90 @@ def get_vertices(interaction, matrix_element):
 
     return [vertex_info,vertex_pos]
 
+def find_vertex(text):
+    "Determines the current vertex in an aloha output file"
+    vertex = text
+    spaces = get_symbols(vertex, ' ')
+    parentheses = get_symbols(vertex, '(')
+    vertex = vertex[spaces[0]+1:parentheses[0]]
+    return vertex
+
+def vertex_replacer(text, vertex):
+    "Function which takes the text of a Fortran vertex file as well as the vertex name as an input"
+    "and outputs the corresponding chiral vertex Fortran file"
+    text_copy = text
+    linebreaks = get_symbols(text_copy, '\n')
+    if (vertex == 'FFV7_0'):
+        FFV7_0_replace = '(F2(3)*V3(3) + F2(4)*V3(4)) + (F1(5)*V3(5) + F1(6)*V3(6))'
+        equality = get_symbols(text_copy, '=')
+        text_copy = text_copy[:equality[-2]+2] + FFV7_0_replace + text_copy[linebreaks[-5]:]
+    if (vertex == 'FFV8_0'):
+        FFV8_0_replace = '(F1(3)*V3(3) + F1(4)*V3(4)) + (F2(5)*V3(5) + F2(6)*V3(6))'
+        equality = get_symbols(text_copy, '=')
+        text_copy = text_copy[:equality[-2]+2] + FFV8_0_replace + text_copy[linebreaks[-5]:]
+    if (vertex == 'FFV7P0_3'):
+        FFV7P0_3_replace = '      V3(3)= DENOM*F1(3)\n'\
+            + '      V3(4)= DENOM*F1(4)\n'\
+            + '      V3(5)= DENOM*F2(5)\n'\
+            + '      V3(6)= DENOM*F2(6)\n'
+        text_copy = text_copy[:linebreaks[-8]+1] + FFV7P0_3_replace + text_copy[linebreaks[-4]+1:]
+    if (vertex == 'FFV8P0_3'):
+        FFV8P0_3_replace = '      V3(3)= DENOM*F2(3)\n'\
+            + '      V3(4)= DENOM*F2(4)\n'\
+            + '      V3(5)= DENOM*F1(5)\n'\
+            + '      V3(6)= DENOM*F1(6)\n'
+        text_copy = text_copy[:linebreaks[-8]+1] + FFV8P0_3_replace + text_copy[linebreaks[-4]+1:]
+    return text_copy
+
+def postex_vertex_replacer(working_dir):
+    "Function which checks the working directory to see what vertices are used in a given process"
+    "and replaces them if any of them are intended to be chiral by directly rewriting the vertex Fortran files"
+    write_dir = working_dir
+    onlyfiles = [f for f in os.listdir(write_dir) if os.path.isfile(os.path.join(write_dir, f))]
+    #sprint(onlyfiles)
+    if 'FFV7_0.f' in onlyfiles:
+        file = open(write_dir + '/FFV7_0.f', 'r')
+        FFV7_0_copy = file.read()
+        #sprint(FFV7_0_copy)
+        FFV7_0_copy = vertex_replacer(FFV7_0_copy, 'FFV7_0')
+        #sprint(FFV7_0_copy)
+        file.close()
+        file = open(write_dir + '/FFV7_0.f', 'w')
+        file.write(FFV7_0_copy)
+        file.close()
+    if 'FFV8_0.f' in onlyfiles:
+        file = open(write_dir + '/FFV8_0.f', 'r')
+        FFV8_0_copy = file.read()
+        #sprint(FFV8_0_copy)
+        FFV8_0_copy = vertex_replacer(FFV8_0_copy, 'FFV8_0')
+        #sprint(FFV8_0_copy)
+        file.close()
+        file = open(write_dir + '/FFV8_0.f', 'w')
+        file.write(FFV8_0_copy)
+        file.close()
+    if 'FFV7P0_3.f' in onlyfiles:
+        file = open(write_dir + '/FFV7P0_3.f', 'r')
+        FFV7P0_3_copy = file.read()
+        #sprint(FFV7P0_3_copy)
+        FFV7P0_3_copy = vertex_replacer(FFV7P0_3_copy, 'FFV7P0_3')
+        #sprint(FFV7P0_3_copy)
+        file.close()
+        file = open(write_dir + '/FFV7P0_3.f', 'w')
+        file.write(FFV7P0_3_copy)
+        file.close()
+    if 'FFV8P0_3.f' in onlyfiles:
+        file = open(write_dir + '/FFV8P0_3.f', 'r')
+        FFV8P0_3_copy = file.read()
+        #sprint(FFV8P0_3_copy)
+        FFV8P0_3_copy = vertex_replacer(FFV8P0_3_copy, 'FFV8P0_3')
+        #sprint(FFV8P0_3_copy)
+        file.close()
+        file = open(write_dir + '/FFV8P0_3.f', 'w')
+        file.write(FFV8P0_3_copy)
+        file.close()
+    return 
+
+
 
 
 class misc(object):

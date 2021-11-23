@@ -936,6 +936,8 @@ param_card.inc: ../Cards/param_card.dat\n\t../bin/madevent treatcards param\n'''
             cp(MG5DIR + '/aloha/template_files/aloha_functions.f', 
                                                  write_dir+'/aloha_functions.f')
         create_aloha.write_aloha_file_inc(write_dir, '.f', '.o')
+        misc.postex_vertex_replacer(write_dir) #Replaces vertices with corresponding chiral ones
+    
 
         # Make final link in the Process
         self.make_model_symbolic_link()
@@ -2225,7 +2227,7 @@ class ProcessExporterFortranSA(ProcessExporterFortran):
         logger.info("Running make for Helas")
         misc.compile(arg=['../lib/libdhelas.a'], cwd=source_dir, mode='fortran')
         logger.info("Running make for Model")
-        misc.compile(arg=['../lib/libmodel.a'], cwd=source_dir, mode='fortran')
+        misc.compile(arg=['../lib/libmodel.a'], cwd=source_dir, mode='fortran'),
 
     #===========================================================================
     # Create proc_card_mg5.dat for Standalone directory
@@ -2683,9 +2685,8 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         helas_calls = fortran_model.get_matrix_element_calls(\
                     matrix_element)
         #Replace scalar helas calls with corresponding fermions
-        helas_calls_2 = self.mg_to_chirality_flow_calls(helas_calls, matrix_element) #Comment out this line to get the actual input interaction
-        #misc.sprint(helas_calls, helas_calls_2)
-        helas_calls = helas_calls_2
+        #helas_calls = self.mg_to_chirality_flow_calls_2(helas_calls, matrix_element) #Comment out this line to get the actual input interaction
+        #helas_calls = helas_calls_2
 
 
         replace_dict['helas_calls'] = "\n".join(helas_calls)
@@ -2953,6 +2954,62 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
                          + "P0" + helas_calls_2py[vertex_info[1][i]][parentheses[0] - 2:]
                     
         return(helas_calls_2py)
+    
+    #===========================================================================
+    # mg_to_chirality_flow_calls
+    #===========================================================================
+    def mg_to_chirality_flow_calls_2(self, helas_calls, matrix_element):
+        """Change helas_calls to give chirality-flow helas objects,"""
+        """by replacing fermionic particles with 2-component spinors"""
+        helas_calls_copy = copy.copy(helas_calls)
+        # get process
+        process_lines = self.get_process_info_lines(matrix_element)
+        # get list of particles in process
+        parts_list = misc.get_particles(process_lines)
+        # for particle in process, get chirality flow charge
+        # here, x_list[i] = 0 means the particle has no x-charge,
+        # x_list[i] = 1 means the particle has x-charge and has positive electric charge,
+        # and x_list[i] = -1 means the particle has x-charge and has negative electric charge
+        left_list = []
+        right_list = []
+        for i in range(len(parts_list)):
+            left_list.append(0)
+            right_list.append(0)
+            # checks whether the particle is a scalar that should be exchanged in our notation,
+            # where the last 3 characters denote chiral charge, scalar status, and electric charge
+            if (parts_list[i][-2] == 'l'):
+                left_list[i] = 1
+            elif (parts_list[i][-2] == 'r'):
+                right_list[i] = 1
+            if ((parts_list[i][-1] == '-')):
+                left_list[i] = -1*left_list[i]
+                right_list[i] = -1*right_list[i]
+        fermionic_list_left = [i for i, e in enumerate(left_list) if e != 0]
+        fermionic_list_right = [i for i, e in enumerate(right_list) if e != 0]
+
+        (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
+        for i in range(ninitial):
+            if ((left_list[i] == 1) and (right_list[i] == 0)):
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:]
+            elif ((left_list[i] == 0) and (right_list[i] == 1)):
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:]
+            elif ((left_list[i] == -1) and (right_list[i] == 0)):
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ILH' + helas_calls_copy[i][8:]
+            elif ((left_list[i] == 0) and (right_list[i] == -1)):
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:]
+        for i in range(ninitial,nexternal):
+            if ((left_list[i] == -1) and (right_list[i] == 0)):
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:]
+            elif ((left_list[i] == 0) and (right_list[i] == -1)):
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:]
+            elif ((left_list[i] == 1) and (right_list[i] == 0)):
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ILH' + helas_calls_copy[i][8:]
+            elif ((left_list[i] == 0) and (right_list[i] == 1)):
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:]
+        
+        return helas_calls_copy
+
+
 
 class ProcessExporterFortranMatchBox(ProcessExporterFortranSA):
     """class to take care of exporting a set of matrix element for the Matchbox
