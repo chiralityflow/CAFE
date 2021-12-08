@@ -2685,7 +2685,7 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         helas_calls = fortran_model.get_matrix_element_calls(\
                     matrix_element)
         #Replace scalar helas calls with corresponding fermions
-        #helas_calls = self.mg_to_chirality_flow_calls_2(helas_calls, matrix_element) #Comment out this line to get the actual input interaction
+        helas_calls = self.mg_to_chirality_flow_calls_3(helas_calls, matrix_element) #Comment out this line to get the actual input interaction
         #helas_calls = helas_calls_2
 
 
@@ -3008,6 +3008,107 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
                 helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:]
         
         return helas_calls_copy
+    
+#===========================================================================
+    # mg_to_chirality_flow_calls
+    #===========================================================================
+    def mg_to_chirality_flow_calls_3(self, helas_calls, matrix_element):
+        """Change helas_calls to give chirality-flow helas objects"""  
+        helas_calls_copy = copy.copy(helas_calls)
+        # get process
+        process_lines = self.get_process_info_lines(matrix_element)
+        # get list of particles in process
+        parts_list = misc.get_particles_outgoing(process_lines)
+        # for particle in process, get chirality flow charge
+        # here, x_list[i] = 0 means the particle has no x-charge,
+        # x_list[i] = 1 means the particle has x-charge and has positive electric charge,
+        # and x_list[i] = -1 means the particle has x-charge and has negative electric charge
+        left_list = []
+        right_list = []
+        for i in range(len(parts_list)):
+            left_list.append(0)
+            right_list.append(0)
+            # checks whether the particle is a scalar that should be exchanged in our notation,
+            # where the last 3 characters denote chiral charge, scalar status, and electric charge
+            if (len(parts_list[i]) > 2):
+                if (parts_list[i][-2] == 'l'):
+                    left_list[i] = 1
+                elif (parts_list[i][-2] == 'r'):
+                    right_list[i] = 1
+                if ((parts_list[i][-1] == '-')):
+                    left_list[i] = -1*left_list[i]
+                    right_list[i] = -1*right_list[i]
+        fermionic_list_left = [i for i, e in enumerate(left_list) if e != 0]
+        fermionic_list_right = [i for i, e in enumerate(right_list) if e != 0]
+        fermionic_change = True
+        if (sum(left_list) == 0) and (sum(right_list) == 0):
+            fermionic_change = False
+        
+
+        if fermionic_change == True:
+            k = sum(left_list)/2.
+            l = sum(right_list)/2.
+            if k > 0.5:
+                for i in range(len(left_list)):
+                    if left_list[i] == 1:
+                        left_list[i] = 0
+                        k -= 1.
+                        if k < 0.5:
+                            break
+            if k < -0.5:
+                for i in range(len(left_list)):
+                    if left_list[i] == -1:
+                        left_list[i] = 0
+                        k += 1.
+                        if k > -0.5:
+                            break
+            if l > 0.5:
+                for i in range(len(right_list)):
+                    if right_list[i] == 1:
+                        right_list[i] = 0
+                        k -= 1.
+                        if k < 0.5:
+                            break
+            if k < -0.5:
+                for i in range(len(right_list)):
+                    if right_list[i] == -1:
+                        right_list[i] = 0
+                        k += 1.
+                        if k > -0.5:
+                            break
+
+        # change the external wavefuntions
+        # treat incoming and outgoing particles independently, since an incoming fermion is equivalent
+        # with an outgoing anti-fermion and vice versa
+        if fermionic_change == True:
+            (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
+            for i in range(ninitial):
+                if ((left_list[i] == 1) and (right_list[i] == 0)):
+                    # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
+                    helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:]
+                elif ((left_list[i] == 0) and (right_list[i] == 1)):
+                    # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:19] + \
+                    helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:]
+                elif ((left_list[i] == -1) and (right_list[i] == 0)):
+                    #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ILH' + helas_calls_copy[i][8:19] + \
+                    helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]
+                elif ((left_list[i] == 0) and (right_list[i] == -1)):
+                    #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:19] + \
+                    helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]
+            for i in range(ninitial,nexternal):
+                if ((left_list[i] == -1) and (right_list[i] == 0)):
+                    #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
+                    helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:]
+                elif ((left_list[i] == 0) and (right_list[i] == -1)):
+                    #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:19] + \
+                    helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:]
+                elif ((left_list[i] == 1) and (right_list[i] == 0)):
+                    #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ILH' + helas_calls_copy[i][8:19] + \
+                    helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]
+                elif ((left_list[i] == 0) and (right_list[i] == 1)):
+                    #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:19] + \
+                    helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]
+        return(helas_calls_copy)
 
 
 

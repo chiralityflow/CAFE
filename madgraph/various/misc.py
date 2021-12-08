@@ -1538,6 +1538,44 @@ def get_particles(interaction):
             k = i+1
     return(part_list)
 
+def get_particles_outgoing(interaction):
+    "Determines which particles are included in a given interaction, using the get_process_info_lines() convention"
+    "All particles are treated as outgoing"
+    linebreaks = get_symbols(interaction,'\n')
+    # We only take the first interaction in a given list of interactions. 
+    # Need to distinguish the formatting if there are several interactions or only one
+    if len(linebreaks) == 0:
+        r = interaction.find('WEIGHTED')
+        first_interac = interaction[11:r]
+    else:
+        first_interac = interaction[11:linebreaks[0]]
+    interac_break = first_interac.find('>')
+    ingoing_parts = first_interac[:interac_break]
+    outgoing_parts = first_interac[interac_break+2:]
+    ingoing_part_list = []
+    outgoing_part_list = []
+    k = 0
+    for i in range(len(ingoing_parts)):
+        if (ingoing_parts[i] == ' '):
+            ingoing_part_list.append(ingoing_parts[k:i])
+            k = i+1
+    for i in range(len(ingoing_part_list)):
+        if (len(ingoing_part_list[i]) > 2):
+            if ingoing_part_list[i][-1] == '+':
+                ingoing_part_list[i] = ingoing_part_list[i][:-1] + '-'
+            elif ingoing_part_list[i][-1] == '-':
+                ingoing_part_list[i] = ingoing_part_list[i][:-1] + '+'
+            if ingoing_part_list[i][-2] == 'l':
+                ingoing_part_list[i] = ingoing_part_list[i][:-2] + 'r' + ingoing_part_list[i][-1:]
+            elif ingoing_part_list[i][-2] == 'r':
+                ingoing_part_list[i] = ingoing_part_list[i][:-2] + 'l' + ingoing_part_list[i][-1:]
+    k = 0
+    for i in range(len(outgoing_parts)):
+        if (outgoing_parts[i] == ' '):
+            outgoing_part_list.append(outgoing_parts[k:i])
+            k = i+1
+    return(ingoing_part_list + outgoing_part_list)
+
 def get_vertices(interaction, matrix_element):
     "Determines which vertices are included in a given interaction, using the helas_calls convention"
     helas = interaction.copy()
@@ -1569,14 +1607,14 @@ def vertex_replacer(text, vertex):
         equality = get_symbols(text_copy, '=')
         text_copy = text_copy[:equality[-2]+2] + FFV7_0_replace + text_copy[linebreaks[-5]:]
     if (vertex == 'FFV8_0'):
-        FFV8_0_replace = '(F1(4)*V3(3) - F1(3)*V3(4))*(F2(5)*V3(6) - F2(6)*V3(5))'
+        FFV8_0_replace = '(F1(3)*V3(3) + F1(4)*V3(4))*(F2(5)*V3(5) + F2(6)*V3(6))'
         equality = get_symbols(text_copy, '=')
         text_copy = text_copy[:equality[-2]+2] + FFV8_0_replace + text_copy[linebreaks[-5]:]
     if (vertex == 'FFV7P0_3'):
-        FFV7P0_3_replace = '      V3(3)= -2*DENOM*F1(4)\n'\
-            + '      V3(4)= 2*DENOM*F1(3)\n'\
-            + '      V3(5)= F2(6)\n'\
-            + '      V3(6)= -F2(5)\n'
+        FFV7P0_3_replace = '      V3(3)= 2*DENOM*F1(3)\n'\
+            + '      V3(4)= 2*DENOM*F1(4)\n'\
+            + '      V3(5)= F2(5)\n'\
+            + '      V3(6)= F2(6)\n'
         text_copy = text_copy[:linebreaks[-8]+1] + FFV7P0_3_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'FFV8P0_3'):
         FFV8P0_3_replace = '      V3(3)= 2*DENOM*F2(3)\n'\
@@ -1584,38 +1622,50 @@ def vertex_replacer(text, vertex):
             + '      V3(5)= F1(5)\n'\
             + '      V3(6)= F1(6)\n'
         text_copy = text_copy[:linebreaks[-8]+1] + FFV8P0_3_replace + text_copy[linebreaks[-4]+1:]
+    if (vertex == 'FFV7_1'):
+        FFV7_1_replace = '      DENOM= COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
+            + '      INPROD= (V3(3)*F2(3)+V3(4)*F2(4))*CONJG((V3(3)*F2(3)+V3(4)*F2(4)))\n'\
+            + '      F1(3)= DENOM*INPROD*(F2(3))\n'\
+            + '      F1(4)= DENOM*INPROD*(F2(4))\n'\
+            + '      F1(5)= 0\n'\
+            + '      F1(6)= 0\n'
+        text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
+        linebreaks = get_symbols(text_copy, '\n')
+        text_copy = text_copy[:linebreaks[-18]+1] + FFV7_1_replace + text_copy[linebreaks[-4]+1:]
+    if (vertex == 'FFV7_2'):
+        FFV7_2_replace = '      DENOM= COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
+            + '      INPROD= (V3(5)*F1(5)+V3(6)*F1(6))*CONJG((V3(5)*F1(5)+V3(6)*F1(6)))\n'\
+            + '      F2(3)= 0\n'\
+            + '      F2(4)= 0\n'\
+            + '      F2(5)= DENOM*INPROD*(F1(5))\n'\
+            + '      F2(6)= DENOM*INPROD*(F1(6))\n'
+        text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
+        linebreaks = get_symbols(text_copy, '\n')
+        text_copy = text_copy[:linebreaks[-19]+1] + FFV7_2_replace + text_copy[linebreaks[-4]+1:]
+    if (vertex == 'FFV8_1'):
+        FFV8_1_replace = '      DENOM= COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
+            + '      INPROD= (V3(5)*F2(5)+V3(6)*F2(6))*CONJG((V3(5)*F2(5)+V3(6)*F2(6)))\n'\
+            + '      F1(3)= 0\n'\
+            + '      F1(4)= 0\n'\
+            + '      F1(5)= DENOM*INPROD*(F2(5))\n'\
+            + '      F1(6)= DENOM*INPROD*(F2(6))\n'
+        text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
+        linebreaks = get_symbols(text_copy, '\n')
+        text_copy = text_copy[:linebreaks[-18]+1] + FFV8_1_replace + text_copy[linebreaks[-4]+1:]
+    if (vertex == 'FFV8_2'):
+        FFV8_2_replace = '      DENOM= COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
+            + '      INPROD= (V3(3)*F1(3)+V3(4)*F1(4))*CONJG((V3(3)*F1(3)+V3(4)*F1(4)))\n'\
+            + '      F2(3)= DENOM*INPROD*(F1(3))\n'\
+            + '      F2(4)= DENOM*INPROD*(F1(4))\n'\
+            + '      F2(5)= 0\n'\
+            + '      F2(6)= 0\n'
+        text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
+        linebreaks = get_symbols(text_copy, '\n')
+        text_copy = text_copy[:linebreaks[-18]+1] + FFV8_2_replace + text_copy[linebreaks[-4]+1:]
     text_copy = 'C     This File is Automatically generated by ALOHA\n'\
         + 'C     but has been modified by CAFE\n' + text_copy[linebreaks[3]:]
     return text_copy
 
-# def vertex_replacer(text, vertex):
-#     "Function which takes the text of a Fortran vertex file as well as the vertex name as an input"
-#     "and outputs the corresponding chiral vertex Fortran file"
-#     text_copy = text
-#     linebreaks = get_symbols(text_copy, '\n')
-#     if (vertex == 'FFV7_0'):
-#         FFV7_0_replace = '(F1(3)*(F2(5)*(V3(3)+V3(6))+F2(6)*(V3(4)+CI*(V3(5))))\n'\
-#             + '     $ +F1(4)*(F2(5)*(V3(4)-CI*(V3(5)))+F2(6)*(V3(3)-V3(6))))'
-#         equality = get_symbols(text_copy, '=')
-#         text_copy = text_copy[:equality[-2]+2] + FFV7_0_replace + text_copy[linebreaks[-5]:]
-#     if (vertex == 'FFV8_0'):
-#         FFV8_0_replace = '(F1(5)*(F2(3)*(V3(3)-V3(6))-F2(4)*(V3(4)+CI*(V3(5))))\n'\
-#             + '     $ +F1(6)*(F2(3)*(-V3(4)+CI*(V3(5)))+F2(4)*(V3(3)+V3(6))))'
-#         equality = get_symbols(text_copy, '=')
-#         text_copy = text_copy[:equality[-2]+2] + FFV8_0_replace + text_copy[linebreaks[-5]:]
-#     if (vertex == 'FFV7P0_3'):
-#         FFV7P0_3_replace = '      V3(3)= DENOM*(-CI)*(F1(3)*F2(5)+F1(4)*F2(6))\n'\
-#             + '      V3(4)= DENOM*(-CI)*(-F1(3)*F2(6)-F1(4)*F2(5))\n'\
-#             + '      V3(5)= DENOM*(-CI)*(-CI*(F1(3)*F2(6))+CI*(F1(4)*F2(5)))\n'\
-#             + '      V3(6)= DENOM*(-CI)*(-F1(3)*F2(5)+F1(4)*F2(6))\n'
-#         text_copy = text_copy[:linebreaks[-8]+1] + FFV7P0_3_replace + text_copy[linebreaks[-4]+1:]
-#     if (vertex == 'FFV8P0_3'):
-#         FFV8P0_3_replace = '      V3(3)= DENOM*(-CI)*(F1(5)*F2(3)+F1(6)*F2(4))\n'\
-#             + '      V3(4)= DENOM*(-CI)*(F1(5)*F2(4)+F1(6)*F2(3))\n'\
-#             + '      V3(5)= DENOM*(-CI)*(+CI*(F1(5)*F2(4))-CI*(F1(6)*F2(3)))\n'\
-#             + '      V3(6)= DENOM*(-CI)*(F1(5)*F2(3)-F1(6)*F2(4))\n'
-#         text_copy = text_copy[:linebreaks[-8]+1] + FFV8P0_3_replace + text_copy[linebreaks[-4]+1:]
-#     return text_copy
 
 def postex_vertex_replacer(working_dir):
     "Function which checks the working directory to see what vertices are used in a given process"
@@ -1662,6 +1712,38 @@ def postex_vertex_replacer(working_dir):
         file.close()
         file = open(write_dir + '/FFV8P0_3.f', 'w')
         file.write(FFV8P0_3_copy)
+        file.close()
+    if 'FFV7_1.f' in onlyfiles:
+        file = open(write_dir + '/FFV7_1.f', 'r')
+        FFV7_1_copy = file.read()
+        FFV7_1_copy = vertex_replacer(FFV7_1_copy, 'FFV7_1')
+        file.close()
+        file = open(write_dir + '/FFV7_1.f', 'w')
+        file.write(FFV7_1_copy)
+        file.close()
+    if 'FFV7_2.f' in onlyfiles:
+        file = open(write_dir + '/FFV7_2.f', 'r')
+        FFV7_2_copy = file.read()
+        FFV7_2_copy = vertex_replacer(FFV7_2_copy, 'FFV7_2')
+        file.close()
+        file = open(write_dir + '/FFV7_2.f', 'w')
+        file.write(FFV7_2_copy)
+        file.close()
+    if 'FFV8_1.f' in onlyfiles:
+        file = open(write_dir + '/FFV8_1.f', 'r')
+        FFV8_1_copy = file.read()
+        FFV8_1_copy = vertex_replacer(FFV8_1_copy, 'FFV8_1')
+        file.close()
+        file = open(write_dir + '/FFV8_1.f', 'w')
+        file.write(FFV8_1_copy)
+        file.close()
+    if 'FFV8_2.f' in onlyfiles:
+        file = open(write_dir + '/FFV8_2.f', 'r')
+        FFV8_2_copy = file.read()
+        FFV8_2_copy = vertex_replacer(FFV8_2_copy, 'FFV8_2')
+        file.close()
+        file = open(write_dir + '/FFV8_2.f', 'w')
+        file.write(FFV8_2_copy)
         file.close()
     return 
 
