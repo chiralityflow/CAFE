@@ -13,6 +13,7 @@
 from __future__ import division
 from object_library import all_particles, Particle
 import parameters as Param
+import propagators
 
 a = Particle(pdg_code = 90022,
              name = 'a',
@@ -21,6 +22,7 @@ a = Particle(pdg_code = 90022,
              color = 1,
              mass = Param.ZERO,
              width = Param.ZERO,
+             propagator = propagators.VO,
              texname = 'a',
              antitexname = 'a',
              charge = 0,

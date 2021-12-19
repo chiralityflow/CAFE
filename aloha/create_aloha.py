@@ -453,6 +453,7 @@ in presence of majorana particle/flow violation"""
         """Return the ALOHA object associated to the user define propagator"""
 
         if not propa.startswith('1'):
+            misc.sprint(dir(self.model))
             propagator = getattr(self.model.propagators, propa)
             numerator = propagator.numerator
             denominator = propagator.denominator      

@@ -273,4 +273,16 @@ class FormFactor(UFOBaseClass):
         global all_form_factors
         all_form_factors.append(self)
 
-        
+
+all_propagators = []
+
+class Propagator(UFOBaseClass):
+    require_args = ['name','numerator']
+
+    def __init__(self, name, numerator, **opt):
+        args = (name, numerator)
+        UFOBaseClass.__init__(self, *args, **opt)
+
+        global all_propagators
+        all_propagators.append(self)
+
