@@ -1,6 +1,8 @@
-from __future__ import division
+from __future__ import absolute_import
 from object_library import all_propagators, Propagator
-import parameters as Param
+
+denominator = "P('mu', id) * P('mu', id) - Mass(id) * Mass(id) + complex(0,1) * Mass(id) * Width(id)"
 
 VO = Propagator(name = 'VO',
-                numerator = '4 * Metric(1,2)')
+                numerator = '-0 * Metric(1,2)',
+                denominator = 'P(-1, id)**2')

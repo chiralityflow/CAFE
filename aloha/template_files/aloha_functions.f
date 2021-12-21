@@ -1317,9 +1317,9 @@ c output:
 c       complex vc(6)          : vector wavefunction       epsilon^mu(v)
 c
       implicit none
-      double complex vc(6)
-      double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh
-      integer nhel,nsv,nsvahl
+      double complex vc(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj
+      double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,pnorm,rnorm,prnorm,prprod
+      integer nhel,nsv,nsvahl,nsvhel
 
       double precision rZero, rHalf, rOne, rTwo
       parameter( rZero = 0.0d0, rHalf = 0.5d0 )
@@ -1372,6 +1372,7 @@ c#endif
       sqh = dsqrt(rHalf)
       hel = dble(nhel)
       nsvahl = nsv*dabs(hel)
+      nsvhel = nsv*hel
       pt2 = p(1)**2+p(2)**2
       pp = min(p(0),dsqrt(pt2+p(3)**2))
       pt = min(pp,dsqrt(pt2))
@@ -1428,17 +1429,42 @@ c#endif
 
       else
 
-         pp = p(0)
-         pt = sqrt(p(1)**2+p(2)**2)
-         vc(3) = dcmplx( rZero )
-         vc(6) = dcmplx( hel*pt/pp*sqh )
-         if ( pt.ne.rZero ) then
-            pzpt = p(3)/(pp*pt)*sqh*hel
-            vc(4) = dcmplx( -p(1)*pzpt , -nsv*p(2)/pt*sqh )
-            vc(5) = dcmplx( -p(2)*pzpt ,  nsv*p(1)/pt*sqh )
+c
+c         pp = p(0)
+c         pt = sqrt(p(1)**2+p(2)**2)
+c
+         pplus = p(0) + p(3)
+         ptrans = dcmplx(p(1),p(2))
+         ptransconj = dcmplx(p(1),-1*p(2))
+         pnorm = sqrt(pplus)
+         rplus = rOne
+         rtrans = rOne
+         rtransconj = rOne
+         rnorm = sqrt(rplus)
+         prnorm = pnorm*rnorm
+c         vc(3) = dcmplx( rZero )
+c         vc(6) = dcmplx( hel*pt/pp*sqh )
+c         if ( pt.ne.rZero ) then
+c            pzpt = p(3)/(pp*pt)*sqh*hel
+c            vc(4) = dcmplx( -p(1)*pzpt , -nsv*p(2)/pt*sqh )
+c            vc(5) = dcmplx( -p(2)*pzpt ,  nsv*p(1)/pt*sqh )
+c         else
+c            vc(4) = dcmplx( -hel*sqh )
+c            vc(5) = dcmplx( rZero , nsv*sign(sqh,p(3)) )
+c         endif
+c
+         if ( nsvhel.eq.rOne ) then
+            prprod = (rtrans*pplus - ptrans*rplus)/prnorm
+            vc(3) = ptransconj/(pnorm*prprod)
+            vc(4) = -1*pplus/(pnorm*prprod)
+            vc(5) = rtrans/(rnorm*prprod)
+            vc(6) = -1*rplus/(rnorm*prprod)
          else
-            vc(4) = dcmplx( -hel*sqh )
-            vc(5) = dcmplx( rZero , nsv*sign(sqh,p(3)) )
+            prprod = (pplus*rtransconj - rplus*ptransconj)/prnorm
+            vc(3) = rtransconj/(rnorm*prprod)
+            vc(4) = -1*rplus/(rnorm*prprod)
+            vc(5) = ptrans/(pnorm*prprod)
+            vc(6) = -1*pplus/(pnorm*prprod)
          endif
 
       endif

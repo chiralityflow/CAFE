@@ -913,7 +913,7 @@ param_card.inc: ../Cards/param_card.dat\n\t../bin/madevent treatcards param\n'''
                 aloha_model = create_aloha.AbstractALOHAModel(model.get('modelpath'))
         aloha_model.add_Lorentz_object(model.get('lorentz'))
 
-        # Compute the subroutines
+        # Compute the subroutiness
         if wanted_lorentz:
             aloha_model.compute_subset(wanted_lorentz)
         else:
@@ -936,7 +936,7 @@ param_card.inc: ../Cards/param_card.dat\n\t../bin/madevent treatcards param\n'''
             cp(MG5DIR + '/aloha/template_files/aloha_functions.f', 
                                                  write_dir+'/aloha_functions.f')
         create_aloha.write_aloha_file_inc(write_dir, '.f', '.o')
-        #misc.postex_vertex_replacer(write_dir) #Replaces vertices with corresponding chiral ones
+        misc.postex_vertex_replacer(write_dir) #Replaces vertices with corresponding chiral ones
     
 
         # Make final link in the Process

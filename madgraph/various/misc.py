@@ -1624,7 +1624,7 @@ def vertex_replacer(text, vertex):
         text_copy = text_copy[:linebreaks[-8]+1] + FFV8P0_3_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'FFV7_1'):
         FFV7_1_replace = '      DENOM= COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
-            + '      INPROD= (V3(3)*F2(3)+V3(4)*F2(4))*CONJG((V3(3)*F2(3)+V3(4)*F2(4)))\n'\
+            + '      INPROD= 4*(V3(3)*F2(3)+V3(4)*F2(4))*(V3(5)*CONJG(F2(3))+V3(4)*CONJG(F2(4)))\n'\
             + '      F1(3)= DENOM*INPROD*(F2(3))\n'\
             + '      F1(4)= DENOM*INPROD*(F2(4))\n'\
             + '      F1(5)= 0\n'\
@@ -1634,7 +1634,7 @@ def vertex_replacer(text, vertex):
         text_copy = text_copy[:linebreaks[-18]+1] + FFV7_1_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'FFV7_2'):
         FFV7_2_replace = '      DENOM= COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
-            + '      INPROD= (V3(5)*F1(5)+V3(6)*F1(6))*CONJG((V3(5)*F1(5)+V3(6)*F1(6)))\n'\
+            + '      INPROD= 4*(V3(5)*F1(5)+V3(6)*F1(6))*(V3(3)*CONJG(F1(5))+V3(4)*CONJG(F1(6)))\n'\
             + '      F2(3)= 0\n'\
             + '      F2(4)= 0\n'\
             + '      F2(5)= DENOM*INPROD*(F1(5))\n'\
@@ -1644,7 +1644,7 @@ def vertex_replacer(text, vertex):
         text_copy = text_copy[:linebreaks[-19]+1] + FFV7_2_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'FFV8_1'):
         FFV8_1_replace = '      DENOM= COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
-            + '      INPROD= (V3(5)*F2(5)+V3(6)*F2(6))*CONJG((V3(5)*F2(5)+V3(6)*F2(6)))\n'\
+            + '      INPROD= 4*(V3(5)*F1(5)+V3(6)*F1(6))*(V3(3)*CONJG(F1(5))+V3(4)*CONJG(F1(6)))\n'\
             + '      F1(3)= 0\n'\
             + '      F1(4)= 0\n'\
             + '      F1(5)= DENOM*INPROD*(F2(5))\n'\
@@ -1654,7 +1654,7 @@ def vertex_replacer(text, vertex):
         text_copy = text_copy[:linebreaks[-18]+1] + FFV8_1_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'FFV8_2'):
         FFV8_2_replace = '      DENOM= COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
-            + '      INPROD= (V3(3)*F1(3)+V3(4)*F1(4))*CONJG((V3(3)*F1(3)+V3(4)*F1(4)))\n'\
+            + '      INPROD= 4*(V3(3)*F2(3)+V3(4)*F2(4))*(V3(5)*CONJG(F2(3))+V3(4)*CONJG(F2(4)))\n'\
             + '      F2(3)= DENOM*INPROD*(F1(3))\n'\
             + '      F2(4)= DENOM*INPROD*(F1(4))\n'\
             + '      F2(5)= 0\n'\
