@@ -3049,6 +3049,7 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         # if the sum of external fermionic chiral charges is non-zero, replace external spinors
         # until the chirality flow among the fermions sums to zero
         if fermionic_change == True:
+            #misc.sprint("Changing some fermions")
             k = sum(left_list)/2.
             l = sum(right_list)/2.
             if k > 0.5:
@@ -3072,7 +3073,7 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
                         k -= 1.
                         if k < 0.5:
                             break
-            if k < -0.5:
+            if l < -0.5:
                 for i in range(len(right_list)):
                     if right_list[i] == -1:
                         right_list[i] = 0

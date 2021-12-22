@@ -1462,16 +1462,16 @@ c         endif
 c
          if ( nsvhel.eq.rOne ) then
             prprod = (rtrans*pplus - ptrans*rplus)/prnorm
-            vc(3) = ptransconj/(pnorm*prprod)
-            vc(4) = -1*pplus/(pnorm*prprod)
-            vc(5) = rtrans/(rnorm)
-            vc(6) = -1*rplus/(rnorm)
+            vc(3) = pplus/(pnorm*prprod)
+            vc(4) = ptransconj/(pnorm*prprod)
+            vc(5) = -1*rplus/(rnorm)
+            vc(6) = -1*rtrans/(rnorm)
          else
             prprod = (pplus*rtransconj - rplus*ptransconj)/prnorm
-            vc(3) = rtransconj/(rnorm*prprod)
-            vc(4) = -1*rplus/(rnorm*prprod)
-            vc(5) = ptrans/(pnorm)
-            vc(6) = -1*pplus/(pnorm)
+            vc(3) = rplus/(rnorm*prprod)
+            vc(4) = rtransconj/(rnorm*prprod)
+            vc(5) = -1*pplus/(pnorm)
+            vc(6) = -1*ptrans/(pnorm)
          endif
 
       endif

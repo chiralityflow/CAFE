@@ -1632,7 +1632,7 @@ def vertex_replacer(text, vertex):
             + '      PTRANSCONJ = DCMPLX(PHAT(1),-1*PHAT(2))\n'\
             + '      FPREFAC = (P1(0) + PVEC)/(2*(1 + PHAT(3)))\n'\
             + '      BPREFAC = (P1(0) - PVEC)/(2*(1 - PHAT(3)))\n'\
-            + '      INPROD = (V3(3)*F2(3)+V3(4)*F2(4))\n'\
+            + '      INPROD = 2*(V3(3)*F2(3)+V3(4)*F2(4))\n'\
             + '      FPROD = FPREFAC*(V3(5)*(1 + PHAT(3)) + V3(6)*PTRANS)\n'\
             + '      BPROD = BPREFAC*(V3(5)*(1 - PHAT(3)) - V3(6)*PTRANS)\n'\
             + '      F1(3) = DENOM*INPROD*(FPROD*(1 + PHAT(3)) + BPROD*(1 - PHAT(3)))\n'\
@@ -1660,7 +1660,7 @@ def vertex_replacer(text, vertex):
             + '      PTRANSCONJ = DCMPLX(PHAT(1),-1*PHAT(2))\n'\
             + '      FPREFAC = (P2(0) + PVEC)/(2*(1 + PHAT(3)))\n'\
             + '      BPREFAC = (P2(0) - PVEC)/(2*(1 - PHAT(3)))\n'\
-            + '      INPROD = (V3(5)*F1(5)+V3(6)*F1(6))\n'\
+            + '      INPROD = 2*(V3(5)*F1(5)+V3(6)*F1(6))\n'\
             + '      FPROD = FPREFAC*(V3(3)*PTRANSCONJ - V3(4)*(1 + PHAT(3)))\n'\
             + '      BPROD = BPREFAC*(-1*V3(3)*PTRANSCONJ - V3(4)*(1 - PHAT(3)))\n'\
             + '      F2(3) = 0\n'\
@@ -1688,7 +1688,7 @@ def vertex_replacer(text, vertex):
             + '      PTRANSCONJ = DCMPLX(PHAT(1),-1*PHAT(2))\n'\
             + '      FPREFAC = (P1(0) + PVEC)/(2*(1 + PHAT(3)))\n'\
             + '      BPREFAC = (P1(0) - PVEC)/(2*(1 - PHAT(3)))\n'\
-            + '      INPROD = (V3(5)*F2(5)+V3(6)*F2(6))\n'\
+            + '      INPROD = 2*(V3(5)*F2(5)+V3(6)*F2(6))\n'\
             + '      FPROD = FPREFAC*(V3(3)*PTRANSCONJ - V3(4)*(1 + PHAT(3)))\n'\
             + '      BPROD = BPREFAC*(-1*V3(3)*PTRANSCONJ - V3(4)*(1 - PHAT(3)))\n'\
             + '      F1(3) = 0\n'\
@@ -1716,7 +1716,7 @@ def vertex_replacer(text, vertex):
             + '      PTRANSCONJ = DCMPLX(PHAT(1),-1*PHAT(2))\n'\
             + '      FPREFAC = (P2(0) + PVEC)/(2*(1 + PHAT(3)))\n'\
             + '      BPREFAC = (P2(0) - PVEC)/(2*(1 - PHAT(3)))\n'\
-            + '      INPROD = (V3(3)*F1(3)+V3(4)*F1(4))\n'\
+            + '      INPROD = 2*(V3(3)*F1(3)+V3(4)*F1(4))\n'\
             + '      FPROD = FPREFAC*(V3(5)*(1 + PHAT(3)) + V3(6)*PTRANS)\n'\
             + '      BPROD = BPREFAC*(V3(5)*(1 - PHAT(3)) - V3(6)*PTRANS)\n'\
             + '      F2(3) = DENOM*INPROD*(FPROD*(1 + PHAT(3)) + BPROD*(1 - PHAT(3)))\n'\
