@@ -1611,16 +1611,16 @@ def vertex_replacer(text, vertex):
         equality = get_symbols(text_copy, '=')
         text_copy = text_copy[:equality[-2]+2] + FFV8_0_replace + text_copy[linebreaks[-5]:]
     if (vertex == 'FFV7P0_3'):
-        FFV7P0_3_replace = '      V3(3)= 2*DENOM*F1(3)\n'\
-            + '      V3(4)= 2*DENOM*F1(4)\n'\
-            + '      V3(5)= F2(5)\n'\
-            + '      V3(6)= F2(6)\n'
+        FFV7P0_3_replace = '      V3(3)= 2*DENOM*F1(4)\n'\
+            + '      V3(4)= -2*DENOM*F1(3)\n'\
+            + '      V3(5)= F2(6)\n'\
+            + '      V3(6)= -1*F2(5)\n'
         text_copy = text_copy[:linebreaks[-8]+1] + FFV7P0_3_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'FFV8P0_3'):
-        FFV8P0_3_replace = '      V3(3)= 2*DENOM*F2(3)\n'\
-            + '      V3(4)= 2*DENOM*F2(4)\n'\
-            + '      V3(5)= F1(5)\n'\
-            + '      V3(6)= F1(6)\n'
+        FFV8P0_3_replace = '      V3(3)= 2*DENOM*F2(4)\n'\
+            + '      V3(4)= -2*DENOM*F2(3)\n'\
+            + '      V3(5)= F1(6)\n'\
+            + '      V3(6)= -1*F1(5)\n'
         text_copy = text_copy[:linebreaks[-8]+1] + FFV8P0_3_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'FFV7_1'):
         FFV7_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
