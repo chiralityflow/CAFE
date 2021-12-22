@@ -1320,6 +1320,7 @@ c
       double complex vc(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj
       double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,pnorm,rnorm,prnorm,prprod
       integer nhel,nsv,nsvahl,nsvhel
+      double precision refmom(4)
 
       double precision rZero, rHalf, rOne, rTwo
       parameter( rZero = 0.0d0, rHalf = 0.5d0 )
@@ -1433,15 +1434,21 @@ c
 c         pp = p(0)
 c         pt = sqrt(p(1)**2+p(2)**2)
 c
+
+         refmom(1) = 1000*rOne
+         refmom(2) = 1000*rOne
+         refmom(3) = rZero
+         refmom(4) = rZero
+         rplus = refmom(1) + refmom(3)
+         rtrans = dcmplx(refmom(2),refmom(3))
+         rtransconj = dcmplx(refmom(2),-1*refmom(3))
          pplus = p(0) + p(3)
          ptrans = dcmplx(p(1),p(2))
          ptransconj = dcmplx(p(1),-1*p(2))
          pnorm = sqrt(pplus)
-         rplus = rOne
-         rtrans = rOne
-         rtransconj = rOne
          rnorm = sqrt(rplus)
          prnorm = pnorm*rnorm
+c
 c         vc(3) = dcmplx( rZero )
 c         vc(6) = dcmplx( hel*pt/pp*sqh )
 c         if ( pt.ne.rZero ) then
@@ -1457,14 +1464,14 @@ c
             prprod = (rtrans*pplus - ptrans*rplus)/prnorm
             vc(3) = ptransconj/(pnorm*prprod)
             vc(4) = -1*pplus/(pnorm*prprod)
-            vc(5) = rtrans/(rnorm*prprod)
-            vc(6) = -1*rplus/(rnorm*prprod)
+            vc(5) = rtrans/(rnorm)
+            vc(6) = -1*rplus/(rnorm)
          else
             prprod = (pplus*rtransconj - rplus*ptransconj)/prnorm
             vc(3) = rtransconj/(rnorm*prprod)
             vc(4) = -1*rplus/(rnorm*prprod)
-            vc(5) = ptrans/(pnorm*prprod)
-            vc(6) = -1*pplus/(pnorm*prprod)
+            vc(5) = ptrans/(pnorm)
+            vc(6) = -1*pplus/(pnorm)
          endif
 
       endif

@@ -2684,8 +2684,8 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         # Extract helas calls
         helas_calls = fortran_model.get_matrix_element_calls(\
                     matrix_element)
-        #Replace scalar helas calls with corresponding fermions
-        helas_calls = self.mg_to_chirality_flow_calls_3(helas_calls, matrix_element) #Comment out this line to get the actual input interaction
+        #Check and correct chirality-flow charges
+        helas_calls = self.chirality_flow_charge_checker(helas_calls, matrix_element) 
         #helas_calls = helas_calls_2
 
 
@@ -3009,11 +3009,11 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         
         return helas_calls_copy
     
-#===========================================================================
-    # mg_to_chirality_flow_calls
     #===========================================================================
-    def mg_to_chirality_flow_calls_3(self, helas_calls, matrix_element):
-        """Change helas_calls to give chirality-flow helas objects"""  
+    # chirality_flow_charge_checker
+    #===========================================================================
+    def chirality_flow_charge_checker(self, helas_calls, matrix_element):
+        """Change helas_calls to give correct chirality flow lines"""  
         helas_calls_copy = copy.copy(helas_calls)
         # get process
         process_lines = self.get_process_info_lines(matrix_element)
@@ -3028,8 +3028,8 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         for i in range(len(parts_list)):
             left_list.append(0)
             right_list.append(0)
-            # checks whether the particle is a scalar that should be exchanged in our notation,
-            # where the last 3 characters denote chiral charge, scalar status, and electric charge
+            # checks whether the particle is a fermion with chiral charge,
+            # where the last 2 characters denote chiral charge and electric charge
             if (len(parts_list[i]) > 2):
                 if (parts_list[i][-2] == 'l'):
                     left_list[i] = 1
@@ -3041,10 +3041,13 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         fermionic_list_left = [i for i, e in enumerate(left_list) if e != 0]
         fermionic_list_right = [i for i, e in enumerate(right_list) if e != 0]
         fermionic_change = True
+        # checks whether the sum of all chiral charges in external fermions adds up to zero
         if (sum(left_list) == 0) and (sum(right_list) == 0):
             fermionic_change = False
         
 
+        # if the sum of external fermionic chiral charges is non-zero, replace external spinors
+        # until the chirality flow among the fermions sums to zero
         if fermionic_change == True:
             k = sum(left_list)/2.
             l = sum(right_list)/2.
