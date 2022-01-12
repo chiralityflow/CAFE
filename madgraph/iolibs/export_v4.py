@@ -936,7 +936,7 @@ param_card.inc: ../Cards/param_card.dat\n\t../bin/madevent treatcards param\n'''
             cp(MG5DIR + '/aloha/template_files/aloha_functions.f', 
                                                  write_dir+'/aloha_functions.f')
         create_aloha.write_aloha_file_inc(write_dir, '.f', '.o')
-        misc.postex_vertex_replacer(write_dir) #Replaces vertices with corresponding chiral ones
+        misc.postex_vertex_replacer(self.dir_path) #Replaces vertices with corresponding chiral ones
     
 
         # Make final link in the Process
@@ -3086,7 +3086,14 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         # with an outgoing anti-fermion and vice versa
         if fermionic_change == True:
             (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
-            for i in range(nexternal):
+            for i in range(ninitial):
+                if ((left_list[i] == 1) and (right_list[i] == 0)):
+                    # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
+                    helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:]
+                elif ((left_list[i] == 0) and (right_list[i] == 1)):
+                    # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:19] + \
+                    helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]
+            for i in range(ninitial,nexternal):
                 if ((left_list[i] == 1) and (right_list[i] == 0)):
                     # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
                     helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]

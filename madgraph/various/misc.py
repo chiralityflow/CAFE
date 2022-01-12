@@ -1603,24 +1603,43 @@ def vertex_replacer(text, vertex):
     text_copy = text
     linebreaks = get_symbols(text_copy, '\n')
     if (vertex == 'FFV7_0'):
-        FFV7_0_replace = '(F2(3)*V3(3) + F2(4)*V3(4))*(F1(5)*V3(5) + F1(6)*V3(6))'
         equality = get_symbols(text_copy, '=')
-        text_copy = text_copy[:equality[-2]+2] + FFV7_0_replace + text_copy[linebreaks[-5]:]
+        p = text_copy[equality[-2]-2]
+        FFV7_0_replace = ' double precision rZero\n'\
+            + '      double complex rZerComp\n'\
+            + '      parameter ( rZero = 0.0d0 )\n'\
+            + '      rZerComp = dcmplx ( rZero )\n'\
+            + '      if ( ( F1(3).eq.rZerComp ) .AND. ( F1(4).eq.rZerComp ) ) then\n'\
+            + '            TMP' + p + ' = (F2(3)*V3(3) + F2(4)*V3(4))*(F1(5)*V3(5) + F1(6)*V3(6))\n'\
+            + '      else\n'\
+            + '            TMP' + p + ' = (F1(3)*V3(3) + F1(4)*V3(4))*(F2(5)*V3(5) + F2(6)*V3(6))\n'\
+            + '      endif\n'
+        text_copy = text_copy[:equality[-2]-6] + FFV7_0_replace + text_copy[linebreaks[-5]+1:]
     if (vertex == 'FFV8_0'):
-        FFV8_0_replace = '(F1(3)*V3(3) + F1(4)*V3(4))*(F2(5)*V3(5) + F2(6)*V3(6))'
         equality = get_symbols(text_copy, '=')
-        text_copy = text_copy[:equality[-2]+2] + FFV8_0_replace + text_copy[linebreaks[-5]:]
+        p = text_copy[equality[-2]-2]
+        FFV8_0_replace =  ' double precision rZero\n'\
+            + '      double complex rZerComp\n'\
+            + '      parameter ( rZero = 0.0d0 )\n'\
+            + '      rZerComp = dcmplx ( rZero )\n'\
+            + '      if ( ( F1(3).eq.rZerComp ) .AND. ( F1(4).eq.rZerComp ) ) then\n'\
+            + '            TMP' + p + ' = (F2(3)*V3(3) + F2(4)*V3(4))*(F1(5)*V3(5) + F1(6)*V3(6))\n'\
+            + '      else\n'\
+            + '            TMP' + p + ' = (F1(3)*V3(3) + F1(4)*V3(4))*(F2(5)*V3(5) + F2(6)*V3(6))\n'\
+            + '      endif\n'
+        equality = get_symbols(text_copy, '=')
+        text_copy = text_copy[:equality[-2]-6] + FFV8_0_replace + text_copy[linebreaks[-5]:]
     if (vertex == 'FFV7P0_3'):
-        FFV7P0_3_replace = '      V3(3)= 2*DENOM*F1(4)\n'\
-            + '      V3(4)= -2*DENOM*F1(3)\n'\
-            + '      V3(5)= F2(6)\n'\
-            + '      V3(6)= -1*F2(5)\n'
-        text_copy = text_copy[:linebreaks[-8]+1] + FFV7P0_3_replace + text_copy[linebreaks[-4]+1:]
-    if (vertex == 'FFV8P0_3'):
-        FFV8P0_3_replace = '      V3(3)= 2*DENOM*F2(4)\n'\
+        FFV7P0_3_replace = '      V3(3)= 2*DENOM*F2(4)\n'\
             + '      V3(4)= -2*DENOM*F2(3)\n'\
             + '      V3(5)= F1(6)\n'\
             + '      V3(6)= -1*F1(5)\n'
+        text_copy = text_copy[:linebreaks[-8]+1] + FFV7P0_3_replace + text_copy[linebreaks[-4]+1:]
+    if (vertex == 'FFV8P0_3'):
+        FFV8P0_3_replace = '      V3(3)= 2*DENOM*F1(4)\n'\
+            + '      V3(4)= -2*DENOM*F1(3)\n'\
+            + '      V3(5)= F2(6)\n'\
+            + '      V3(6)= -1*F2(5)\n'
         text_copy = text_copy[:linebreaks[-8]+1] + FFV8P0_3_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'FFV7_1'):
         FFV7_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
@@ -1632,13 +1651,23 @@ def vertex_replacer(text, vertex):
             + '      PTRANSCONJ = DCMPLX(PHAT(1),-1*PHAT(2))\n'\
             + '      FPREFAC = (P1(0) + PVEC)/(2*(1 + PHAT(3)))\n'\
             + '      BPREFAC = (P1(0) - PVEC)/(2*(1 - PHAT(3)))\n'\
-            + '      INPROD = 2*(V3(3)*F2(3)+V3(4)*F2(4))\n'\
-            + '      FPROD = FPREFAC*(V3(5)*(1 + PHAT(3)) + V3(6)*PTRANS)\n'\
-            + '      BPROD = BPREFAC*(V3(5)*(1 - PHAT(3)) - V3(6)*PTRANS)\n'\
-            + '      F1(3) = DENOM*INPROD*(FPROD*(1 + PHAT(3)) + BPROD*(1 - PHAT(3)))\n'\
-            + '      F1(4) = DENOM*INPROD*(FPROD*PTRANSCONJ - BPROD*PTRANSCONJ)\n'\
-            + '      F1(5) = 0\n'\
-            + '      F1(6) = 0\n'
+            + '      if ( ( F2(5).eq.rZerComp ) .AND. ( F2(6).eq.rZerComp ) ) then\n'\
+            + '            INPROD = 2*(V3(3)*F2(3)+V3(4)*F2(4))\n'\
+            + '            FPROD = FPREFAC*(V3(5)*(1 + PHAT(3)) + V3(6)*PTRANS)\n'\
+            + '            BPROD = BPREFAC*(V3(5)*(1 - PHAT(3)) - V3(6)*PTRANS)\n'\
+            + '            F1(3) = DENOM*INPROD*(FPROD*(1 + PHAT(3)) + BPROD*(1 - PHAT(3)))\n'\
+            + '            F1(4) = DENOM*INPROD*(FPROD*PTRANSCONJ - BPROD*PTRANSCONJ)\n'\
+            + '            F1(5) = 0\n'\
+            + '            F1(6) = 0\n'\
+            + '      else\n'\
+            + '            INPROD = 2*(V3(5)*F2(5)+V3(6)*F2(6))\n'\
+            + '            FPROD = FPREFAC*(V3(3)*PTRANSCONJ - V3(4)*(1 + PHAT(3)))\n'\
+            + '            BPROD = BPREFAC*(-1*V3(3)*PTRANSCONJ - V3(4)*(1 - PHAT(3)))\n'\
+            + '            F1(3) = 0\n'\
+            + '            F1(4) = 0\n'\
+            + '            F1(5) = DENOM*INPROD*(FPROD*PTRANS - BPROD*PTRANS)\n'\
+            + '            F1(6) = DENOM*INPROD*(-1*FPROD*(1+PHAT(3)) - BPROD*(1 - PHAT(3)))\n'\
+            + '      endif\n'
         text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n'\
             + '      REAL*8 PVEC\n'\
             + '      REAL*8 PHAT(3)\n'\
@@ -1647,7 +1676,11 @@ def vertex_replacer(text, vertex):
             + '      COMPLEX*16 FPREFAC\n'\
             + '      COMPLEX*16 BPREFAC\n'\
             + '      COMPLEX*16 FPROD\n'\
-            + '      COMPLEX*16 BPROD\n' + text_copy[linebreaks[15]+1:]
+            + '      COMPLEX*16 BPROD\n'\
+            + '      double precision rZero\n'\
+            + '      double complex rZerComp\n'\
+            + '      parameter ( rZero = 0.0d0 )\n'\
+            + '      rZerComp = dcmplx ( rZero )\n' + text_copy[linebreaks[15]+1:]
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[-18]+1] + FFV7_1_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'FFV7_2'):
@@ -1660,13 +1693,23 @@ def vertex_replacer(text, vertex):
             + '      PTRANSCONJ = DCMPLX(PHAT(1),-1*PHAT(2))\n'\
             + '      FPREFAC = (P2(0) + PVEC)/(2*(1 + PHAT(3)))\n'\
             + '      BPREFAC = (P2(0) - PVEC)/(2*(1 - PHAT(3)))\n'\
-            + '      INPROD = 2*(V3(5)*F1(5)+V3(6)*F1(6))\n'\
-            + '      FPROD = FPREFAC*(V3(3)*PTRANSCONJ - V3(4)*(1 + PHAT(3)))\n'\
-            + '      BPROD = BPREFAC*(-1*V3(3)*PTRANSCONJ - V3(4)*(1 - PHAT(3)))\n'\
-            + '      F2(3) = 0\n'\
-            + '      F2(4) = 0\n'\
-            + '      F2(5) = DENOM*INPROD*(FPROD*PTRANS - BPROD*PTRANS)\n'\
-            + '      F2(6) = DENOM*INPROD*(-1*FPROD*(1+PHAT(3)) - BPROD*(1 - PHAT(3)))\n'
+            + '      if ( ( F1(5).eq.rZerComp ) .AND. ( F1(6).eq.rZerComp ) ) then\n'\
+            + '            INPROD = 2*(V3(3)*F1(3)+V3(4)*F1(4))\n'\
+            + '            FPROD = FPREFAC*(V3(5)*(1 + PHAT(3)) + V3(6)*PTRANS)\n'\
+            + '            BPROD = BPREFAC*(V3(5)*(1 - PHAT(3)) - V3(6)*PTRANS)\n'\
+            + '            F2(3) = DENOM*INPROD*(FPROD*(1 + PHAT(3)) + BPROD*(1 - PHAT(3)))\n'\
+            + '            F2(4) = DENOM*INPROD*(FPROD*PTRANSCONJ - BPROD*PTRANSCONJ)\n'\
+            + '            F2(5) = 0\n'\
+            + '            F2(6) = 0\n'\
+            + '      else\n'\
+            + '            INPROD = 2*(V3(5)*F1(5)+V3(6)*F1(6))\n'\
+            + '            FPROD = FPREFAC*(V3(3)*PTRANSCONJ - V3(4)*(1 + PHAT(3)))\n'\
+            + '            BPROD = BPREFAC*(-1*V3(3)*PTRANSCONJ - V3(4)*(1 - PHAT(3)))\n'\
+            + '            F2(3) = 0\n'\
+            + '            F2(4) = 0\n'\
+            + '            F2(5) = DENOM*INPROD*(FPROD*PTRANS - BPROD*PTRANS)\n'\
+            + '            F2(6) = DENOM*INPROD*(-1*FPROD*(1+PHAT(3)) - BPROD*(1 - PHAT(3)))\n'\
+            + '      endif\n'
         text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n'\
             + '      REAL*8 PVEC\n'\
             + '      REAL*8 PHAT(3)\n'\
@@ -1675,10 +1718,14 @@ def vertex_replacer(text, vertex):
             + '      COMPLEX*16 FPREFAC\n'\
             + '      COMPLEX*16 BPREFAC\n'\
             + '      COMPLEX*16 FPROD\n'\
-            + '      COMPLEX*16 BPROD\n' + text_copy[linebreaks[15]+1:]
+            + '      COMPLEX*16 BPROD\n'\
+            + '      double precision rZero\n'\
+            + '      double complex rZerComp\n'\
+            + '      parameter ( rZero = 0.0d0 )\n'\
+            + '      rZerComp = dcmplx ( rZero )\n' + text_copy[linebreaks[15]+1:]
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[-19]+1] + FFV7_2_replace + text_copy[linebreaks[-4]+1:]
-    if (vertex == 'FFV8_1'):
+    if (vertex == 'FFV8_1'): 
         FFV8_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
             + '      PVEC = SQRT(P1(1)**2 + P1(2)**2 + P1(3)**2)\n'\
             + '      PHAT(1) = -P1(1)/PVEC\n'\
@@ -1688,13 +1735,23 @@ def vertex_replacer(text, vertex):
             + '      PTRANSCONJ = DCMPLX(PHAT(1),-1*PHAT(2))\n'\
             + '      FPREFAC = (P1(0) + PVEC)/(2*(1 + PHAT(3)))\n'\
             + '      BPREFAC = (P1(0) - PVEC)/(2*(1 - PHAT(3)))\n'\
-            + '      INPROD = 2*(V3(5)*F2(5)+V3(6)*F2(6))\n'\
-            + '      FPROD = FPREFAC*(V3(3)*PTRANSCONJ - V3(4)*(1 + PHAT(3)))\n'\
-            + '      BPROD = BPREFAC*(-1*V3(3)*PTRANSCONJ - V3(4)*(1 - PHAT(3)))\n'\
-            + '      F1(3) = 0\n'\
-            + '      F1(4) = 0\n'\
-            + '      F1(5) = DENOM*INPROD*(FPROD*PTRANS - BPROD*PTRANS)\n'\
-            + '      F1(6) = DENOM*INPROD*(-1*FPROD*(1+PHAT(3)) - BPROD*(1 - PHAT(3)))\n'
+            + '      if ( ( F2(5).eq.rZerComp ) .AND. ( F2(6).eq.rZerComp ) ) then\n'\
+            + '            INPROD = 2*(V3(3)*F2(3)+V3(4)*F2(4))\n'\
+            + '            FPROD = FPREFAC*(V3(5)*(1 + PHAT(3)) + V3(6)*PTRANS)\n'\
+            + '            BPROD = BPREFAC*(V3(5)*(1 - PHAT(3)) - V3(6)*PTRANS)\n'\
+            + '            F1(3) = DENOM*INPROD*(FPROD*(1 + PHAT(3)) + BPROD*(1 - PHAT(3)))\n'\
+            + '            F1(4) = DENOM*INPROD*(FPROD*PTRANSCONJ - BPROD*PTRANSCONJ)\n'\
+            + '            F1(5) = 0\n'\
+            + '            F1(6) = 0\n'\
+            + '      else\n'\
+            + '            INPROD = 2*(V3(5)*F2(5)+V3(6)*F2(6))\n'\
+            + '            FPROD = FPREFAC*(V3(3)*PTRANSCONJ - V3(4)*(1 + PHAT(3)))\n'\
+            + '            BPROD = BPREFAC*(-1*V3(3)*PTRANSCONJ - V3(4)*(1 - PHAT(3)))\n'\
+            + '            F1(3) = 0\n'\
+            + '            F1(4) = 0\n'\
+            + '            F1(5) = DENOM*INPROD*(FPROD*PTRANS - BPROD*PTRANS)\n'\
+            + '            F1(6) = DENOM*INPROD*(-1*FPROD*(1+PHAT(3)) - BPROD*(1 - PHAT(3)))\n'\
+            + '      endif\n'
         text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n'\
             + '      REAL*8 PVEC\n'\
             + '      REAL*8 PHAT(3)\n'\
@@ -1703,7 +1760,11 @@ def vertex_replacer(text, vertex):
             + '      COMPLEX*16 FPREFAC\n'\
             + '      COMPLEX*16 BPREFAC\n'\
             + '      COMPLEX*16 FPROD\n'\
-            + '      COMPLEX*16 BPROD\n' + text_copy[linebreaks[15]+1:]
+            + '      COMPLEX*16 BPROD\n'\
+            + '      double precision rZero\n'\
+            + '      double complex rZerComp\n'\
+            + '      parameter ( rZero = 0.0d0 )\n'\
+            + '      rZerComp = dcmplx ( rZero )\n' + text_copy[linebreaks[15]+1:]
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[-18]+1] + FFV8_1_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'FFV8_2'):
@@ -1716,13 +1777,23 @@ def vertex_replacer(text, vertex):
             + '      PTRANSCONJ = DCMPLX(PHAT(1),-1*PHAT(2))\n'\
             + '      FPREFAC = (P2(0) + PVEC)/(2*(1 + PHAT(3)))\n'\
             + '      BPREFAC = (P2(0) - PVEC)/(2*(1 - PHAT(3)))\n'\
-            + '      INPROD = 2*(V3(3)*F1(3)+V3(4)*F1(4))\n'\
-            + '      FPROD = FPREFAC*(V3(5)*(1 + PHAT(3)) + V3(6)*PTRANS)\n'\
-            + '      BPROD = BPREFAC*(V3(5)*(1 - PHAT(3)) - V3(6)*PTRANS)\n'\
-            + '      F2(3) = DENOM*INPROD*(FPROD*(1 + PHAT(3)) + BPROD*(1 - PHAT(3)))\n'\
-            + '      F2(4) = DENOM*INPROD*(FPROD*PTRANSCONJ - BPROD*PTRANSCONJ)\n'\
-            + '      F2(5) = 0\n'\
-            + '      F2(6) = 0\n'
+            + '      if ( ( F1(5).eq.rZerComp ) .AND. ( F1(6).eq.rZerComp ) )then\n'\
+            + '            INPROD = 2*(V3(3)*F1(3)+V3(4)*F1(4))\n'\
+            + '            FPROD = FPREFAC*(V3(5)*(1 + PHAT(3)) + V3(6)*PTRANS)\n'\
+            + '            BPROD = BPREFAC*(V3(5)*(1 - PHAT(3)) - V3(6)*PTRANS)\n'\
+            + '            F2(3) = DENOM*INPROD*(FPROD*(1 + PHAT(3)) + BPROD*(1 - PHAT(3)))\n'\
+            + '            F2(4) = DENOM*INPROD*(FPROD*PTRANSCONJ - BPROD*PTRANSCONJ)\n'\
+            + '            F2(5) = 0\n'\
+            + '            F2(6) = 0\n'\
+            + '      else\n'\
+            + '            INPROD = 2*(V3(5)*F1(5)+V3(6)*F1(6))\n'\
+            + '            FPROD = FPREFAC*(V3(3)*PTRANSCONJ - V3(4)*(1 + PHAT(3)))\n'\
+            + '            BPROD = BPREFAC*(-1*V3(3)*PTRANSCONJ - V3(4)*(1 - PHAT(3)))\n'\
+            + '            F2(3) = 0\n'\
+            + '            F2(4) = 0\n'\
+            + '            F2(5) = DENOM*INPROD*(FPROD*PTRANS - BPROD*PTRANS)\n'\
+            + '            F2(6) = DENOM*INPROD*(-1*FPROD*(1+PHAT(3)) - BPROD*(1 - PHAT(3)))\n'\
+            + '      endif\n'
         text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n'\
             + '      REAL*8 PVEC\n'\
             + '      REAL*8 PHAT(3)\n'\
@@ -1731,7 +1802,11 @@ def vertex_replacer(text, vertex):
             + '      COMPLEX*16 FPREFAC\n'\
             + '      COMPLEX*16 BPREFAC\n'\
             + '      COMPLEX*16 FPROD\n'\
-            + '      COMPLEX*16 BPROD\n' + text_copy[linebreaks[15]+1:]
+            + '      COMPLEX*16 BPROD\n'\
+            + '      double precision rZero\n'\
+            + '      double complex rZerComp\n'\
+            + '      parameter ( rZero = 0.0d0 )\n'\
+            + '      rZerComp = dcmplx ( rZero )\n' + text_copy[linebreaks[15]+1:]
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[-18]+1] + FFV8_2_replace + text_copy[linebreaks[-4]+1:]
     text_copy = 'C     This file was automatically generated by ALOHA\n'\
@@ -1742,7 +1817,10 @@ def vertex_replacer(text, vertex):
 def postex_vertex_replacer(working_dir):
     "Function which checks the working directory to see what vertices are used in a given process"
     "and replaces them by directly rewriting the vertex Fortran files (if any of them are intended to be chiral)"
-    write_dir = working_dir
+    write_dir = pjoin(working_dir, 'Source', 'DHELAS')
+    #proc_dir = pjoin(working_dir, 'SubProcesses')
+    #list_subfolders_with_paths = [f.path for f in os.scandir(proc_dir) if f.is_dir()]
+    #misc.sprint(list_subfolders_with_paths)
     onlyfiles = [f for f in os.listdir(write_dir) if os.path.isfile(os.path.join(write_dir, f))]
     #sprint(onlyfiles)
     if 'FFV7_0.f' in onlyfiles:
