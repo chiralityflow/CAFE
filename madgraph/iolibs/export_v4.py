@@ -3042,8 +3042,8 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         fermionic_list_right = [i for i, e in enumerate(right_list) if e != 0]
         fermionic_change = True
         # checks whether the sum of all chiral charges in external fermions adds up to zero
-        if (sum(left_list) == 0) and (sum(right_list) == 0):
-            fermionic_change = False
+        # if (sum(left_list) == 0) and (sum(right_list) == 0):
+        #     fermionic_change = False
         
 
         # if the sum of external fermionic chiral charges is non-zero, replace external spinors
@@ -3080,24 +3080,52 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         #                 k += 1.
         #                 if k > -0.5:
         #                     break
-
+        lleft_list = []
+        rright_list = []
+        for iwf in range(len(helas_calls_copy)):
+            # Get list of wfs in helas_calls_copy[iwf]
+            curr_call_wfs_pieces = helas_calls_copy[iwf].split(')')[:-2]
+            lleft_list.append(0)
+            rright_list.append(0)
+            if(len(curr_call_wfs_pieces) > 0):
+                if (curr_call_wfs_pieces[0][5:11] == 'FFV7_1') or (curr_call_wfs_pieces[0][5:11] == 'FFV8_2'):
+                    lleft_list[iwf] = 0
+                    rright_list[iwf] = 1
+                    misc.sprint(curr_call_wfs_pieces[0][5:11])
+                elif (curr_call_wfs_pieces[0][5:11] == 'FFV7_2') or (curr_call_wfs_pieces[0][5:11] == 'FFV8_1'):
+                    lleft_list[iwf] = 1
+                    rright_list[iwf] = 0
+            curr_call_wfs = [i[-1] for i in curr_call_wfs_pieces]
+        for i in range(len(parts_list)):
+            # checks whether the particle is a fermion with chiral charge,
+            # where the last 2 characters denote chiral charge and electric charge
+            if (len(parts_list[i]) > 2):
+                if (parts_list[i][-2] == 'l'):
+                    lleft_list[i] = 1
+                elif (parts_list[i][-2] == 'r'):
+                    rright_list[i] = 1
         # change the external wavefuntions
-        # treat incoming and outgoing particles independently, since an incoming fermion is equivalent
-        # with an outgoing anti-fermion and vice versa
         if fermionic_change == True:
             (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
-            for i in range(ninitial):
-                if ((left_list[i] == 1) and (right_list[i] == 0)):
+            # for k in range(ninitial):
+            #     if (lleft_list[k] == 1) and (rright_list[k] == 0):
+            #         lleft_list[k] = 0
+            #         rright_list[k] = 1
+            #     elif (lleft_list[k] == 0) and (rright_list[k] == 1):
+            #         lleft_list[k] = 1
+            #         rright_list[k] = 0
+            # for i in range(ninitial):
+            #     if ((left_list[i] == 1) and (right_list[i] == 0)):
+            #         # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
+            #         helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:]
+            #     elif ((left_list[i] == 0) and (right_list[i] == 1)):
+            #         # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:19] + \
+            #         helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]
+            for i in range(nexternal):
+                if ((lleft_list[i] == 1) and (rright_list[i] == 0)):
                     # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
-                    helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:]
-                elif ((left_list[i] == 0) and (right_list[i] == 1)):
-                    # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:19] + \
                     helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]
-            for i in range(ninitial,nexternal):
-                if ((left_list[i] == 1) and (right_list[i] == 0)):
-                    # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
-                    helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]
-                elif ((left_list[i] == 0) and (right_list[i] == 1)):
+                elif ((lleft_list[i] == 0) and (rright_list[i] == 1)):
                     # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:19] + \
                     helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:]
                 # elif ((left_list[i] == -1) and (right_list[i] == 0)):
@@ -3106,6 +3134,13 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
                 # elif ((left_list[i] == 0) and (right_list[i] == -1)):
                 #     #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:19] + \
                 #     helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]
+            for i in range(nexternal, len(lleft_list)):
+                if (lleft_list[i] == 1):
+                    misc.sprint(lleft_list[i])
+                    misc.sprint(helas_calls_copy[i])
+                elif (rright_list[i] == 1):
+                    misc.sprint(rright_list[i])
+                    misc.sprint(helas_calls_copy[i])
             # for i in range(ninitial,nexternal):
             #     if ((left_list[i] == -1) and (right_list[i] == 0)):
             #         #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
