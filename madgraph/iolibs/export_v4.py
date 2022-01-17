@@ -3096,7 +3096,6 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
                 if (curr_call_wfs_pieces[0][5:11] == 'FFV7_1') or (curr_call_wfs_pieces[0][5:11] == 'FFV8_2'):
                     lleft_list[iwf] = 0
                     rright_list[iwf] = 1
-                    misc.sprint(curr_call_wfs_pieces[0][5:11])
                 elif (curr_call_wfs_pieces[0][5:11] == 'FFV7_2') or (curr_call_wfs_pieces[0][5:11] == 'FFV8_1'):
                     lleft_list[iwf] = 1
                     rright_list[iwf] = 0
@@ -3114,6 +3113,14 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
                     lleft_list[i] = 1
                 elif (parts_list[i][-2] == 'r'):
                     rright_list[i] = 1
+        (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
+        for k in range(ninitial):
+            if (lleft_list[k] == 1) and (rright_list[k] == 0):
+                lleft_list[k] = 0
+                rright_list[k] = 1
+            elif (lleft_list[k] == 0) and (rright_list[k] == 1):
+                lleft_list[k] = 1
+                rright_list[k] = 0
         for q in range(len(int_phot_list)):
             if int_phot_list[q] == 1:
                 wf1 = int(wfs_calls[q][0])
@@ -3135,14 +3142,6 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
                     helas_calls_copy[q] = helas_calls_2py
         # change the external wavefuntions
         if fermionic_change == True:
-            (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
-            # for k in range(ninitial):
-            #     if (lleft_list[k] == 1) and (rright_list[k] == 0):
-            #         lleft_list[k] = 0
-            #         rright_list[k] = 1
-            #     elif (lleft_list[k] == 0) and (rright_list[k] == 1):
-            #         lleft_list[k] = 1
-            #         rright_list[k] = 0
             # for i in range(ninitial):
             #     if ((left_list[i] == 1) and (right_list[i] == 0)):
             #         # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
