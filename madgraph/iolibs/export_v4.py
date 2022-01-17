@@ -3082,11 +3082,16 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         #                     break
         lleft_list = []
         rright_list = []
+        int_phot_list = []
+        wfs_calls = []
+        amp_calcs = []
         for iwf in range(len(helas_calls_copy)):
             # Get list of wfs in helas_calls_copy[iwf]
             curr_call_wfs_pieces = helas_calls_copy[iwf].split(')')[:-2]
             lleft_list.append(0)
             rright_list.append(0)
+            int_phot_list.append(0)
+            amp_calcs.append(0)
             if(len(curr_call_wfs_pieces) > 0):
                 if (curr_call_wfs_pieces[0][5:11] == 'FFV7_1') or (curr_call_wfs_pieces[0][5:11] == 'FFV8_2'):
                     lleft_list[iwf] = 0
@@ -3095,7 +3100,12 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
                 elif (curr_call_wfs_pieces[0][5:11] == 'FFV7_2') or (curr_call_wfs_pieces[0][5:11] == 'FFV8_1'):
                     lleft_list[iwf] = 1
                     rright_list[iwf] = 0
+                elif (curr_call_wfs_pieces[0][5:13] == 'FFV7P0_3') or (curr_call_wfs_pieces[0][5:13] == 'FFV8P0_3'):
+                    int_phot_list[iwf] = 1
+                elif (curr_call_wfs_pieces[0][5:11] == 'FFV7_0') or (curr_call_wfs_pieces[0][5:11] == 'FFV8_0'):
+                    amp_calcs[iwf] = 1
             curr_call_wfs = [i[-1] for i in curr_call_wfs_pieces]
+            wfs_calls.append(curr_call_wfs)
         for i in range(len(parts_list)):
             # checks whether the particle is a fermion with chiral charge,
             # where the last 2 characters denote chiral charge and electric charge
@@ -3104,6 +3114,25 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
                     lleft_list[i] = 1
                 elif (parts_list[i][-2] == 'r'):
                     rright_list[i] = 1
+        for q in range(len(int_phot_list)):
+            if int_phot_list[q] == 1:
+                wf1 = int(wfs_calls[q][0])
+                wf2 = int(wfs_calls[q][1])
+                if (lleft_list[wf1 - 1] == 0) and (rright_list[wf2 - 1] == 0):
+                    endparenths = misc.get_symbols(helas_calls_copy[q],')')
+                    helas_calls_2py = helas_calls_copy[q][:endparenths[0] - 1] + str(wf2) + helas_calls_copy[q][endparenths[0]:endparenths[1] - 1]\
+                        + str(wf1) + helas_calls_copy[q][endparenths[1]:]
+                    # misc.sprint(helas_calls_copy[q],helas_calls_2py)
+                    helas_calls_copy[q] = helas_calls_2py
+            elif amp_calcs[q] == 1:
+                wf1 = int(wfs_calls[q][0])
+                wf2 = int(wfs_calls[q][1])
+                if (lleft_list[wf1 - 1] == 0) and (rright_list[wf2 - 1] == 0):
+                    endparenths = misc.get_symbols(helas_calls_copy[q],')')
+                    helas_calls_2py = helas_calls_copy[q][:endparenths[0] - 1] + str(wf2) + helas_calls_copy[q][endparenths[0]:endparenths[1] - 1]\
+                        + str(wf1) + helas_calls_copy[q][endparenths[1]:]
+                    # misc.sprint(helas_calls_copy[q],helas_calls_2py)
+                    helas_calls_copy[q] = helas_calls_2py
         # change the external wavefuntions
         if fermionic_change == True:
             (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
@@ -3134,13 +3163,6 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
                 # elif ((left_list[i] == 0) and (right_list[i] == -1)):
                 #     #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:19] + \
                 #     helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]
-            for i in range(nexternal, len(lleft_list)):
-                if (lleft_list[i] == 1):
-                    misc.sprint(lleft_list[i])
-                    misc.sprint(helas_calls_copy[i])
-                elif (rright_list[i] == 1):
-                    misc.sprint(rright_list[i])
-                    misc.sprint(helas_calls_copy[i])
             # for i in range(ninitial,nexternal):
             #     if ((left_list[i] == -1) and (right_list[i] == 0)):
             #         #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
