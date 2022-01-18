@@ -32,6 +32,30 @@ V_4 = Vertex(name = 'V_4',
               lorentz = [ L.FFV8 ],
               couplings = {(0,0):C.GC_3})
 
+V_21 = Vertex(name = 'V_21',
+              particles = [ P.elec__plus__, P.elec__minus__, P.a ],
+              color = [ '1' ],
+              lorentz = [ L.FFV7 ],
+              couplings = {(0,0):C.GC_3})
+
+V_22 = Vertex(name = 'V_22',
+              particles = [ P.elec__plus__, P.elec__minus__, P.a ],
+              color = [ '1' ],
+              lorentz = [ L.FFV8 ],
+              couplings = {(0,0):C.GC_3})
+
+V_23 = Vertex(name = 'V_23',
+              particles = [ P.muon__plus__, P.muon__minus__, P.a ],
+              color = [ '1' ],
+              lorentz = [ L.FFV7 ],
+              couplings = {(0,0):C.GC_3})
+
+V_24 = Vertex(name = 'V_24',
+              particles = [ P.muon__plus__, P.muon__minus__, P.a ],
+              color = [ '1' ],
+              lorentz = [ L.FFV8 ],
+              couplings = {(0,0):C.GC_3})
+
 # V_9 = Vertex(name = 'V_9',
 #               particles = [ P.eR__plus__, P.eL__minus__, P.a2 ],
 #               color = [ '1' ],

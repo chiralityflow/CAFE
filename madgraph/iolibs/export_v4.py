@@ -3114,13 +3114,13 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
                 elif (parts_list[i][-2] == 'r'):
                     rright_list[i] = 1
         (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
-        for k in range(ninitial):
-            if (lleft_list[k] == 1) and (rright_list[k] == 0):
-                lleft_list[k] = 0
-                rright_list[k] = 1
-            elif (lleft_list[k] == 0) and (rright_list[k] == 1):
-                lleft_list[k] = 1
-                rright_list[k] = 0
+        # for k in range(ninitial): # uncomment this for-loop to switch initial state fermion chiralities
+        #     if (lleft_list[k] == 1) and (rright_list[k] == 0):
+        #         lleft_list[k] = 0
+        #         rright_list[k] = 1
+        #     elif (lleft_list[k] == 0) and (rright_list[k] == 1):
+        #         lleft_list[k] = 1
+        #         rright_list[k] = 0
         for q in range(len(int_phot_list)):
             if int_phot_list[q] == 1:
                 wf1 = int(wfs_calls[q][0])

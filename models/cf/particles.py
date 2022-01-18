@@ -146,6 +146,24 @@ ghWm = Particle(pdg_code = 9000004,
 
 ghWm__tilde__ = ghWm.anti()
 
+elec__minus__ = Particle(pdg_code = 11011,
+                      name = 'elec-',
+                      antiname = 'elec+',
+                      spin = 2,
+                      color = 1,
+                      mass = Param.ZERO,
+                      width = Param.ZERO,
+                      texname = 'elec-',
+                      antitexname = 'elec+',
+                      charge = -1,
+                      GhostNumber = 0,
+                      LeptonNumber = 1,
+                      line='dotted',
+                      leftchirality = 1,
+                      Y = 0)
+
+elec__plus__ = elec__minus__.anti()
+
 eL__minus__ = Particle(pdg_code = 90001,
                       name = 'eL-',
                       antiname = 'eR+',
@@ -181,6 +199,24 @@ eR__minus__ = Particle(pdg_code = 90003,
                       Y = 0)
 
 eL__plus__ = eR__minus__.anti()
+
+muon__minus__ = Particle(pdg_code = 11013,
+                       name = 'muon-',
+                       antiname = 'muon+',
+                       spin = 2,
+                       color = 1,
+                       mass = Param.ZERO,
+                       width = Param.ZERO,
+                       texname = 'muon-',
+                       antitexname = 'muon+',
+                       charge = -1,
+                       GhostNumber = 0,
+                       LeptonNumber = 1,
+                       line='dotted',
+                       leftchirality = 1,
+                       Y = 0)
+                       
+muon__plus__ = muon__minus__.anti()
 
 muL__minus__ = Particle(pdg_code = 90005,
                        name = 'muL-',

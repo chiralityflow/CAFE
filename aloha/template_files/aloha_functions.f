@@ -86,11 +86,11 @@ c#endif
             ip = (1+nh)/2
             im = (1-nh)/2
 c
-c            fi(3) = ip     * sqm(ip)
-c            fi(4) = im*nsf * sqm(ip)
+            fi(3) = ip     * sqm(ip)
+            fi(4) = im*nsf * sqm(ip)
 c
-            fi(3) = dcmplx( rZero )
-            fi(4) = dcmplx( rZero )
+c            fi(3) = dcmplx( rZero )
+c            fi(4) = dcmplx( rZero )
             fi(5) = ip*nsf * sqm(im)
             fi(6) = im     * sqm(im)
 
@@ -113,11 +113,11 @@ c
             endif
 
 c
-c            fi(3) = sfomeg(1)*chi(im)
-c            fi(4) = sfomeg(1)*chi(ip)
+            fi(3) = sfomeg(1)*chi(im)
+            fi(4) = sfomeg(1)*chi(ip)
 c
-            fi(3) = dcmplx( rZero )
-            fi(4) = dcmplx( rZero )
+c            fi(3) = dcmplx( rZero )
+c            fi(4) = dcmplx( rZero )
             fi(5) = sfomeg(2)*chi(im)
             fi(6) = sfomeg(2)*chi(ip)
 
@@ -143,11 +143,11 @@ c
             fi(6) = chi(2)
          else
 c
-c            fi(3) = chi(2)
-c            fi(4) = chi(1)
+            fi(3) = chi(2)
+            fi(4) = chi(1)
 c
-            fi(3) = dcmplx( rZero )
-            fi(4) = dcmplx( rZero )
+c            fi(3) = dcmplx( rZero )
+c            fi(4) = dcmplx( rZero )
             fi(5) = dcmplx( rZero )
             fi(6) = dcmplx( rZero )
          endif
@@ -612,11 +612,11 @@ c#endif
             ip = nhel * -1 * ((1-nh)/2)
             fo(3) = im     * sqm(abs(ip))
             fo(4) = ip*nsf * sqm(abs(ip))
-            fo(5) = dcmplx( rZero )
-            fo(6) = dcmplx( rZero )
+c            fo(5) = dcmplx( rZero )
+c            fo(6) = dcmplx( rZero )
 c           
-c            fo(5) = im*nsf * sqm(abs(im))
-c            fo(6) = ip     * sqm(abs(im))
+            fo(5) = im*nsf * sqm(abs(im))
+            fo(6) = ip     * sqm(abs(im))
 c
          else
 
@@ -639,11 +639,11 @@ c
 
             fo(3) = sfomeg(2)*chi(im)
             fo(4) = sfomeg(2)*chi(ip)
-            fo(5) = dcmplx( rZero )
-            fo(6) = dcmplx( rZero )
+c            fo(5) = dcmplx( rZero )
+c            fo(6) = dcmplx( rZero )
 c
-c            fo(5) = sfomeg(1)*chi(im)
-c            fo(6) = sfomeg(1)*chi(ip)
+            fo(5) = sfomeg(1)*chi(im)
+            fo(6) = sfomeg(1)*chi(ip)
 c
 
          endif
@@ -669,11 +669,11 @@ c
          else
             fo(3) = dcmplx( rZero )
             fo(4) = dcmplx( rZero )
-            fo(5) = dcmplx( rZero )
-            fo(6) = dcmplx( rZero )
+c            fo(5) = dcmplx( rZero )
+c            fo(6) = dcmplx( rZero )
 c
-c            fo(5) = chi(2)
-c            fo(6) = chi(1)
+            fo(5) = chi(2)
+            fo(6) = chi(1)
 c
          endif
 
