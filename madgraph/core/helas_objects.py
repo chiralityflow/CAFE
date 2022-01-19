@@ -650,6 +650,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
     def __init__(self, *arguments):
         """Allow generating a HelasWavefunction from a Leg
         """
+        misc.sprint('In HelasWavefunction init')
 
         if len(arguments) > 2:
             if isinstance(arguments[0], base_objects.Leg) and \
@@ -659,6 +660,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
                 leg = arguments[0]
                 interaction_id = arguments[1]
                 model = arguments[2]
+                # misc.sprint(arguments)
                 
                 # decay_ids is the pdg codes for particles with decay
                 # chains defined
@@ -701,6 +703,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
                 else:
                     self.set('polarization', leg.get('polarization'))
                 self.set('interaction_id', interaction_id, model)
+                misc.sprint(self.get('polarization'), self.get('interaction_id'), self.get('number'))
         elif arguments:
             super(HelasWavefunction, self).__init__(arguments[0])
         else:
@@ -892,9 +895,20 @@ class HelasWavefunction(base_objects.PhysicsObject):
                 self.set('interaction_id', value)
                 if value > 0:
                     inter = model.get('interaction_dict')[value]
+                    misc.sprint(self.get('pdg_code'))
+                    # AL: Try changing the left/rightness of off-shell fermion in vertex definition
+                    if self.get('pdg_code') == 90001:
+                        for part in inter.get('particles'):
+                            if part.get('pdg_code') == 90003:
+                                part.set('pdg_code',90001)
+                                part.set('name', 'el-')
+                                part.set('antiname', 'el+')
+                        misc.sprint(inter.get('particles'))
+                    misc.sprint(inter)
                     self.set('pdg_codes',
                              [part.get_pdg_code() for part in \
                               inter.get('particles')])
+                    misc.sprint(self.get('pdg_codes'))
                     self.set('orders', inter.get('orders'))
                     # Note that the following values might change, if
                     # the relevant color/lorentz/coupling is not index 0

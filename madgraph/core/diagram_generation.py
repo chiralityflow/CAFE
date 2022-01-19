@@ -694,12 +694,12 @@ class Amplitude(base_objects.PhysicsObject):
                                                   is_decay_proc,
                                                   process.get('orders'))
         else:
-            misc.sprint(is_decay_proc)
+            # misc.sprint(is_decay_proc)
             # AL: change the final fermion propagator from left/left or right/right
             # to left/right or right/left
             ref_dict_to0 = model.get('ref_dict_to0')
             # AL: delete old left/left or right/right fermions from dict
-            misc.sprint(ref_dict_to0)
+            # misc.sprint(ref_dict_to0)
             ref_dict_to0.pop((90001,-90001),None)
             ref_dict_to0[(90001,-90003)] = [0]
             ref_dict_to0.pop((-90001,90001),None)
@@ -716,7 +716,7 @@ class Amplitude(base_objects.PhysicsObject):
             ref_dict_to0[(90007,-90005)] = [0]
             ref_dict_to0.pop((-90007,90007),None)
             ref_dict_to0[(-90007,90005)] = [0]
-            misc.sprint(ref_dict_to0)
+            # misc.sprint(ref_dict_to0)
 
 
             reduced_leglist = self.reduce_leglist(leglist,
@@ -724,7 +724,7 @@ class Amplitude(base_objects.PhysicsObject):
                                                   model.get('ref_dict_to0'),
                                                   is_decay_proc,
                                                   process.get('orders'))
-            misc.sprint(reduced_leglist)
+            # misc.sprint(reduced_leglist)
         #In LoopAmplitude the function below is overloaded such that it
         #converts back all DGLoopLegs to Legs. In the default tree-level
         #diagram generation, this does nothing.
@@ -1012,8 +1012,8 @@ class Amplitude(base_objects.PhysicsObject):
         # Special treatment for decay chain legs
 
         if curr_leglist.can_combine_to_0(ref_dict_to0, is_decay_proc):
-            misc.sprint('all legs combined into single vertex', curr_leglist)
-            misc.sprint(ref_dict_to0)
+            # misc.sprint('all legs combined into single vertex', curr_leglist)
+            # misc.sprint(ref_dict_to0)
             # Extract the interaction id associated to the vertex 
             
             vertex_ids = self.get_combined_vertices(curr_leglist,
@@ -1044,18 +1044,18 @@ class Amplitude(base_objects.PhysicsObject):
         # misc.sprint(comb_lists)
         # Create a list of leglists/vertices by merging combinations
         leg_vertex_list = self.merge_comb_legs(comb_lists, ref_dict_to1)
-        misc.sprint(leg_vertex_list)
+        # misc.sprint(leg_vertex_list)
 
         # Consider all the pairs
         for leg_vertex_tuple in leg_vertex_list:
-            misc.sprint(leg_vertex_tuple)
+            # misc.sprint(leg_vertex_tuple)
 
             # Remove forbidden particles
             if self.get('process').get('forbidden_particles') and \
                 any([abs(vertex.get('legs')[-1].get('id')) in \
                 self.get('process').get('forbidden_particles') \
                 for vertex in leg_vertex_tuple[1]]):
-                    misc.sprint('forbidden particles')
+                    # misc.sprint('forbidden particles')
                     continue
 
             # Check for coupling orders. If couplings < 0, skip recursion.
@@ -1078,8 +1078,8 @@ class Amplitude(base_objects.PhysicsObject):
             # If there is a reduced diagram
             if reduced_diagram:
                 vertex_list_list = [list(leg_vertex_tuple[1])]
-                misc.sprint(len(vertex_list_list),vertex_list_list)
-                if len(vertex_list_list) == 3: misc.sprint(vertex_list_list)
+                # misc.sprint(len(vertex_list_list),vertex_list_list)
+                # if len(vertex_list_list) == 3: misc.sprint(vertex_list_list)
                 vertex_list_list.append(reduced_diagram)
                 expanded_list = expand_list_list(vertex_list_list)
                 res.extend(expanded_list)
@@ -1169,7 +1169,7 @@ class Amplitude(base_objects.PhysicsObject):
 
                 # Check if the combination is valid
                 if base_objects.LegList(comb).can_combine_to_1(ref_dict_to1):
-                    misc.sprint(comb)
+                    # misc.sprint(comb)
 
                     # Identify the rest, create a list [comb,rest] and
                     # add it to res
@@ -1178,7 +1178,7 @@ class Amplitude(base_objects.PhysicsObject):
                     for leg in comb:
                         res_list.remove(leg)
                     res_list.insert(list_legs.index(comb[0]), comb)
-                    misc.sprint(res_list)
+                    # misc.sprint(res_list)
                     res.append(res_list)
 
                     # Now, deal with cases with more than 1 combination
@@ -1196,15 +1196,15 @@ class Amplitude(base_objects.PhysicsObject):
                     res_list.append(comb)
                     # This is where recursion actually happens, 
                     # on the second part
-                    misc.sprint(res_list2)
+                    # misc.sprint(res_list2)
                     for item in self.combine_legs(res_list2,
                                                   ref_dict_to1,
                                                   max_multi_to1):
-                        misc.sprint(item)
+                        # misc.sprint(item)
                         final_res_list = copy.copy(res_list)
                         final_res_list.extend(item)
                         res.append(final_res_list)
-                        misc.sprint(final_res_list)
+                        # misc.sprint(final_res_list)
 
         return res
 
@@ -1250,14 +1250,14 @@ class Amplitude(base_objects.PhysicsObject):
                     # Create and add the object. This is done by a
                     # separate routine, to allow overloading by
                     # daughter classes
-                    misc.sprint(leg_vert_ids)
+                    # misc.sprint(leg_vert_ids)
                     new_leg_vert_ids = []
                     if leg_vert_ids:
                         new_leg_vert_ids = self.get_combined_legs(entry,
                                                                   leg_vert_ids,
                                                                   number,
                                                                   state)
-                    misc.sprint(new_leg_vert_ids)
+                    # misc.sprint(new_leg_vert_ids)
                     reduced_list.append([l[0] for l in new_leg_vert_ids])
                     # misc.sprint(new_leg_vert_ids[0][0]['id'])
                     # change left <-> right for chiral particles
@@ -1277,7 +1277,7 @@ class Amplitude(base_objects.PhysicsObject):
                         new_leg_vert_ids[0][0]['id'] = 90005
                     elif new_leg_vert_ids[0][0]['id'] == 90007: 
                         new_leg_vert_ids[0][0]['id'] = 90005
-                    misc.sprint(new_leg_vert_ids[0][0]['id'])
+                    # misc.sprint(new_leg_vert_ids[0][0]['id'])
                     # Create and add the corresponding vertex
                     # Extract vertex ids corresponding to the various legs
                     # in mylegs
