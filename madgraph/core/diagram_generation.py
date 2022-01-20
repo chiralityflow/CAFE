@@ -721,7 +721,8 @@ class Amplitude(base_objects.PhysicsObject):
 
             reduced_leglist = self.reduce_leglist(leglist,
                                                   max_multi_to1,
-                                                  model.get('ref_dict_to0'),
+                                                #   model.get('ref_dict_to0'),
+                                                  ref_dict_to0,
                                                   is_decay_proc,
                                                   process.get('orders'))
             # misc.sprint(reduced_leglist)

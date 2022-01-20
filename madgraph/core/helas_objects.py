@@ -14,6 +14,7 @@
 ################################################################################
 from __future__ import division
 from __future__ import absolute_import
+import wave
 """Definitions of objects used to generate language-independent Helas
 calls: HelasWavefunction, HelasAmplitude, HelasDiagram for the
 generation of wavefunctions and amplitudes, HelasMatrixElement and
@@ -702,6 +703,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
                         self.set('state', 'outgoing')
                 else:
                     self.set('polarization', leg.get('polarization'))
+                misc.sprint('about to change interactions here')
                 self.set('interaction_id', interaction_id, model)
                 misc.sprint(self.get('polarization'), self.get('interaction_id'), self.get('number'))
         elif arguments:
@@ -896,14 +898,35 @@ class HelasWavefunction(base_objects.PhysicsObject):
                 if value > 0:
                     inter = model.get('interaction_dict')[value]
                     misc.sprint(self.get('pdg_code'))
-                    # AL: Try changing the left/rightness of off-shell fermion in vertex definition
-                    if self.get('pdg_code') == 90001:
-                        for part in inter.get('particles'):
-                            if part.get('pdg_code') == 90003:
-                                part.set('pdg_code',90001)
-                                part.set('name', 'el-')
-                                part.set('antiname', 'el+')
-                        misc.sprint(inter.get('particles'))
+                    # # AL: Try changing the left/rightness of off-shell fermion in vertex definition
+                    # # AL: TODO: Update the vertex name as well? One for left, other for right?
+                    # # AL: FFV7_0 = FFV8_0 and FFV7_3 = FFV8_3 so we only care about getting off-shell fermions
+                    # # AL: correct. I.e. we need to make say FFV7 left-chiral, and FFV8 right-chiral?
+                    # # AL: TODO: Currently also changing external particle = bad! Work out how to fix this.
+                    # if self.get('pdg_code') == 90001 or self.get('pdg_code') == -90001:
+                    #     for part in inter.get('particles'):
+                    #         if part.get('pdg_code') == 90003:
+                    #             part.set('pdg_code',90001)
+                    #             part.set('name', 'el-')
+                    #             part.set('antiname', 'el+')
+                    # if self.get('pdg_code') == 90003 or self.get('pdg_code') == -90003:
+                    #     for part in inter.get('particles'):
+                    #         if part.get('pdg_code') == 90001:
+                    #             part.set('pdg_code',90003)
+                    #             part.set('name', 'er-')
+                    #             part.set('antiname', 'er+')
+                    # # if self.get('pdg_code') == 90001:
+                    #     for part in inter.get('particles'):
+                    #         if part.get('pdg_code') == 90003:
+                    #             part.set('pdg_code',90001)
+                    #             part.set('name', 'el-')
+                    #             part.set('antiname', 'el+')
+                    # if self.get('pdg_code') == 90001:
+                    #     for part in inter.get('particles'):
+                    #         if part.get('pdg_code') == 90003:
+                    #             part.set('pdg_code',90001)
+                    #             part.set('name', 'el-')
+                    #             part.set('antiname', 'el+')
                     misc.sprint(inter)
                     self.set('pdg_codes',
                              [part.get_pdg_code() for part in \
@@ -1074,7 +1097,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
         # Finally, the mother numbers
         array_rep.extend([mother['number'] for \
                           mother in self['mothers']])
-        
+        misc.sprint(array_rep)
         return array_rep
 
     def get_pdg_code(self):
@@ -1208,6 +1231,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
                                                     external_wavefunctions,
                                                     self,
                                                     wf_number)
+        misc.sprint('I am in function to check Majorana flow', wf_number, self)
 
         return self, wf_number
 
@@ -1237,7 +1261,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
 
         if not found_majorana:
             found_majorana = self.get('self_antipart')
-
+        misc.sprint(found_majorana)
         new_wf = self
         flip_flow = False
         flip_sign = False
@@ -1443,6 +1467,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
 
         other_fermions = [wf for wf in self.get('mothers') if \
                           wf.is_fermion() and wf != fermion_mother]
+        misc.sprint(fermion_mother, other_fermions)
         # Pick out bosons
         bosons = [wf for wf in self.get('mothers') if wf.is_boson()]
 
@@ -1468,6 +1493,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
             fermion_number_list.extend(boson.get_fermion_order())
 
         if self.is_fermion():
+            misc.sprint(mother_list[0], fermion_number_list)
             return [mother_list[0], fermion_number_list]
         
         return fermion_number_list
@@ -1514,6 +1540,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
         else:
             return_dict['state_id'] = -(-1) ** self.get_with_flow('is_part')
         return_dict['number_external'] = self.get('number_external')
+        misc.sprint(return_dict)
         
         return return_dict
 
@@ -1554,6 +1581,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
                 i=ind
             # temporary END
             nb = mother.get('me_id') - flip
+            misc.sprint(nb)
             output[str(i)] = nb
             if not OptimizedOutput:
                 if mother.get('is_loop'):
@@ -1575,7 +1603,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
                     output['WF%d'%i]=output['WF%d'%i]+',H)'
                 else:
                     output['WF%d'%i]=output['WF%d'%i]+')'
-                    
+            misc.sprint(output)
         #fixed argument
         for i, coup in enumerate(self.get_with_flow('coupling')):
             # We do not include the - sign in front of the coupling of loop
@@ -1627,6 +1655,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
             else: 
                 output['CM'] ='CMASS_%s' % self.get('mass')
         output.update(opt)
+        misc.sprint(output)
         return output
     
     def get_spin_state_number(self, flip=False):
@@ -1651,6 +1680,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
 
         part_number = self.find_outgoing_number()
         mother_number = (part_number-1)//2*2
+        misc.sprint(part_number,mother_number)
 
         return HelasMatrixElement.sorted_mothers(self)[mother_number]
 
@@ -1660,7 +1690,8 @@ class HelasWavefunction(base_objects.PhysicsObject):
         
         if self.get('interaction_id') == 0:
             return 0
-        
+        # misc.sprint(self.find_leg_index(self.get_anti_pdg_code(),\
+        #                                            self.get_spin_state_number()))
         return self.find_leg_index(self.get_anti_pdg_code(),\
                                                    self.get_spin_state_number())
         
@@ -1671,6 +1702,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
         """
         wf_indices = self.get('pdg_codes')
         wf_index = wf_indices.index(pdg_code)
+        misc.sprint(wf_indices, wf_index)
 
         # If fermion, then we need to correct for I/O status
         if spin_state % 2 == 0:
@@ -1680,6 +1712,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
             elif wf_index % 2 == 1 and spin_state > 0:
                 # Incoming particle at odd slot -> decrease by 1
                 wf_index -= 1
+        misc.sprint(wf_index + 1)
         return wf_index + 1
     
     def get_call_key(self):
@@ -1708,7 +1741,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
             res.append(self.get('conjugate_indices'))
             
 
-        
+        misc.sprint(res)
 
         return (tuple(res), tuple(self.get('lorentz')))
 
@@ -1719,6 +1752,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
         vertices = base_objects.VertexList()
 
         mothers = self.get('mothers')
+        misc.sprint(mothers)
 
         if not mothers:
             return vertices
@@ -1728,8 +1762,9 @@ class HelasWavefunction(base_objects.PhysicsObject):
             # This is where recursion happens
             vertices.extend(mother.get_base_vertices(\
                                                 wf_dict, vx_list,optimization))
-
+        misc.sprint(vertices)
         vertex = self.get_base_vertex(wf_dict, vx_list, optimization)
+        misc.sprint(vertex, vx_list)
 
         try:
             index = vx_list.index(vertex)
@@ -1764,6 +1799,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
                 'onshell': self.get('onshell'),
                 'loop_line':self.get('is_loop')
                 })
+            misc.sprint(lastleg)
 
             if optimization != 0 and not self.get('is_loop'):
                 wf_dict[(self.get('number'),self.get('onshell'))] = lastleg
@@ -3311,6 +3347,7 @@ class HelasDiagram(base_objects.PhysicsObject):
 
         wavefunctions = HelasWavefunctionList.extract_wavefunctions(\
                                        self.get('amplitudes')[0].get('mothers'))
+        misc.sprint(wavefunctions)
 
         coupling_orders = {}
         for wf in wavefunctions + [self.get('amplitudes')[0]]:
@@ -3452,9 +3489,11 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             if isinstance(amplitude, diagram_generation.Amplitude):
                 super(HelasMatrixElement, self).__init__()
                 self.get('processes').append(amplitude.get('process'))
+                misc.sprint(self.get('processes'))
                 self.set('has_mirror_process',
                          amplitude.get('has_mirror_process'))
                 self.generate_helas_diagrams(amplitude, optimization, decay_ids)
+                misc.sprint('after generate helas diagrams in HelasME')
                 self.calculate_fermionfactors()
                 self.calculate_identical_particle_factor()
                 if gen_color and not self.get('color_basis'):
@@ -3508,6 +3547,166 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         self.get('color_basis').build(self.get('base_amplitude'))
         self.set('color_matrix',
           color_amp.ColorMatrix(self.get('color_basis')))
+
+    # AL: New function to add LL and RR vertices to model after diagrams already generated
+    def add_LL_RR_vertices(self,amplitude, ext_wfs):
+        # Get model in question
+        process = amplitude.get('process')
+        model = process.get('model')
+
+        # Check if the process involves chiral fermions
+        is_chiral = False
+        # if not ext_wfs[key].is_fermion() for key in ext_wfs.keys():
+        #     misc.sprint('no fermions')
+        for key in ext_wfs.keys():
+            wf = ext_wfs[key]
+            # Check explicitly if chiral particles are involved
+            if wf['particle']['pdg_code'] == 90001: 
+                is_chiral = True
+                break
+            if wf['particle']['pdg_code'] == 90003: 
+                is_chiral = True
+                break
+            if wf['particle']['pdg_code'] == 90005: 
+                is_chiral = True
+                break
+            if wf['particle']['pdg_code'] == 90007: 
+                is_chiral = True
+                break
+        
+        # If not chiral, return the model unchanged
+        if not is_chiral: return model
+
+        # Else, add new interactions to dictionary
+        # I go through this one by one
+        # TODO: Find a better more stable way to get which interaction to copy
+
+        ##################
+        # emRRa vertex
+        ##################
+
+        # AL: Make a new copy of the interaction changes independently of the old one
+        new_int_emRRa = copy.deepcopy(model.get('interaction_dict')[2])
+                    
+        # AL: Give interaction an unused id                 
+        n_ints_in_model = len(model.get('interaction_dict'))
+        new_int_emRRa['id'] = n_ints_in_model + 1
+                    
+        # AL: for RR, use FFV8
+        new_int_emRRa['lorentz'] = ['FFV8']
+                    
+        # AL: update particles in interaction
+        for ipart, part in enumerate(new_int_emRRa['particles']):
+            if part['name'] == 'er-':
+                er_id = ipart
+            elif part['name'] == 'el-':
+                el_id = ipart
+        new_int_emRRa['particles'][el_id] = copy.copy(new_int_emRRa['particles'][er_id])
+                    
+        # AL: make new particle an antiparticle
+        new_int_emRRa['particles'][el_id]['is_part'] = False
+                    
+        # AL: add new interaction to the interaction_dict and interactions
+        model.get('interaction_dict')[n_ints_in_model + 1] = new_int_emRRa
+        model.get('interactions').append(new_int_emRRa)
+
+        ##################
+        # emLLa vertex
+        ##################
+
+        # AL: Make a new copy of the interaction changes independently of the old one
+        new_int_emLLa = copy.deepcopy(model.get('interaction_dict')[2])
+                    
+        # AL: Give interaction an unused id                 
+        n_ints_in_model += 1
+        new_int_emLLa['id'] = n_ints_in_model + 1
+                    
+        # AL: for LL, use FFV7
+        new_int_emLLa['lorentz'] = ['FFV7']
+                    
+        # AL: update particles in interaction
+        for ipart, part in enumerate(new_int_emLLa['particles']):
+            if part['name'] == 'er-':
+                er_id = ipart
+            elif part['name'] == 'el-':
+                el_id = ipart
+        new_int_emLLa['particles'][er_id] = copy.copy(new_int_emLLa['particles'][el_id])
+                    
+        # AL: make new particle an antiparticle
+        new_int_emLLa['particles'][er_id]['is_part'] = True
+                    
+        # AL: add new interaction to the interaction_dict and interactions
+        model.get('interaction_dict')[n_ints_in_model + 1] = new_int_emLLa
+        model.get('interactions').append(new_int_emLLa)
+
+
+        ##################
+        # epLLa vertex
+        ##################
+
+        # AL: Make a new copy of the interaction changes independently of the old one
+        new_int_epLLa = copy.deepcopy(model.get('interaction_dict')[1])
+                    
+        # AL: Give interaction an unused id                 
+        n_ints_in_model += 1
+        new_int_epLLa['id'] = n_ints_in_model + 1
+                    
+        # AL: for LL, use FFV7
+        new_int_epLLa['lorentz'] = ['FFV7']
+                    
+        # AL: update particles in interaction
+        for ipart, part in enumerate(new_int_epLLa['particles']):
+            if part['name'] == 'er-':
+                er_id = ipart
+            elif part['name'] == 'el-':
+                el_id = ipart
+        new_int_epLLa['particles'][er_id] = copy.copy(new_int_epLLa['particles'][el_id])
+                    
+        # AL: make new particle a particle
+        new_int_epLLa['particles'][er_id]['is_part'] = True
+        new_int_epLLa['particles'][el_id]['is_part'] = False
+                    
+        # AL: add new interaction to the interaction_dict and interactions
+        model.get('interaction_dict')[n_ints_in_model + 1] = new_int_epLLa
+        model.get('interactions').append(new_int_epLLa)
+
+        ##################
+        # epRRa vertex
+        ##################
+
+        # AL: Make a new copy of the interaction changes independently of the old one
+        new_int_epRRa = copy.deepcopy(model.get('interaction_dict')[1])
+                    
+        # AL: Give interaction an unused id                 
+        n_ints_in_model +=1
+        new_int_epRRa['id'] = n_ints_in_model + 1
+                    
+        # AL: for RR, use FFV8
+        new_int_epRRa['lorentz'] = ['FFV8']
+                    
+        # AL: update particles in interaction
+        for ipart, part in enumerate(new_int_epRRa['particles']):
+            if part['name'] == 'er-':
+                er_id = ipart
+            elif part['name'] == 'el-':
+                el_id = ipart
+        new_int_epRRa['particles'][el_id] = copy.copy(new_int_epRRa['particles'][er_id])
+                    
+        # AL: make new particle an antiparticle
+        new_int_epRRa['particles'][el_id]['is_part'] = True
+        new_int_epRRa['particles'][er_id]['is_part'] = False
+                    
+        # AL: add new interaction to the interaction_dict and interactions
+        model.get('interaction_dict')[n_ints_in_model + 1] = new_int_epRRa
+        model.get('interactions').append(new_int_epRRa)
+
+
+        misc.sprint(model.get('interactions'))
+
+
+
+
+        return model
         
     def generate_helas_diagrams(self, amplitude, optimization=1,decay_ids=[]):
         """Starting from a list of Diagrams from the diagram
@@ -3528,6 +3727,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         self.optimization = optimization
 
         diagram_list = amplitude.get('diagrams')
+        misc.sprint(diagram_list)
         process = amplitude.get('process')
 
         model = process.get('model')
@@ -3547,6 +3747,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                                         HelasWavefunction(leg, 0, model,
                                                           decay_ids)) \
                                        for leg in process.get('legs')])
+        misc.sprint(external_wavefunctions)
 
         # Initially, have one wavefunction for each external leg.
         wf_number = len(process.get('legs'))
@@ -3555,6 +3756,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # since all bosons should be treated as outgoing
         for key in external_wavefunctions.keys():
             wf = external_wavefunctions[key]
+            # misc.sprint(wf, key)
             if wf.is_boson() and wf.get('state') == 'initial' and \
                not wf.get('self_antipart'):
                 wf.set('is_part', not wf.get('is_part'))
@@ -3575,6 +3777,19 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         amplitude_number = 0
         diagram_number = 0
 
+        # AL: Add LL and RR interactions to model
+        self.add_LL_RR_vertices(amplitude, external_wavefunctions)
+        misc.sprint(model.get('interactions'))
+
+        # AL: keep track of if we've already defined LLphoton and RRphoton vertices
+        isemLLa = False
+        isemRRa = False
+
+        # AL: have a unique name for each of the new vertices we need
+        new_int_emLLa = {}
+        new_int_epLLa = {}
+        new_int_emRRa = {}
+        new_int_epRRa = {}
         for diagram in diagram_list:
 
             # List of dictionaries from leg number to wave function,
@@ -3592,11 +3807,98 @@ class HelasMatrixElement(base_objects.PhysicsObject):
 
             # Single out last vertex, since this will give amplitude
             lastvx = vertices.pop()
+            misc.sprint(lastvx)
+            intertmp = model.get('interaction_dict')[lastvx.get('id')]
+            misc.sprint(intertmp)
+
+
+            # AL: Add new interactions of LLphoton and RRphoton to interaction dictionary
+            # AL: TODO make this some sort of dictionary lookup for greater speed?
+            for vertex in vertices:
+                misc.sprint(vertex)
+                misc.sprint(vertex['legs'])
+                vids = []
+                for part in vertex['legs']:
+                    vids.append(part['id'])
+                nel = vids.count(90001)
+                ner = vids.count(90003)
+                misc.sprint(vids, nel, ner)
+                # AL: Try to make a new dictionary entry for the model, an LLphoton (RRphoton) vertex
+                if nel == 2:
+
+                    # AL: if I have already created this vertex then continue
+                    if isemLLa: continue
+
+                    # AL: Make a new copy of the interaction changes independently of the old one
+                    new_int_emLLa = copy.deepcopy(model.get('interaction_dict')[vertex.get('id')])
+                    
+                    # AL: Give interaction an unused id                 
+                    n_ints_in_model = len(model.get('interaction_dict'))
+                    new_int_emLLa['id'] = n_ints_in_model + 1
+                    
+                    # AL: If LL, use FFV7
+                    new_int_emLLa['lorentz'] = ['FFV7']
+                    
+                    # AL: update particles in interaction
+                    for ipart, part in enumerate(new_int_emLLa['particles']):
+                        if part['name'] == 'er-':
+                            er_id = ipart
+                        elif part['name'] == 'el-':
+                            el_id = ipart
+                    new_int_emLLa['particles'][er_id] = copy.copy(new_int_emLLa['particles'][el_id])
+                    
+                    # AL: make new particle an antiparticle
+                    new_int_emLLa['particles'][er_id]['is_part'] = False
+                    
+                    # AL: add new interaction to the interaction_dict and interactions
+                    model.get('interaction_dict')[n_ints_in_model + 1] = new_int_emLLa
+                    model.get('interactions').append(new_int_emLLa)
+                    misc.sprint(model.get('interaction_dict')[vertex.get('id')])
+                    misc.sprint(model.get('interaction_dict'))
+                    misc.sprint(model.get('interactions'))
+
+                    # AL: we now have this vertex
+                    isemLLa = True
+
+                elif ner == 2:
+                    # AL: if I have already created this vertex then continue
+                    if isemRRa: continue
+
+                    # AL: Make a new copy of the interaction changes independently of the old one
+                    new_int_emRRa = copy.deepcopy(model.get('interaction_dict')[vertex.get('id')])
+                    
+                    # AL: Give interaction an unused id                 
+                    n_ints_in_model = len(model.get('interaction_dict'))
+                    new_int_emRRa['id'] = n_ints_in_model + 1
+                    
+                    # AL: If RR, use FFV8
+                    new_int_emRRa['lorentz'] = ['FFV8']
+                    
+                    # AL: update particles in interaction
+                    for ipart, part in enumerate(new_int_emRRa['particles']):
+                        if part['name'] == 'er-':
+                            er_id = ipart
+                        elif part['name'] == 'el-':
+                            el_id = ipart
+                    new_int_emRRa['particles'][el_id] = copy.copy(new_int_emRRa['particles'][er_id])
+                    
+                    # AL: make new particle an antiparticle
+                    new_int_emRRa['particles'][el_id]['is_part'] = False
+                    
+                    # AL: add new interaction to the interaction_dict and interactions
+                    model.get('interaction_dict')[n_ints_in_model + 1] = new_int_emRRa
+                    model.get('interactions').append(new_int_emRRa)
+                    misc.sprint(model.get('interactions'))
+
+                    # AL: we now have this vertex
+                    isemRRA = True
+
+            
 
             # Go through all vertices except the last and create
             # wavefunctions
             for vertex in vertices:
-
+                
                 # In case there are diagrams with multiple Lorentz/color 
                 # structures, we need to keep track of the wavefunctions
                 # for each such structure separately, and generate
@@ -3608,8 +3910,26 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 # will be written out before the first amplitude is written.
                 new_number_to_wavefunctions = []
                 new_color_lists = []
+                
+                # AL: Try to update vertex id for off-shell chiral fermions
+                vids = []
+                for part in vertex['legs']:
+                    vids.append(part['id'])
+                misc.sprint(vids)
+                intertmp = model.get('interaction_dict')[vertex.get('id')]
+                misc.sprint(intertmp)
+                misc.sprint(new_int_emRRa)
+                if vids.count(90001) == 2:
+                    vertex.set('id',new_int_emLLa.get('id'))
+                elif vids.count(90003) == 2:
+                    # AL: change vertex to emRRa vertex
+                    vertex.set('id',new_int_emRRa.get('id'))
+                    misc.sprint(vertex, vertex.get('id'))
+                    # pass
+                    # misc.sprint(model.get('interaction_dict')[vertex.get('particles')])
                 for number_wf_dict, color_list in zip(number_to_wavefunctions,
                                                      color_lists):
+                    misc.sprint(number_wf_dict)
                     legs = copy.copy(vertex.get('legs'))
                     last_leg = legs.pop()
                     # Generate list of mothers from legs
@@ -3618,6 +3938,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                                               wavefunctions,
                                               diagram_wavefunctions)
                     inter = model.get('interaction_dict')[vertex.get('id')]
+                    misc.sprint(inter)
 
                     # Now generate new wavefunction for the last leg
 
@@ -3625,6 +3946,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     done_color = {} # store link to color
                     for coupl_key in sorted(inter.get('couplings').keys()):
                         color = coupl_key[0]
+                        misc.sprint(color, coupl_key)
                         if color in done_color:
                             wf = done_color[color]
                             wf.get('coupling').append(inter.get('couplings')[coupl_key])
@@ -3638,10 +3960,14 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                         wf.set('lorentz', [inter.get('lorentz')[coupl_key[1]]])
                         wf.set('color_key', color)
                         wf.set('mothers', mothers)
+                        misc.sprint(wf.get('lorentz'), inter.get('lorentz'))
+                        misc.sprint(wf.get('color_key'))
+                        misc.sprint(wf.get('mothers'))
                         # Need to set incoming/outgoing and
                         # particle/antiparticle according to the fermion flow
                         # of mothers
                         wf.set_state_and_particle(model)
+                        misc.sprint('do I get here?')
                         # Need to check for clashing fermion flow due to
                         # Majorana fermions, and modify if necessary
                         # Also need to keep track of the wavefunction number.
