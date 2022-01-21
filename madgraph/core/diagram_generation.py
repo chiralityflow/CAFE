@@ -1251,16 +1251,14 @@ class Amplitude(base_objects.PhysicsObject):
                     # Create and add the object. This is done by a
                     # separate routine, to allow overloading by
                     # daughter classes
-                    # misc.sprint(leg_vert_ids)
                     new_leg_vert_ids = []
                     if leg_vert_ids:
                         new_leg_vert_ids = self.get_combined_legs(entry,
                                                                   leg_vert_ids,
                                                                   number,
                                                                   state)
-                    # misc.sprint(new_leg_vert_ids)
                     reduced_list.append([l[0] for l in new_leg_vert_ids])
-                    # misc.sprint(new_leg_vert_ids[0][0]['id'])
+     
                     # AL: change left <-> right for chiral particles
                     if new_leg_vert_ids[0][0]['id'] == -90003: 
                         new_leg_vert_ids[0][0]['id'] = -90001
@@ -1278,7 +1276,7 @@ class Amplitude(base_objects.PhysicsObject):
                         new_leg_vert_ids[0][0]['id'] = 90007
                     elif new_leg_vert_ids[0][0]['id'] == 90007: 
                         new_leg_vert_ids[0][0]['id'] = 90005
-                    # misc.sprint(new_leg_vert_ids[0][0]['id'])
+                    
                     # Create and add the corresponding vertex
                     # Extract vertex ids corresponding to the various legs
                     # in mylegs
@@ -1292,7 +1290,6 @@ class Amplitude(base_objects.PhysicsObject):
                         vlist.append(base_objects.Vertex(
                                          {'legs':myleglist,
                                           'id':vert_id}))
-                    # misc.sprint(vlist)
 
                     vertex_list.append(vlist)
 

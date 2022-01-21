@@ -2682,6 +2682,7 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
                                        'proc_prefix':proc_prefix, 'proc_id':''}
 
         # Extract helas calls
+        misc.sprint(type(fortran_model))
         helas_calls = fortran_model.get_matrix_element_calls(\
                     matrix_element)
         #Check and correct chirality-flow charges
@@ -2900,6 +2901,7 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         # with an outgoing anti-fermion and vice versa
         (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
         for i in range(ninitial):
+            misc.sprint('I am changing in/out flowing wfs')
             if ((left_list[i] == 1) and (right_list[i] == 0)):
                 # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
                 helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:19] + \
@@ -3013,6 +3015,8 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
     # chirality_flow_charge_checker
     #===========================================================================
     def chirality_flow_charge_checker(self, helas_calls, matrix_element):
+        # AL: removing this function temporarily
+        return(helas_calls)
         """Change helas_calls to give correct chirality flow lines"""  
         helas_calls_copy = copy.copy(helas_calls)
         # get process
@@ -3150,6 +3154,7 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
             #         # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:19] + \
             #         helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]
             for i in range(nexternal):
+                misc.sprint('I am changing in/out flowing wfs')
                 if ((lleft_list[i] == 1) and (rright_list[i] == 0)):
                     # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
                     helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]

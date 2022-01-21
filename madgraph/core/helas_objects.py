@@ -3591,8 +3591,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         n_ints_in_model = len(model.get('interaction_dict'))
         new_int_emRRa['id'] = n_ints_in_model + 1
                     
-        # AL: for RR, use FFV8
-        new_int_emRRa['lorentz'] = ['FFV8']
+        # AL: for RR, use RRV1
+        new_int_emRRa['lorentz'] = ['RRV1']
                     
         # AL: update particles in interaction
         for ipart, part in enumerate(new_int_emRRa['particles']):
@@ -3620,8 +3620,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         n_ints_in_model += 1
         new_int_emLLa['id'] = n_ints_in_model + 1
                     
-        # AL: for LL, use FFV7
-        new_int_emLLa['lorentz'] = ['FFV7']
+        # AL: for LL, use LLV1
+        new_int_emLLa['lorentz'] = ['LLV1']
                     
         # AL: update particles in interaction
         for ipart, part in enumerate(new_int_emLLa['particles']):
@@ -3650,8 +3650,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         n_ints_in_model += 1
         new_int_epLLa['id'] = n_ints_in_model + 1
                     
-        # AL: for LL, use FFV7
-        new_int_epLLa['lorentz'] = ['FFV7']
+        # AL: for LL, use LLV1
+        new_int_epLLa['lorentz'] = ['LLV1']
                     
         # AL: update particles in interaction
         for ipart, part in enumerate(new_int_epLLa['particles']):
@@ -3680,8 +3680,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         n_ints_in_model +=1
         new_int_epRRa['id'] = n_ints_in_model + 1
                     
-        # AL: for RR, use FFV8
-        new_int_epRRa['lorentz'] = ['FFV8']
+        # AL: for RR, use RRV1
+        new_int_epRRa['lorentz'] = ['RRV1']
                     
         # AL: update particles in interaction
         for ipart, part in enumerate(new_int_epRRa['particles']):
@@ -3710,8 +3710,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         n_ints_in_model += 1
         new_int_mumRRa['id'] = n_ints_in_model + 1
                     
-        # AL: for RR, use FFV8
-        new_int_mumRRa['lorentz'] = ['FFV8']
+        # AL: for RR, use RRV1
+        new_int_mumRRa['lorentz'] = ['RRV1']
                     
         # AL: update particles in interaction
         for ipart, part in enumerate(new_int_mumRRa['particles']):
@@ -3739,8 +3739,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         n_ints_in_model += 1
         new_int_mumLLa['id'] = n_ints_in_model + 1
                     
-        # AL: for LL, use FFV7
-        new_int_mumLLa['lorentz'] = ['FFV7']
+        # AL: for LL, use LLV1
+        new_int_mumLLa['lorentz'] = ['LLV1']
                     
         # AL: update particles in interaction
         for ipart, part in enumerate(new_int_mumLLa['particles']):
@@ -3769,8 +3769,11 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         n_ints_in_model += 1
         new_int_mupLLa['id'] = n_ints_in_model + 1
                     
-        # AL: for LL, use FFV7
-        new_int_mupLLa['lorentz'] = ['FFV7']
+        # # AL: for LL, use FFV7
+        # new_int_mupLLa['lorentz'] = ['FFV7']
+        
+        # AL: for LL, use LLV1
+        new_int_mupLLa['lorentz'] = ['LLV1']
                     
         # AL: update particles in interaction
         for ipart, part in enumerate(new_int_mupLLa['particles']):
@@ -3799,8 +3802,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         n_ints_in_model +=1
         new_int_mupRRa['id'] = n_ints_in_model + 1
                     
-        # AL: for RR, use FFV8
-        new_int_mupRRa['lorentz'] = ['FFV8']
+        # AL: for RR, use RRV1
+        new_int_mupRRa['lorentz'] = ['RRV1']
                     
         # AL: update particles in interaction
         for ipart, part in enumerate(new_int_mupRRa['particles']):
