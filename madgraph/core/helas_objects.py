@@ -1231,7 +1231,6 @@ class HelasWavefunction(base_objects.PhysicsObject):
                                                     external_wavefunctions,
                                                     self,
                                                     wf_number)
-        misc.sprint('I am in function to check Majorana flow', wf_number, self)
 
         return self, wf_number
 
@@ -3693,14 +3692,133 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         new_int_epRRa['particles'][el_id] = copy.copy(new_int_epRRa['particles'][er_id])
                     
         # AL: make new particle an antiparticle
-        new_int_epRRa['particles'][el_id]['is_part'] = True
-        new_int_epRRa['particles'][er_id]['is_part'] = False
+        new_int_epRRa['particles'][el_id]['is_part'] = False
+        new_int_epRRa['particles'][er_id]['is_part'] = True
                     
         # AL: add new interaction to the interaction_dict and interactions
         model.get('interaction_dict')[n_ints_in_model + 1] = new_int_epRRa
         model.get('interactions').append(new_int_epRRa)
 
+        ##################
+        # mumRRa vertex
+        ##################
 
+        # AL: Make a new copy of the interaction changes independently of the old one
+        new_int_mumRRa = copy.deepcopy(model.get('interaction_dict')[4])
+                    
+        # AL: Give interaction an unused id                 
+        n_ints_in_model += 1
+        new_int_mumRRa['id'] = n_ints_in_model + 1
+                    
+        # AL: for RR, use FFV8
+        new_int_mumRRa['lorentz'] = ['FFV8']
+                    
+        # AL: update particles in interaction
+        for ipart, part in enumerate(new_int_mumRRa['particles']):
+            if part['name'] == 'mur-':
+                mur_id = ipart
+            elif part['name'] == 'mul-':
+                mul_id = ipart
+        new_int_mumRRa['particles'][mul_id] = copy.copy(new_int_mumRRa['particles'][mur_id])
+                    
+        # AL: make new particle an antiparticle
+        new_int_mumRRa['particles'][mul_id]['is_part'] = False
+                    
+        # AL: add new interaction to the interaction_dict and interactions
+        model.get('interaction_dict')[n_ints_in_model + 1] = new_int_mumRRa
+        model.get('interactions').append(new_int_mumRRa)
+
+        ##################
+        # mumLLa vertex
+        ##################
+
+        # AL: Make a new copy of the interaction changes independently of the old one
+        new_int_mumLLa = copy.deepcopy(model.get('interaction_dict')[4])
+                    
+        # AL: Give interaction an unused id                 
+        n_ints_in_model += 1
+        new_int_mumLLa['id'] = n_ints_in_model + 1
+                    
+        # AL: for LL, use FFV7
+        new_int_mumLLa['lorentz'] = ['FFV7']
+                    
+        # AL: update particles in interaction
+        for ipart, part in enumerate(new_int_mumLLa['particles']):
+            if part['name'] == 'mur-':
+                mur_id = ipart
+            elif part['name'] == 'mul-':
+                mul_id = ipart
+        new_int_mumLLa['particles'][mur_id] = copy.copy(new_int_mumLLa['particles'][mul_id])
+                    
+        # AL: make new particle an antiparticle
+        new_int_mumLLa['particles'][mur_id]['is_part'] = True
+                    
+        # AL: add new interaction to the interaction_dict and interactions
+        model.get('interaction_dict')[n_ints_in_model + 1] = new_int_mumLLa
+        model.get('interactions').append(new_int_mumLLa)
+
+
+        ##################
+        # mupLLa vertex
+        ##################
+
+        # AL: Make a new copy of the interaction changes independently of the old one
+        new_int_mupLLa = copy.deepcopy(model.get('interaction_dict')[3])
+                    
+        # AL: Give interaction an unused id                 
+        n_ints_in_model += 1
+        new_int_mupLLa['id'] = n_ints_in_model + 1
+                    
+        # AL: for LL, use FFV7
+        new_int_mupLLa['lorentz'] = ['FFV7']
+                    
+        # AL: update particles in interaction
+        for ipart, part in enumerate(new_int_mupLLa['particles']):
+            if part['name'] == 'mur-':
+                mur_id = ipart
+            elif part['name'] == 'mul-':
+                mul_id = ipart
+        new_int_mupLLa['particles'][mur_id] = copy.copy(new_int_mupLLa['particles'][mul_id])
+                    
+        # AL: make new particle a particle
+        new_int_mupLLa['particles'][mur_id]['is_part'] = True
+        new_int_mupLLa['particles'][mul_id]['is_part'] = False
+                    
+        # AL: add new interaction to the interaction_dict and interactions
+        model.get('interaction_dict')[n_ints_in_model + 1] = new_int_mupLLa
+        model.get('interactions').append(new_int_mupLLa)
+
+        ##################
+        # mupRRa vertex
+        ##################
+
+        # AL: Make a new copy of the interaction changes independently of the old one
+        new_int_mupRRa = copy.deepcopy(model.get('interaction_dict')[3])
+                    
+        # AL: Give interaction an unused id                 
+        n_ints_in_model +=1
+        new_int_mupRRa['id'] = n_ints_in_model + 1
+                    
+        # AL: for RR, use FFV8
+        new_int_mupRRa['lorentz'] = ['FFV8']
+                    
+        # AL: update particles in interaction
+        for ipart, part in enumerate(new_int_mupRRa['particles']):
+            if part['name'] == 'mur-':
+                mur_id = ipart
+            elif part['name'] == 'mul-':
+                mul_id = ipart
+        new_int_mupRRa['particles'][mul_id] = copy.copy(new_int_mupRRa['particles'][mur_id])
+                    
+        # AL: make new particle an antiparticle
+        new_int_mupRRa['particles'][mul_id]['is_part'] = False
+        new_int_mupRRa['particles'][mur_id]['is_part'] = True
+                    
+        # AL: add new interaction to the interaction_dict and interactions
+        model.get('interaction_dict')[n_ints_in_model + 1] = new_int_mupRRa
+        model.get('interactions').append(new_int_mupRRa)
+       
+       
         misc.sprint(model.get('interactions'))
 
 
@@ -3781,15 +3899,6 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         self.add_LL_RR_vertices(amplitude, external_wavefunctions)
         misc.sprint(model.get('interactions'))
 
-        # AL: keep track of if we've already defined LLphoton and RRphoton vertices
-        isemLLa = False
-        isemRRa = False
-
-        # AL: have a unique name for each of the new vertices we need
-        new_int_emLLa = {}
-        new_int_epLLa = {}
-        new_int_emRRa = {}
-        new_int_epRRa = {}
         for diagram in diagram_list:
 
             # List of dictionaries from leg number to wave function,
@@ -3808,92 +3917,12 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             # Single out last vertex, since this will give amplitude
             lastvx = vertices.pop()
             misc.sprint(lastvx)
-            intertmp = model.get('interaction_dict')[lastvx.get('id')]
-            misc.sprint(intertmp)
 
 
             # AL: Add new interactions of LLphoton and RRphoton to interaction dictionary
             # AL: TODO make this some sort of dictionary lookup for greater speed?
             for vertex in vertices:
                 misc.sprint(vertex)
-                misc.sprint(vertex['legs'])
-                vids = []
-                for part in vertex['legs']:
-                    vids.append(part['id'])
-                nel = vids.count(90001)
-                ner = vids.count(90003)
-                misc.sprint(vids, nel, ner)
-                # AL: Try to make a new dictionary entry for the model, an LLphoton (RRphoton) vertex
-                if nel == 2:
-
-                    # AL: if I have already created this vertex then continue
-                    if isemLLa: continue
-
-                    # AL: Make a new copy of the interaction changes independently of the old one
-                    new_int_emLLa = copy.deepcopy(model.get('interaction_dict')[vertex.get('id')])
-                    
-                    # AL: Give interaction an unused id                 
-                    n_ints_in_model = len(model.get('interaction_dict'))
-                    new_int_emLLa['id'] = n_ints_in_model + 1
-                    
-                    # AL: If LL, use FFV7
-                    new_int_emLLa['lorentz'] = ['FFV7']
-                    
-                    # AL: update particles in interaction
-                    for ipart, part in enumerate(new_int_emLLa['particles']):
-                        if part['name'] == 'er-':
-                            er_id = ipart
-                        elif part['name'] == 'el-':
-                            el_id = ipart
-                    new_int_emLLa['particles'][er_id] = copy.copy(new_int_emLLa['particles'][el_id])
-                    
-                    # AL: make new particle an antiparticle
-                    new_int_emLLa['particles'][er_id]['is_part'] = False
-                    
-                    # AL: add new interaction to the interaction_dict and interactions
-                    model.get('interaction_dict')[n_ints_in_model + 1] = new_int_emLLa
-                    model.get('interactions').append(new_int_emLLa)
-                    misc.sprint(model.get('interaction_dict')[vertex.get('id')])
-                    misc.sprint(model.get('interaction_dict'))
-                    misc.sprint(model.get('interactions'))
-
-                    # AL: we now have this vertex
-                    isemLLa = True
-
-                elif ner == 2:
-                    # AL: if I have already created this vertex then continue
-                    if isemRRa: continue
-
-                    # AL: Make a new copy of the interaction changes independently of the old one
-                    new_int_emRRa = copy.deepcopy(model.get('interaction_dict')[vertex.get('id')])
-                    
-                    # AL: Give interaction an unused id                 
-                    n_ints_in_model = len(model.get('interaction_dict'))
-                    new_int_emRRa['id'] = n_ints_in_model + 1
-                    
-                    # AL: If RR, use FFV8
-                    new_int_emRRa['lorentz'] = ['FFV8']
-                    
-                    # AL: update particles in interaction
-                    for ipart, part in enumerate(new_int_emRRa['particles']):
-                        if part['name'] == 'er-':
-                            er_id = ipart
-                        elif part['name'] == 'el-':
-                            el_id = ipart
-                    new_int_emRRa['particles'][el_id] = copy.copy(new_int_emRRa['particles'][er_id])
-                    
-                    # AL: make new particle an antiparticle
-                    new_int_emRRa['particles'][el_id]['is_part'] = False
-                    
-                    # AL: add new interaction to the interaction_dict and interactions
-                    model.get('interaction_dict')[n_ints_in_model + 1] = new_int_emRRa
-                    model.get('interactions').append(new_int_emRRa)
-                    misc.sprint(model.get('interactions'))
-
-                    # AL: we now have this vertex
-                    isemRRA = True
-
-            
 
             # Go through all vertices except the last and create
             # wavefunctions
@@ -3912,21 +3941,34 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 new_color_lists = []
                 
                 # AL: Try to update vertex id for off-shell chiral fermions
+                # First get ids in vertex. If it's an LL or RR chiral vertex,
+                # replace the current LR vertex with the correct one.
                 vids = []
                 for part in vertex['legs']:
                     vids.append(part['id'])
                 misc.sprint(vids)
-                intertmp = model.get('interaction_dict')[vertex.get('id')]
-                misc.sprint(intertmp)
-                misc.sprint(new_int_emRRa)
                 if vids.count(90001) == 2:
-                    vertex.set('id',new_int_emLLa.get('id'))
+                    vertex.set('id',6)
                 elif vids.count(90003) == 2:
-                    # AL: change vertex to emRRa vertex
-                    vertex.set('id',new_int_emRRa.get('id'))
-                    misc.sprint(vertex, vertex.get('id'))
-                    # pass
-                    # misc.sprint(model.get('interaction_dict')[vertex.get('particles')])
+                    vertex.set('id',5)
+                elif vids.count(-90001) == 2:
+                    vertex.set('id',7)
+                elif vids.count(-90003) == 2:
+                    vertex.set('id',8)
+                elif vids.count(90005) == 2:
+                    misc.sprint(vids)
+                    vertex.set('id',10)
+                elif vids.count(90007) == 2:
+                    misc.sprint(vids)
+                    vertex.set('id',9)
+                elif vids.count(-90005) == 2:
+                    misc.sprint(vids)
+                    vertex.set('id',11)
+                elif vids.count(-90007) == 2:
+                    misc.sprint(vids)
+                    vertex.set('id',12)
+                
+
                 for number_wf_dict, color_list in zip(number_to_wavefunctions,
                                                      color_lists):
                     misc.sprint(number_wf_dict)

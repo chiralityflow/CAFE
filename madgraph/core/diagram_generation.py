@@ -1261,7 +1261,7 @@ class Amplitude(base_objects.PhysicsObject):
                     # misc.sprint(new_leg_vert_ids)
                     reduced_list.append([l[0] for l in new_leg_vert_ids])
                     # misc.sprint(new_leg_vert_ids[0][0]['id'])
-                    # change left <-> right for chiral particles
+                    # AL: change left <-> right for chiral particles
                     if new_leg_vert_ids[0][0]['id'] == -90003: 
                         new_leg_vert_ids[0][0]['id'] = -90001
                     elif new_leg_vert_ids[0][0]['id'] == -90001: 
@@ -1272,10 +1272,10 @@ class Amplitude(base_objects.PhysicsObject):
                         new_leg_vert_ids[0][0]['id'] = 90003
                     elif new_leg_vert_ids[0][0]['id'] == -90005: 
                         new_leg_vert_ids[0][0]['id'] = -90007
-                    elif new_leg_vert_ids[0][0]['id'] == -90005: 
-                        new_leg_vert_ids[0][0]['id'] = -90007
-                    elif new_leg_vert_ids[0][0]['id'] == 90007: 
-                        new_leg_vert_ids[0][0]['id'] = 90005
+                    elif new_leg_vert_ids[0][0]['id'] == -90007: 
+                        new_leg_vert_ids[0][0]['id'] = -90005
+                    elif new_leg_vert_ids[0][0]['id'] == 90005: 
+                        new_leg_vert_ids[0][0]['id'] = 90007
                     elif new_leg_vert_ids[0][0]['id'] == 90007: 
                         new_leg_vert_ids[0][0]['id'] = 90005
                     # misc.sprint(new_leg_vert_ids[0][0]['id'])
