@@ -14,25 +14,25 @@ import lorentz as L
 V_1 = Vertex(name = 'V_1',
               particles = [ P.eR__plus__, P.eL__minus__, P.a ],
               color = [ '1' ],
-              lorentz = [ L.FFV7 ],
+              lorentz = [ L.RLV1 ],
               couplings = {(0,0):C.GC_3})
 
 V_2 = Vertex(name = 'V_2',
               particles = [ P.eL__plus__, P.eR__minus__, P.a ],
               color = [ '1' ],
-              lorentz = [ L.FFV8 ],
+              lorentz = [ L.LRV1 ],
               couplings = {(0,0):C.GC_3})
 
 V_3 = Vertex(name = 'V_3',
               particles = [ P.muR__plus__, P.muL__minus__, P.a ],
               color = [ '1' ],
-              lorentz = [ L.FFV7 ],
+              lorentz = [ L.RLV1 ],
               couplings = {(0,0):C.GC_3})
 
 V_4 = Vertex(name = 'V_4',
               particles = [ P.muL__plus__, P.muR__minus__, P.a ],
               color = [ '1' ],
-              lorentz = [ L.FFV8 ],
+              lorentz = [ L.LRV1 ],
               couplings = {(0,0):C.GC_3})
 
 

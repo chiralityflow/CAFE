@@ -3820,7 +3820,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # AL: add new interaction to the interaction_dict and interactions
         model.get('interaction_dict')[n_ints_in_model + 1] = new_int_mupRRa
         model.get('interactions').append(new_int_mupRRa)
-       
+
        
         misc.sprint(model.get('interactions'))
 
@@ -3959,18 +3959,13 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 elif vids.count(-90003) == 2:
                     vertex.set('id',8)
                 elif vids.count(90005) == 2:
-                    misc.sprint(vids)
                     vertex.set('id',10)
                 elif vids.count(90007) == 2:
-                    misc.sprint(vids)
                     vertex.set('id',9)
                 elif vids.count(-90005) == 2:
-                    misc.sprint(vids)
                     vertex.set('id',11)
                 elif vids.count(-90007) == 2:
-                    misc.sprint(vids)
                     vertex.set('id',12)
-                
 
                 for number_wf_dict, color_list in zip(number_to_wavefunctions,
                                                      color_lists):
@@ -3983,7 +3978,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                                               wavefunctions,
                                               diagram_wavefunctions)
                     inter = model.get('interaction_dict')[vertex.get('id')]
-                    misc.sprint(inter)
+                    if vertex.get('id') == 1 or vertex.get('id') == 2: 
+                        misc.sprint(inter)
 
                     # Now generate new wavefunction for the last leg
 
@@ -4065,6 +4061,32 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                                                   color_lists):
                 # Now generate HelasAmplitudes from the last vertex.
                 if lastvx.get('id'):
+                    # AL: Change vertex ids as in wavefunction case
+                    # TODO: Make this a function rather than writing it twice
+                    # TODO: Use some sort of dictionary to get id numbers to be more generic/allow us to update model in future
+                    misc.sprint(lastvx.get('id'))
+                    vids = []
+                    for part in lastvx['legs']:
+                        vids.append(part['id'])
+                    misc.sprint(vids)
+                    if vids.count(90001) == 2:
+                        lastvx.set('id',6)
+                    elif vids.count(90003) == 2:
+                        lastvx.set('id',5)
+                    elif vids.count(-90001) == 2:
+                        lastvx.set('id',7)
+                    elif vids.count(-90003) == 2:
+                        lastvx.set('id',8)
+                    elif vids.count(90005) == 2:
+                        lastvx.set('id',10)
+                    elif vids.count(90007) == 2:
+                        lastvx.set('id',9)
+                    elif vids.count(-90005) == 2:
+                        lastvx.set('id',11)
+                    elif vids.count(-90007) == 2:
+                        lastvx.set('id',12)
+
+
                     inter = model.get_interaction(lastvx.get('id'))
                     keys = sorted(inter.get('couplings').keys())
                     pdg_codes = [p.get_pdg_code() for p in \
