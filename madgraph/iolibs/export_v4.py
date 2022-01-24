@@ -3017,6 +3017,7 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
     def chirality_flow_charge_checker(self, helas_calls, matrix_element):
         # AL: removing this function temporarily
         return(helas_calls)
+        
         """Change helas_calls to give correct chirality flow lines"""  
         helas_calls_copy = copy.copy(helas_calls)
         # get process

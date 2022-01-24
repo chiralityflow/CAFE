@@ -3547,6 +3547,72 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         self.set('color_matrix',
           color_amp.ColorMatrix(self.get('color_basis')))
 
+    # AL: New function to get all chiral particles in a process
+    def is_chiral_particles(self, ext_wfs):
+        # loop over wf pdg numbers 
+        for key in ext_wfs.keys():
+            pdg_code = ext_wfs[key]['particle']['pdg_code']
+            # All chiral particle numbers between 90000 and 90021
+            # TODO: Update this after choosing a consistent set of conventions!!
+            if pdg_code > 90000 and pdg_code < 90022:
+                return True
+        
+        # Haven't found a chiral particle, return false
+        return False
+
+    # AL: New functio to get the chiral particles in a process
+    def get_chiral_particles(self, ext_wfs):
+        # loop over wf pdg numbers 
+        pdg_codes = []
+        ext_nums = []
+        for ikey, key in enumerate(ext_wfs.keys()):
+            pdg_code = ext_wfs[key]['particle']['pdg_code']
+            # All chiral particle numbers between 90000 and 90021
+            # TODO: Update this after choosing a consistent set of conventions!!
+            if pdg_code > 90000 and pdg_code < 90022:
+                pdg_code = ext_wfs[key]['particle']['pdg_code']
+                if pdg_code not in pdg_codes:
+                    pdg_codes.append(pdg_code)
+                    ext_nums.append(ikey+1)
+                    # misc.sprint(ext_wfs[ikey+1])
+                    # ext_nums.append(ext_wfs[key])
+        
+        return pdg_codes, ext_nums
+
+
+        # misc.sprint(pdg_codes)
+        # if pdg_codes == []: return False
+        # else: return True
+
+
+    # AL: New function to create dictionary of interactions where key is more human readable
+    def get_chiral_vertex_dict(self, model):
+        """A function to return a dictionary with key: value = vertex_name: id_number"""
+        # First get all interactions
+        interactions = model.get('interactions')
+
+        # Create the dictionary of vertex names to id numbers
+        vert_to_id_dict = {}
+
+        # Loop over interactions in model and get dictionary of vertex names to id numbers
+        for inter in interactions:
+            tmp_name = ''
+            for part in inter.get('particles'):
+                if part.get('is_part') == True:
+                    tmp_name += part['name']
+                else: 
+                    tmp_name += part['antiname']
+            vert_to_id_dict[tmp_name] = inter.get('id')
+
+        return vert_to_id_dict
+
+    # # AL: New function to get particle in model from pdg_code
+    # # TODO: Can this be done already without this function??
+    # def get_pdg_to_name(self, model, pdg_code):
+    #     """A function to get the particle in the model from the pdg_code"""
+
+    #     return
+
     # AL: New function to add LL and RR vertices to model after diagrams already generated
     def add_LL_RR_vertices(self,amplitude, ext_wfs):
         # Get model in question
@@ -3554,25 +3620,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         model = process.get('model')
 
         # Check if the process involves chiral fermions
-        is_chiral = False
-        # if not ext_wfs[key].is_fermion() for key in ext_wfs.keys():
-        #     misc.sprint('no fermions')
-        for key in ext_wfs.keys():
-            wf = ext_wfs[key]
-            # Check explicitly if chiral particles are involved
-            if wf['particle']['pdg_code'] == 90001: 
-                is_chiral = True
-                break
-            if wf['particle']['pdg_code'] == 90003: 
-                is_chiral = True
-                break
-            if wf['particle']['pdg_code'] == 90005: 
-                is_chiral = True
-                break
-            if wf['particle']['pdg_code'] == 90007: 
-                is_chiral = True
-                break
-        
+        is_chiral = self.is_chiral_particles(ext_wfs)
+
         # If not chiral, return the model unchanged
         if not is_chiral: return model
 
@@ -3580,12 +3629,102 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # I go through this one by one
         # TODO: Find a better more stable way to get which interaction to copy
 
+        # Get dictionary of processes to vertex id numbers
+        vert_to_id_dict = self.get_chiral_vertex_dict(model)
+        misc.sprint(vert_to_id_dict)
+
+
+        # Try to do this in a loop
+        # I want an LL part vertex, an LL antipart vertex, an RR part vertex, and an RR antipart vertex
+        # for each type of chiral particle in the process
+        # First I should get the chiral particles in the process
+        # Then I go through each LR combination and add the four relevant vertices
+
+        # Get chiral particles in process
+        chir_particles, ext_nums = self.get_chiral_particles(ext_wfs)
+        misc.sprint(chir_particles, ext_nums)
+
+        # Loop through chiral particles to get the new vertices
+        for ipart, part in enumerate(chir_particles):
+            # calculate names for original process, new processes, chirality
+            orig_vtx = ''
+            new_vtx_p = ''
+            new_vtx_m = ''
+            chiraily = ''
+
+            # get name of particle we're considering, add it to vertex names
+            # TODO: update this function to be more flexible when not just QED vertices!!
+            part_name = ext_wfs[ipart+1].get('name')
+            chirality = part_name[-2]
+            misc.sprint(chirality)
+            if chirality != 'l' and chirality != 'r':
+                raise self.PhysicsObjectError("%s is not a valid chirality" % str(chirality))
+            if part_name[-1] == '+':
+                orig_vtx = part_name + part_name[:-2]
+                if chirality == 'l': orig_vtx += 'r-a'
+                else: orig_vtx += 'l-a'
+                part_name_p = part_name
+                part_name_m = part_name[:-1] + '-'
+            elif part_name[-1] == '-':
+                orig_vtx = part_name[:-2] 
+                if chirality == 'l': orig_vtx += 'r+' + part_name + 'a'
+                else: orig_vtx += 'l+' + part_name + 'a'
+                part_name_p = part_name[:-1] + '+'
+                part_name_m = part_name
+
+            # Use below names to increase and output new vert_to_id_dict
+            # TODO: Put vert_to_id_dict as output!!!
+            new_vtx_mp = part_name_m + part_name_p + 'a'
+            new_vtx_pm = part_name_p + part_name_m + 'a'
+
+            # Get new interaction that we'll add to dictionary
+            new_int_mp = copy.deepcopy(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]])
+            new_int_pm = copy.deepcopy(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]])
+
+            # AL: Give interaction an unused id                 
+            n_ints_in_model = len(model.get('interaction_dict'))
+            new_int_mp['id'] = n_ints_in_model + 1
+            new_int_pm['id'] = n_ints_in_model + 2
+
+            # AL: for RR, use RRV1, for LL, use LLV1
+            if chirality == 'r':
+                new_int_mp['lorentz'] = ['RRV1']
+                new_int_pm['lorentz'] = ['RRV1']
+            else: 
+                new_int_mp['lorentz'] = ['LLV1']
+                new_int_pm['lorentz'] = ['LLV1']
+            
+            # AL: update particles in interaction
+            misc.sprint(new_int_mp['particles'][0]['pdg_code'], part)
+            if new_int_mp['particles'][0]['pdg_code'] == part:
+                new_int_mp['particles'][1] = copy.copy(new_int_mp['particles'][0])
+                # if part < 0:
+                #     new_int_mp
+            elif new_int_mp['particles'][1]['pdg_code'] == part:
+                new_int_mp['particles'][0] = copy.copy(new_int_mp['particles'][1])
+            misc.sprint(new_int_mp)
+            misc.sprint(new_int_pm)
+            # for ipart, part in enumerate(new_int_p['particles']):
+            #     if part['name'] == 'er-':
+            #         er_id = ipart
+            #     elif part['name'] == 'el-':
+            #         el_id = ipart
+            # new_int_emRRa['particles'][el_id] = copy.copy(new_int_emRRa['particles'][er_id])
+       
+
+            misc.sprint(part_name, orig_vtx, new_vtx_mp, new_vtx_pm)
+
         ##################
         # emRRa vertex
         ##################
 
+        misc.sprint(model.get('interaction_dict'))
+        misc.sprint(model.get('interactions'))
+        misc.sprint(vert_to_id_dict)
+
         # AL: Make a new copy of the interaction changes independently of the old one
-        new_int_emRRa = copy.deepcopy(model.get('interaction_dict')[2])
+        # new_int_emRRa = copy.deepcopy(model.get('interaction_dict')[2])
+        new_int_emRRa = copy.deepcopy(model.get('interaction_dict')[vert_to_id_dict['el+er-a']])
                     
         # AL: Give interaction an unused id                 
         n_ints_in_model = len(model.get('interaction_dict'))
@@ -3978,8 +4117,6 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                                               wavefunctions,
                                               diagram_wavefunctions)
                     inter = model.get('interaction_dict')[vertex.get('id')]
-                    if vertex.get('id') == 1 or vertex.get('id') == 2: 
-                        misc.sprint(inter)
 
                     # Now generate new wavefunction for the last leg
 
