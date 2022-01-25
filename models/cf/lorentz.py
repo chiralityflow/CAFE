@@ -32,13 +32,6 @@ RRV1 = Lorentz(name = 'RRV1',
                spins = [ 2, 2, 3],
                structure = 'Gamma(3,2,-1)*ProjP(-1,1)' )
 
-# LRV1 = Lorentz(name = 'LRV1',
-#                spins = [ 2, 2, 3],
-#                structure = 'Gamma(3,2,-1)*ProjP(-1,1)' )
-# RLV1 = Lorentz(name = 'RLV1',
-#                spins = [ 2, 2, 3 ],
-#                structure = 'Gamma(3,2,-1)*ProjM(-1,1)' )
-              
 
 
 

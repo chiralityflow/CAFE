@@ -1,5 +1,5 @@
 # TODO: Put your own directory here!!
-co_dir=~/Physics/ChiralityFlowMG/ChiralityFlowTrunk
+co_dir=~/Physics/ChiralityFlowMG/ChiralityFlowMG
 cd $co_dir
 python  card_write.py
 # get list of cards and folders to consider
@@ -15,12 +15,14 @@ fList=$(python -c 'import card_write as c; print(c.getFList())')
 while [ -s $cList ]; do
   # get first process
   cardUsed=$(tail -1 $cList)
+  printf "\n-----------------------------"
   printf "\nProcessing ${cardUsed}\n"
+  printf "-----------------------------\n"
   #echo "$cardUsed"
 
   # generate the process
   dir=$(tail -1 $fList)
-  echo "$dir"
+  # echo "$dir"
   printf "\nTesting time to generate files"
   # time (./bin/mg5 cards/$cardUsed > log; cd ${co_dir}/${dir}; caffeinate -i make check > log)
   time ./bin/mg5_amc cards/$cardUsed > log; 
@@ -44,7 +46,7 @@ while [ -s $cList ]; do
   for i in {1..100}; do
     # get the subprocess
     dir=$(tail -1 $fList)
-    echo "$dir"
+    printf "\n$dir"
     # check if the subprocesses has finished, if it has, remove it and end this loop
     if [ "$dir" == "endProc" ]
     then

@@ -2682,7 +2682,6 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
                                        'proc_prefix':proc_prefix, 'proc_id':''}
 
         # Extract helas calls
-        misc.sprint(type(fortran_model))
         helas_calls = fortran_model.get_matrix_element_calls(\
                     matrix_element)
         #Check and correct chirality-flow charges

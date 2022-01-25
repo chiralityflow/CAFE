@@ -278,10 +278,8 @@ class HelasCallWriter(base_objects.PhysicsObject):
         corresponding to the key"""
 
         try:
-            misc.sprint(wavefunction.get_call_key())
             call = self["wavefunctions"][wavefunction.get_call_key()](\
                                                                    wavefunction)
-            # if not wavefunction.get('mothers') and abs(wavefunction.get_call_key()[0][0]) == 2: misc.sprint(call)
             if not wavefunction.get('mothers'):
                 call = self.get_chiral_wavefunction_call(wavefunction, call)
         except KeyError as error:
@@ -1119,7 +1117,7 @@ class FortranUFOHelasCallWriter(UFOHelasCallWriter):
             raise self.PhysicsObjectError("generate_helas_call must be called with wavefunction or amplitude")
         
         call = "CALL "
-        misc.sprint('In generate_helas_call')
+        # misc.sprint('In generate_helas_call')
 
         call_function = None
 
@@ -1144,7 +1142,6 @@ class FortranUFOHelasCallWriter(UFOHelasCallWriter):
 
     def generate_external_wavefunction(self,argument):
         """ Generate an external wavefunction """
-        misc.sprint(argument)
         call="CALL "
         call_function = None
         if argument.get('is_loop'):
@@ -1153,7 +1150,6 @@ class FortranUFOHelasCallWriter(UFOHelasCallWriter):
             # String is just IXXXXX, OXXXXX, VXXXXX or SXXXXX
             call = call + HelasCallWriter.mother_dict[\
                 argument.get_spin_state_number()]
-            misc.sprint(call)
             # Fill out with X up to 6 positions
             call = call + 'X' * (11 - len(call))
             call = call + "(P(0,%(number_external)d),"
