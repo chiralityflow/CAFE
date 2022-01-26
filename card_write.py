@@ -33,7 +33,7 @@ fList='folderList4e'
 
 ###################
 
-suffix = 'test_220105'
+suffix = 'test_220125'
 
 
 f = open(cList,'w')
@@ -48,8 +48,8 @@ f.close()
 
 #####################
 
-naMin = 2
-naMax = 3
+naMin = 0
+naMax = 4
 
 for proc in procs:
   for na in range(naMin,naMax+1):

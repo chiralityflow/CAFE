@@ -20,6 +20,7 @@ based on relevant properties.
 """
 
 from __future__ import absolute_import
+from typing import final
 from six.moves import filter
 #force filter to be a generator # like in py3
 
@@ -74,10 +75,13 @@ class DiagramTag(object):
         """Initialize with a diagram. Create DiagramTagChainLinks according to
         the diagram, and figure out if we need to shift the central vertex."""
 
+        # misc.sprint('I am in diagram generation')
+
         # wf_dict keeps track of the intermediate particles
         leg_dict = {}
         # Create the chain which will be the diagram tag
         for vertex in diagram.get('vertices'):
+            # misc.sprint(vertex)
             # Only add incoming legs
             legs = vertex.get('legs')[:-1]
             lastvx = vertex == diagram.get('vertices')[-1]
@@ -448,6 +452,7 @@ class Amplitude(base_objects.PhysicsObject):
 
     def __init__(self, argument=None):
         """Allow initialization with Process"""
+        # misc.sprint('I am in daigram_generation.__init__')
         if isinstance(argument, base_objects.Process):
             super(Amplitude, self).__init__()
             self.set('process', argument)
@@ -688,12 +693,36 @@ class Amplitude(base_objects.PhysicsObject):
                                                   is_decay_proc,
                                                   process.get('orders'))
         else:
+            # AL: change the final fermion propagator from left/left or right/right
+            # to left/right or right/left
+            ref_dict_to0 = model.get('ref_dict_to0')
+            # AL: delete old left/left or right/right fermions from dict
+            # AL: TODO: Update this to write a function which automatically finds 
+            # all chiral particles and changes the ref_dict_to0 for them
+            ref_dict_to0.pop((90001,-90001),None)
+            ref_dict_to0[(90001,-90003)] = [0]
+            ref_dict_to0.pop((-90001,90001),None)
+            ref_dict_to0[(-90001,90003)] = [0]
+            ref_dict_to0.pop((90003,-90003),None)
+            ref_dict_to0[(90003,-90001)] = [0]
+            ref_dict_to0.pop((-90003,90003),None)
+            ref_dict_to0[(-90003,90001)] = [0]
+            ref_dict_to0.pop((90005,-90005),None)
+            ref_dict_to0[(90005,-90007)] = [0]
+            ref_dict_to0.pop((-90005,90005),None)
+            ref_dict_to0[(-90005,90007)] = [0]
+            ref_dict_to0.pop((90007,-90007),None)
+            ref_dict_to0[(90007,-90005)] = [0]
+            ref_dict_to0.pop((-90007,90007),None)
+            ref_dict_to0[(-90007,90005)] = [0]
+
+
             reduced_leglist = self.reduce_leglist(leglist,
                                                   max_multi_to1,
-                                                  model.get('ref_dict_to0'),
+                                                #   model.get('ref_dict_to0'),
+                                                  ref_dict_to0,
                                                   is_decay_proc,
                                                   process.get('orders'))
-        
         #In LoopAmplitude the function below is overloaded such that it
         #converts back all DGLoopLegs to Legs. In the default tree-level
         #diagram generation, this does nothing.
@@ -1006,12 +1035,14 @@ class Amplitude(base_objects.PhysicsObject):
         # Create a list of all valid combinations of legs
         comb_lists = self.combine_legs(curr_leglist,
                                        ref_dict_to1, max_multi_to1)
-
+        # misc.sprint(comb_lists)
         # Create a list of leglists/vertices by merging combinations
         leg_vertex_list = self.merge_comb_legs(comb_lists, ref_dict_to1)
+        # misc.sprint(leg_vertex_list)
 
         # Consider all the pairs
         for leg_vertex_tuple in leg_vertex_list:
+            # misc.sprint(leg_vertex_tuple)
 
             # Remove forbidden particles
             if self.get('process').get('forbidden_particles') and \
@@ -1128,10 +1159,12 @@ class Amplitude(base_objects.PhysicsObject):
 
                 # Check if the combination is valid
                 if base_objects.LegList(comb).can_combine_to_1(ref_dict_to1):
+                    # misc.sprint(comb)
 
                     # Identify the rest, create a list [comb,rest] and
                     # add it to res
                     res_list = copy.copy(list_legs)
+                    
                     for leg in comb:
                         res_list.remove(leg)
                     res_list.insert(list_legs.index(comb[0]), comb)
@@ -1178,9 +1211,9 @@ class Amplitude(base_objects.PhysicsObject):
             vertex_list = []
 
             for entry in comb_list:
-
                 # Act on all leg combinations
                 if isinstance(entry, tuple):
+                    # misc.sprint(entry)
 
                     # Build the leg object which will replace the combination:
                     # 1) leg ids is as given in the ref_dict
@@ -1206,10 +1239,26 @@ class Amplitude(base_objects.PhysicsObject):
                                                                   leg_vert_ids,
                                                                   number,
                                                                   state)
-                    
                     reduced_list.append([l[0] for l in new_leg_vert_ids])
-
-
+     
+                    # AL: change left <-> right for chiral particles
+                    if new_leg_vert_ids[0][0]['id'] == -90003: 
+                        new_leg_vert_ids[0][0]['id'] = -90001
+                    elif new_leg_vert_ids[0][0]['id'] == -90001: 
+                        new_leg_vert_ids[0][0]['id'] = -90003
+                    elif new_leg_vert_ids[0][0]['id'] == 90003: 
+                        new_leg_vert_ids[0][0]['id'] = 90001
+                    elif new_leg_vert_ids[0][0]['id'] == 90001: 
+                        new_leg_vert_ids[0][0]['id'] = 90003
+                    elif new_leg_vert_ids[0][0]['id'] == -90005: 
+                        new_leg_vert_ids[0][0]['id'] = -90007
+                    elif new_leg_vert_ids[0][0]['id'] == -90007: 
+                        new_leg_vert_ids[0][0]['id'] = -90005
+                    elif new_leg_vert_ids[0][0]['id'] == 90005: 
+                        new_leg_vert_ids[0][0]['id'] = 90007
+                    elif new_leg_vert_ids[0][0]['id'] == 90007: 
+                        new_leg_vert_ids[0][0]['id'] = 90005
+                    
                     # Create and add the corresponding vertex
                     # Extract vertex ids corresponding to the various legs
                     # in mylegs

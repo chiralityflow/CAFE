@@ -14,6 +14,7 @@
 ################################################################################
 from __future__ import division
 from __future__ import absolute_import
+import wave
 """Definitions of objects used to generate language-independent Helas
 calls: HelasWavefunction, HelasAmplitude, HelasDiagram for the
 generation of wavefunctions and amplitudes, HelasMatrixElement and
@@ -650,6 +651,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
     def __init__(self, *arguments):
         """Allow generating a HelasWavefunction from a Leg
         """
+        # misc.sprint('In HelasWavefunction init')
 
         if len(arguments) > 2:
             if isinstance(arguments[0], base_objects.Leg) and \
@@ -1060,7 +1062,6 @@ class HelasWavefunction(base_objects.PhysicsObject):
         # Finally, the mother numbers
         array_rep.extend([mother['number'] for \
                           mother in self['mothers']])
-        
         return array_rep
 
     def get_pdg_code(self):
@@ -1223,7 +1224,6 @@ class HelasWavefunction(base_objects.PhysicsObject):
 
         if not found_majorana:
             found_majorana = self.get('self_antipart')
-
         new_wf = self
         flip_flow = False
         flip_sign = False
@@ -1561,7 +1561,6 @@ class HelasWavefunction(base_objects.PhysicsObject):
                     output['WF%d'%i]=output['WF%d'%i]+',H)'
                 else:
                     output['WF%d'%i]=output['WF%d'%i]+')'
-                    
         #fixed argument
         for i, coup in enumerate(self.get_with_flow('coupling')):
             # We do not include the - sign in front of the coupling of loop
@@ -1646,7 +1645,6 @@ class HelasWavefunction(base_objects.PhysicsObject):
         
         if self.get('interaction_id') == 0:
             return 0
-        
         return self.find_leg_index(self.get_anti_pdg_code(),\
                                                    self.get_spin_state_number())
         
@@ -1693,9 +1691,6 @@ class HelasWavefunction(base_objects.PhysicsObject):
         if self.needs_hermitian_conjugate():
             res.append(self.get('conjugate_indices'))
             
-
-        
-
         return (tuple(res), tuple(self.get('lorentz')))
 
     def get_base_vertices(self, wf_dict, vx_list = [], optimization = 1):
@@ -1705,6 +1700,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
         vertices = base_objects.VertexList()
 
         mothers = self.get('mothers')
+        # misc.sprint(mothers)
 
         if not mothers:
             return vertices
@@ -1714,7 +1710,6 @@ class HelasWavefunction(base_objects.PhysicsObject):
             # This is where recursion happens
             vertices.extend(mother.get_base_vertices(\
                                                 wf_dict, vx_list,optimization))
-
         vertex = self.get_base_vertex(wf_dict, vx_list, optimization)
 
         try:
@@ -3494,6 +3489,194 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         self.get('color_basis').build(self.get('base_amplitude'))
         self.set('color_matrix',
           color_amp.ColorMatrix(self.get('color_basis')))
+
+    # AL: New function to get all chiral particles in a process
+    def is_chiral_particles(self, ext_wfs):
+        # loop over wf pdg numbers 
+        for key in ext_wfs.keys():
+            pdg_code = ext_wfs[key]['particle']['pdg_code']
+            # All chiral particle numbers between 90000 and 90021
+            # TODO: Update this after choosing a consistent set of conventions!!
+            if pdg_code > 90000 and pdg_code < 90022:
+                return True
+        
+        # Haven't found a chiral particle, return false
+        return False
+
+    # AL: New function to get the chiral particles in a process
+    def get_chiral_particles(self, ext_wfs):
+        # loop over wf pdg numbers 
+        pdg_codes = []
+        ext_nums = []
+        for ikey, key in enumerate(ext_wfs.keys()):
+            pdg_code = ext_wfs[key]['particle']['pdg_code']
+            # All chiral particle numbers between 90000 and 90021
+            # TODO: Update this after choosing a consistent set of conventions!!
+            if pdg_code > 90000 and pdg_code < 90022:
+                pdg_code = ext_wfs[key]['particle']['pdg_code']
+                if pdg_code not in pdg_codes:
+                    pdg_codes.append(pdg_code)
+                    ext_nums.append(ikey+1)
+        
+        return pdg_codes, ext_nums
+
+    # AL: New function to create dictionary of interactions where key is more human readable
+    def get_chiral_vertex_dict(self, model):
+        """A function to return a dictionary with key: value = vertex_name: id_number"""
+        # First get all interactions
+        interactions = model.get('interactions')
+
+        # Create the dictionary of vertex names to vertex id numbers
+        vert_to_id_dict = {}
+
+        # Loop over interactions in model and get dictionary of vertex names to id numbers
+        for inter in interactions:
+            tmp_name = ''
+            for part in inter.get('particles'):
+                if part.get('is_part') == True:
+                    tmp_name += part['name']
+                else: 
+                    tmp_name += part['antiname']
+            vert_to_id_dict[tmp_name] = inter.get('id')
+
+
+        return vert_to_id_dict
+
+    # # AL: New function to get names of particles in vertex from pdg_codes in vertex
+    def set_new_vertex_id(self, vertex, pdg_codes, vert_id_to_pdgs_dict):
+        """A function to return the vertex idthe pdg_codes"""
+         # First sort the ids (fermions before boson in QED)
+        # TODO: Update this if we have e.g. W- with pdg_code < pdg_code(fermions)
+        pdg_codes.sort()
+        
+        # If not all-outgoing, then we have LL or RR vertex
+        if not pdg_codes[0]*pdg_codes[1] < 0:
+            # change to all outgoing particles
+            pdg_codes[0] = -pdg_codes[0]
+
+            # Get new vertex id
+            vertex.set('id', list(vert_id_to_pdgs_dict.keys())\
+                [list(vert_id_to_pdgs_dict.values()).index(pdg_codes)])
+        
+
+        return vertex
+
+    # AL: New function to add LL and RR vertices to model after diagrams already generated
+    def add_LL_RR_vertices(self,amplitude, ext_wfs):
+        # Get model in question
+        process = amplitude.get('process')
+        model = process.get('model')
+
+        # Check if the process involves chiral fermions
+        is_chiral = self.is_chiral_particles(ext_wfs)
+
+        # If not chiral, return the model unchanged
+        empty_dict = {}
+        if not is_chiral: return model, empty_dict
+
+        # Else, add new interactions to dictionary
+
+        # Get dictionary of processes to vertex id numbers
+        vert_to_id_dict = self.get_chiral_vertex_dict(model)
+
+        # Initialise dictionary of vertex ids to pdg codes
+        vert_ids_to_pdg = {}
+
+
+        # I now create the new vertices in a loop. For both LL and RR, 
+        # and for each type of chiral particle in the process,
+        # I want a particle-antiparticle vertex, and an antiparticle-particle vertex.
+        # First I get the chiral particles in the process.
+        # Then I go through each LR combination and add the four relevant vertices
+
+        # Get chiral particles in process
+        chir_particles, ext_nums = self.get_chiral_particles(ext_wfs)
+
+        # Loop through chiral particles to get the new vertices
+        for ipart, part in enumerate(chir_particles):
+            # get name of particle we're considering, add it to vertex names
+            # TODO: update this function to be more flexible when not just QED vertices!!
+            part_name = ext_wfs[ext_nums[ipart]].get('name')
+            chirality = part_name[-2]
+            if chirality != 'l' and chirality != 'r':
+                raise self.PhysicsObjectError("%s is not a valid chirality" % str(chirality))
+            
+            if part_name[-1] == '+':
+                orig_vtx = part_name + part_name[:-2]
+                if chirality == 'l': 
+                    orig_vtx += 'r-a'
+                else: 
+                    orig_vtx += 'l-a'
+                part_name_p = part_name
+                part_name_m = part_name[:-1] + '-'
+            
+            elif part_name[-1] == '-':
+                orig_vtx = part_name[:-2] 
+                if chirality == 'l': 
+                    orig_vtx += 'r+' + part_name + 'a'
+                else: 
+                    orig_vtx += 'l+' + part_name + 'a'
+                part_name_p = part_name[:-1] + '+'
+                part_name_m = part_name
+
+            # Use below names to increase and output new vert_to_id_dict
+            new_vtx_mp = part_name_m + part_name_p + 'a'
+            new_vtx_pm = part_name_p + part_name_m + 'a'
+            
+            # Get new interaction that we'll add to dictionary
+            new_int_mp = copy.deepcopy(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]])
+            new_int_pm = copy.deepcopy(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]])
+
+            # AL: Give interaction an unused id
+            n_ints_in_model = len(model.get('interaction_dict'))
+            new_int_mp['id'] = n_ints_in_model + 1
+            new_int_pm['id'] = n_ints_in_model + 2
+
+            # Put in dictionary vert_ids_to_pdg
+            # TODO: Update this function when new bosons are available for third particle
+            if part < 0:
+                # mp vertex
+                vert_ids_to_pdg[n_ints_in_model + 1] = [-part, part, 90022]
+                # pm vertex
+                vert_ids_to_pdg[n_ints_in_model + 2] = [part, -part, 90022]
+            else:
+                # mp vertex
+                vert_ids_to_pdg[n_ints_in_model + 1] = [part, -part, 90022]
+                # pm vertex
+                vert_ids_to_pdg[n_ints_in_model + 2] = [-part, part, 90022]
+
+            # AL: for RR, use RRV1, for LL, use LLV1
+            if chirality == 'r':
+                new_int_mp['lorentz'] = ['RRV1']
+                new_int_pm['lorentz'] = ['RRV1']
+            else: 
+                new_int_mp['lorentz'] = ['LLV1']
+                new_int_pm['lorentz'] = ['LLV1']
+            
+            # AL: update particles in interaction
+            if new_int_mp['particles'][0]['pdg_code'] == part:
+                new_int_mp['particles'][1] = copy.copy(new_int_mp['particles'][0])
+            elif new_int_mp['particles'][1]['pdg_code'] == part:
+                new_int_mp['particles'][0] = copy.copy(new_int_mp['particles'][1])
+            if new_int_pm['particles'][0]['pdg_code'] == part:
+                new_int_pm['particles'][1] = copy.copy(new_int_pm['particles'][0])
+            elif new_int_pm['particles'][1]['pdg_code'] == part:
+                new_int_pm['particles'][0] = copy.copy(new_int_pm['particles'][1])
+
+            # AL: update which is particle, antiparticle
+            new_int_mp['particles'][0]['is_part'] = True
+            new_int_mp['particles'][1]['is_part'] = False
+            new_int_pm['particles'][0]['is_part'] = False
+            new_int_pm['particles'][1]['is_part'] = True
+            
+            # AL: add new interaction to the interaction_dict and interactions
+            model.get('interaction_dict')[n_ints_in_model + 1] = new_int_mp
+            model.get('interactions').append(new_int_mp)
+            model.get('interaction_dict')[n_ints_in_model + 2] = new_int_pm
+            model.get('interactions').append(new_int_pm)
+       
+
+        return model, vert_ids_to_pdg
         
     def generate_helas_diagrams(self, amplitude, optimization=1,decay_ids=[]):
         """Starting from a list of Diagrams from the diagram
@@ -3561,6 +3744,11 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         amplitude_number = 0
         diagram_number = 0
 
+        # AL: Add LL and RR interactions to model, 
+        # and get dictionary of vertex names to vertex ids
+        model, vert_id_to_pdgs_dict = self.add_LL_RR_vertices(\
+                                 amplitude, external_wavefunctions)
+
         for diagram in diagram_list:
 
             # List of dictionaries from leg number to wave function,
@@ -3582,7 +3770,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             # Go through all vertices except the last and create
             # wavefunctions
             for vertex in vertices:
-
+                
                 # In case there are diagrams with multiple Lorentz/color 
                 # structures, we need to keep track of the wavefunctions
                 # for each such structure separately, and generate
@@ -3594,6 +3782,24 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 # will be written out before the first amplitude is written.
                 new_number_to_wavefunctions = []
                 new_color_lists = []
+                
+                # AL: Try to update vertex id for off-shell chiral fermions
+                
+                # Check if the process involves chiral fermions
+                is_chiral = self.is_chiral_particles(external_wavefunctions)
+
+                # if chiral and LL or RR, get the new vertex id
+                if is_chiral:
+                    # First get ids in vertex.
+                    vids = []
+                    for part in vertex['legs']:
+                        vids.append(part['id'])
+                    
+                    updated_vertex = self.set_new_vertex_id(vertex, vids, vert_id_to_pdgs_dict)
+
+                    vertex.set('id', updated_vertex.get('id'))
+
+
                 for number_wf_dict, color_list in zip(number_to_wavefunctions,
                                                      color_lists):
                     legs = copy.copy(vertex.get('legs'))
@@ -3680,6 +3886,21 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                                                   color_lists):
                 # Now generate HelasAmplitudes from the last vertex.
                 if lastvx.get('id'):
+                    # AL: Change vertex ids as in wavefunction case
+                    # Check if the process involves chiral fermions
+                    is_chiral = self.is_chiral_particles(external_wavefunctions)
+                    
+                    # if chiral and LL or RR, get the new vertex id
+                    if is_chiral:
+                    # First get ids in vertex.
+                        vids = []
+                        for part in lastvx['legs']:
+                            vids.append(part['id'])
+
+                        updated_lastvx = self.set_new_vertex_id(lastvx, vids, vert_id_to_pdgs_dict)
+
+                        lastvx.set('id', updated_lastvx.get('id'))
+                    
                     inter = model.get_interaction(lastvx.get('id'))
                     keys = sorted(inter.get('couplings').keys())
                     pdg_codes = [p.get_pdg_code() for p in \
