@@ -1555,6 +1555,7 @@ def right_prod(p1,p2):
 def levi_left_prod(p1,p2):
     "ZW: Writes out the explicit left inner product of particles p1 and p2"
     "multiplied by the upper index Levi-Civita tensor acting on p1"
+    # ZW: Unused, but created in case it ever comes up
     inprod = '({}(4)*{}(3) - {}(3)*{}(4))'.format(p1,p2,p1,p2)
     return inprod
 
@@ -1562,6 +1563,7 @@ def levi_right_prod(p1,p2):
     "ZW: Writes out the explicit right inner product of particles p1 and p2"
     "multiplied by the upper index Levi-Civita tensor acting on p1"
     inprod = '({}(6)*{}(5) - {}(5)*{}(6))'.format(p1,p2,p1,p2)
+    # ZW: Unused, but created in case it ever comes up
     return inprod
 
 def pslash_right(bra,p):
@@ -1579,27 +1581,6 @@ def pslash_left(bra,p):
     comp1 = '(({}(0) + {}(3))*{}(3) + ({}(1) - CI*{}(2))*{}(4))'.format(p,p,bra,p,p,bra)
     comp2 = '(({}(1) + CI*{}(2))*{}(3) + ({}(0) - {}(3))*{}(4))'.format(p,p,bra,p,p,bra)
     return [comp1,comp2]
-
-def get_vertices(interaction, matrix_element):
-    "ZW: Determines which vertices are included in a given interaction, using the helas_calls convention"
-    helas = interaction.copy()
-    (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
-    vertex_info = []
-    vertex_pos = []
-    for i in range(nexternal,len(helas)):
-        if (helas[i][0] != '#'):
-            vertex_info.append(helas[i][5:])
-            vertex_pos.append(i)
-
-    return [vertex_info,vertex_pos]
-
-def find_vertex(text):
-    "ZW: Determines the current vertex in an aloha output file"
-    vertex = text
-    spaces = get_symbols(vertex, ' ')
-    parentheses = get_symbols(vertex, '(')
-    vertex = vertex[spaces[0]+1:parentheses[0]]
-    return vertex
 
 def vertex_replacer(text, vertex):
     "Function which takes the text of a Fortran vertex file as well as the vertex name as an input"
@@ -1632,12 +1613,12 @@ def vertex_replacer(text, vertex):
     if (vertex == 'LRV1_0'):
         equality = get_symbols(text_copy, '=')
         p = text_copy[equality[-2]-2]
-        LRV1_0_replace = ' TMP{} = {}*{}\n'.format(p,left_prod('F1','V3'),right_prod('V3','F2'))
+        LRV1_0_replace = ' TMP{} = -CI*{}*{}\n'.format(p,left_prod('F1','V3'),right_prod('V3','F2'))
         text_copy = text_copy[:equality[-2]-6] + LRV1_0_replace + text_copy[linebreaks[-5]+1:]
     if (vertex == 'RLV1_0'):
         equality = get_symbols(text_copy, '=')
         p = text_copy[equality[-2]-2]
-        RLV1_0_replace =  ' TMP{} = {}*{}\n'.format(p,left_prod('F2','V3'),right_prod('V3','F1'))
+        RLV1_0_replace =  ' TMP{} = -CI*{}*{}\n'.format(p,left_prod('F2','V3'),right_prod('V3','F1'))
         equality = get_symbols(text_copy, '=')
         text_copy = text_copy[:equality[-2]-6] + RLV1_0_replace + text_copy[linebreaks[-5]+1:]
     if (vertex == 'LRV1P0_3'):

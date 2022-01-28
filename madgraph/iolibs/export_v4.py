@@ -914,6 +914,8 @@ param_card.inc: ../Cards/param_card.dat\n\t../bin/madevent treatcards param\n'''
         aloha_model.add_Lorentz_object(model.get('lorentz'))
 
         # Compute the subroutiness
+        #misc.sprint(wanted_lorentz)
+        #if we want to add vertices, we do it here
         if wanted_lorentz:
             aloha_model.compute_subset(wanted_lorentz)
         else:

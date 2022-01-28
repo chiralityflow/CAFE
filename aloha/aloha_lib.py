@@ -639,7 +639,6 @@ class MultVariable(array):
     def simplify(self):
         """ simplify the product"""
         if not len(self):
-            misc.sprint("IT DID THE THING")
             return self.prefactor
         return self  
     

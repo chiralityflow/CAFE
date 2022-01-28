@@ -110,12 +110,83 @@ ghWm = Particle(pdg_code = 9000004,
 
 ghWm__tilde__ = ghWm.anti()
 
-eL__minus__ = Particle(pdg_code = 80011,
+# eL__minus__ = Particle(pdg_code = 80011,
+#                       name = 'eL-',
+#                       antiname = 'eL+',
+#                       spin = 2,
+#                       color = 1,
+#                       mass = Param.ZERO,
+#                       width = Param.ZERO,
+#                       texname = 'eL-',
+#                       antitexname = 'eL+',
+#                       charge = -1,
+#                       GhostNumber = 0,
+#                       LeptonNumber = 1,
+#                       line='dotted',
+#                       leftchirality = 1,
+#                       Y = 0)
+
+# eL__plus__ = eL__minus__.anti()
+
+
+# eR__minus__ = Particle(pdg_code = 90011,
+#                       name = 'eR-',
+#                       antiname = 'eR+',
+#                       spin = 2,
+#                       color = 1,
+#                       mass = Param.ZERO,
+#                       width = Param.ZERO,
+#                       texname = 'eR-',
+#                       antitexname = 'eR+',
+#                       charge = -1,
+#                       GhostNumber = 0,
+#                       LeptonNumber = 1,
+#                       line='straight',
+#                       Y = 0)
+
+# eR__plus__ = eR__minus__.anti()
+
+# muL__minus__ = Particle(pdg_code = 80013,
+#                        name = 'muL-',
+#                        antiname = 'muL+',
+#                        spin = 2,
+#                        color = 1,
+#                        mass = Param.ZERO,
+#                        width = Param.ZERO,
+#                        texname = 'muL-',
+#                        antitexname = 'muL+',
+#                        charge = -1,
+#                        GhostNumber = 0,
+#                        LeptonNumber = 1,
+#                        line='dotted',
+#                        Y = 0)
+                       
+# muL__plus__ = muL__minus__.anti()
+
+# muR__minus__ = Particle(pdg_code = 90013,
+#                        name = 'muR-',
+#                        antiname = 'muR+',
+#                        spin = 2,
+#                        color = 1,
+#                        mass = Param.ZERO,
+#                        width = Param.ZERO,
+#                        texname = 'muR-',
+#                        antitexname = 'muR+',
+#                        charge = -1,
+#                        GhostNumber = 0,
+#                        LeptonNumber = 1,
+#                        line='straight',
+#                        Y = 0)
+
+# muR__plus__ = muR__minus__.anti()
+
+
+eL__minus__ = Particle(pdg_code = 90001,
                       name = 'eL-',
                       antiname = 'eL+',
                       spin = 2,
                       color = 1,
-                      mass = Param.ZERO,
+                      mass = Param.Me,
                       width = Param.ZERO,
                       texname = 'eL-',
                       antitexname = 'eL+',
@@ -129,12 +200,12 @@ eL__minus__ = Particle(pdg_code = 80011,
 eL__plus__ = eL__minus__.anti()
 
 
-eR__minus__ = Particle(pdg_code = 90011,
+eR__minus__ = Particle(pdg_code = 90003,
                       name = 'eR-',
                       antiname = 'eR+',
                       spin = 2,
                       color = 1,
-                      mass = Param.ZERO,
+                      mass = Param.Me,
                       width = Param.ZERO,
                       texname = 'eR-',
                       antitexname = 'eR+',
@@ -142,16 +213,17 @@ eR__minus__ = Particle(pdg_code = 90011,
                       GhostNumber = 0,
                       LeptonNumber = 1,
                       line='straight',
+                      rightchirality = 1,
                       Y = 0)
 
 eR__plus__ = eR__minus__.anti()
 
-muL__minus__ = Particle(pdg_code = 80013,
+muL__minus__ = Particle(pdg_code = 90005,
                        name = 'muL-',
                        antiname = 'muL+',
                        spin = 2,
                        color = 1,
-                       mass = Param.ZERO,
+                       mass = Param.MM,
                        width = Param.ZERO,
                        texname = 'muL-',
                        antitexname = 'muL+',
@@ -159,16 +231,17 @@ muL__minus__ = Particle(pdg_code = 80013,
                        GhostNumber = 0,
                        LeptonNumber = 1,
                        line='dotted',
+                       leftchirality = 1,
                        Y = 0)
                        
 muL__plus__ = muL__minus__.anti()
 
-muR__minus__ = Particle(pdg_code = 90013,
+muR__minus__ = Particle(pdg_code = 90007,
                        name = 'muR-',
                        antiname = 'muR+',
                        spin = 2,
                        color = 1,
-                       mass = Param.ZERO,
+                       mass = Param.MM,
                        width = Param.ZERO,
                        texname = 'muR-',
                        antitexname = 'muR+',
@@ -176,7 +249,7 @@ muR__minus__ = Particle(pdg_code = 90013,
                        GhostNumber = 0,
                        LeptonNumber = 1,
                        line='straight',
+                       rightchirality = 1,
                        Y = 0)
 
 muR__plus__ = muR__minus__.anti()
-
