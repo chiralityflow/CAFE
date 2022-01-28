@@ -688,7 +688,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
                 # Set fermion flow state. Initial particle and final
                 # antiparticle are incoming, and vice versa for
                 # outgoing
-                if self.is_fermion():
+                if self.is_fermion() and not self.is_chiral:
                     if leg.get('polarization'):
                         pol = list(leg.get('polarization'))
                         self.set('polarization', pol) 
@@ -945,6 +945,12 @@ class HelasWavefunction(base_objects.PhysicsObject):
 
     def is_boson(self):
         return not self.is_fermion()
+
+    # AL: new function to check if particle is a chiral fermion
+    # AL TODO: update how this is done after changing pdg_ids
+    def is_chiral(self):
+        return abs(self.get('pdg_code')) < 90010 and \
+             abs(self.get('pdg_code')) > 90000
 
     def is_majorana(self):
         return self.is_fermion() and self.get('self_antipart')
@@ -1495,7 +1501,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
         return_dict['me_id'] = self.get('me_id')
         return_dict['number_external'] = self.get('number_external')
         return_dict['mass'] = self.get('mass')
-        if self.is_boson():
+        if self.is_boson() or self.is_chiral:
             return_dict['state_id'] = (-1) ** (self.get('state') == 'initial')
         else:
             return_dict['state_id'] = -(-1) ** self.get_with_flow('is_part')
