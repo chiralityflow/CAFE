@@ -298,15 +298,36 @@ class HelasCallWriter(base_objects.PhysicsObject):
         
         # AL: first get pdg_code. If left- or right-fermion, update call 
         pdg_code = wavefunction.get('particle').get('pdg_code')
+        nsv_new = wavefunction.get('leg_state')
         
         # AL: update LH wavefunction
         if pdg_code in [90001, 90005]:
+            # Change in/out label to left label
             call = call[:5] + 'L' + call[6:]
+            
+            # change in-flow/out-flow nsv to initial/final nsv
+            io_old = call.split(',')[-3]
+            if nsv_new == False:
+                io_new = '-' + io_old[1:]
+                call = call.replace(io_old, io_new)
+            else: 
+                io_new = '+' + io_old[1:]
+                call = call.replace(io_old, io_new)
         
         # AL: update RH wavefunction
         elif pdg_code in [90003, 90007]:
+            # Change in/out label to right label            
             call = call[:5] + 'R' + call[6:]
         
+            # change in-flow/out-flow nsv to initial/final nsv
+            io_old = call.split(',')[-3]
+            if nsv_new == False:
+                io_new = '-' + io_old[1:]
+                call = call.replace(io_old, io_new)
+            else: 
+                io_new = '+' + io_old[1:]
+                call = call.replace(io_old, io_new)
+
         return call
 
     def get_amplitude_call(self, amplitude):
