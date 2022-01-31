@@ -1307,6 +1307,7 @@ def write_aloha_file_inc(aloha_dir,file_ext, comp_ext):
     text="ALOHARoutine = "
     text += ' '.join(aloha_files)
     text +='\n'
+    
 
     open(os.path.join(aloha_dir, 'aloha_file.inc'), 'w').write(text) 
 

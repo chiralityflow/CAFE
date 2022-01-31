@@ -3776,7 +3776,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             # Go through all vertices except the last and create
             # wavefunctions
             for vertex in vertices:
-                
+
                 # In case there are diagrams with multiple Lorentz/color 
                 # structures, we need to keep track of the wavefunctions
                 # for each such structure separately, and generate

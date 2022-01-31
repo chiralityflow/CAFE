@@ -1566,7 +1566,7 @@ def levi_right_prod(p1,p2):
     # ZW: Unused, but created in case it ever comes up
     return inprod
 
-def pslash_right(bra,p):
+def pbar_ket(bra,p):
     "ZW: writes out the explicit multiplication of"
     "a right-handed bra with the p-slash matrix in the HELAS Fortrant convention"
     "returns a two-component list, corresponding to the output left-handed spinor"
@@ -1574,16 +1574,16 @@ def pslash_right(bra,p):
     comp2 = '({}(5)*({}(1) - CI*{}(2)) + {}(6)*({}(0) - {}(3)))'.format(bra,p,p,bra,p,p)
     return [comp1,comp2]
 
-def pslash_left(bra,p):
+def pbar_bra(ket,p):
     "ZW: writes out the explicit multiplication of"
     "a left-handed ket with the p-slash matrix in the HELAS Fortrant convention"
     "returns a two-component list, corresponding to the output right-handed spinor"
-    comp1 = '(({}(0) + {}(3))*{}(3) + ({}(1) - CI*{}(2))*{}(4))'.format(p,p,bra,p,p,bra)
-    comp2 = '(({}(1) + CI*{}(2))*{}(3) + ({}(0) - {}(3))*{}(4))'.format(p,p,bra,p,p,bra)
+    comp1 = '(({}(0) + {}(3))*{}(3) + ({}(1) - CI*{}(2))*{}(4))'.format(p,p,ket,p,p,ket)
+    comp2 = '(({}(1) + CI*{}(2))*{}(3) + ({}(0) - {}(3))*{}(4))'.format(p,p,ket,p,p,ket)
     return [comp1,comp2]
 
 def vertex_replacer(text, vertex):
-    "Function which takes the text of a Fortran vertex file as well as the vertex name as an input"
+    "ZW: Function which takes the text of a Fortran vertex file as well as the vertex name as an input"
     "and outputs the corresponding chiral vertex Fortran file"
     text_copy = text
     linebreaks = get_symbols(text_copy, '\n')
@@ -1622,11 +1622,11 @@ def vertex_replacer(text, vertex):
         equality = get_symbols(text_copy, '=')
         text_copy = text_copy[:equality[-2]-6] + RLV1_0_replace + text_copy[linebreaks[-5]+1:]
     if (vertex == 'LRV1P0_3'):
-        FFV7P0_3_replace = '      V3(3) = 2*DENOM*F1(4)\n'\
+        LRV1P0_3_replace = '      V3(3) = 2*DENOM*F1(4)\n'\
             + '      V3(4) = -2*DENOM*F1(3)\n'\
             + '      V3(5) = F2(6)\n'\
             + '      V3(6) = -1*F2(5)\n'
-        text_copy = text_copy[:linebreaks[-8]+1] + FFV7P0_3_replace + text_copy[linebreaks[-4]+1:]
+        text_copy = text_copy[:linebreaks[-8]+1] + LRV1P0_3_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'RLV1P0_3'):
         RLV1P0_3_replace = '      V3(3) = 2*DENOM*F2(4)\n'\
             + '      V3(4) = -2*DENOM*F2(3)\n'\
@@ -1634,7 +1634,7 @@ def vertex_replacer(text, vertex):
             + '      V3(6) = -1*F1(5)\n'
         text_copy = text_copy[:linebreaks[-8]+1] + RLV1P0_3_replace + text_copy[linebreaks[-4]+1:]
     # if (vertex == 'FFV7_1'):
-    #     spinor = pslash_left('V3','P1')
+    #     spinor = pbar_left('V3','P1')
     #     FFV7_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
     #         + '      INPROD = {}\n'.format(right_prod('V3','F2'))\
     #         + '      F1(3) = 0\n'\
@@ -1645,7 +1645,7 @@ def vertex_replacer(text, vertex):
     #     linebreaks = get_symbols(text_copy, '\n')
     #     text_copy = text_copy[:linebreaks[-18]+1] + FFV7_1_replace + text_copy[linebreaks[-4]+1:]
     # if (vertex == 'FFV7_2'):
-    #     spinor = pslash_right('V3','P2')
+    #     spinor = pbar_right('V3','P2')
     #     FFV7_2_replace = '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
     #         + '      INPROD = {}\n'.format(left_prod('F1','V3'))\
     #         + '      F2(3) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
@@ -1656,7 +1656,7 @@ def vertex_replacer(text, vertex):
     #     linebreaks = get_symbols(text_copy, '\n')
     #     text_copy = text_copy[:linebreaks[-19]+1] + FFV7_2_replace + text_copy[linebreaks[-4]+1:]
     # if (vertex == 'FFV8_1'): 
-    #     spinor = pslash_right('V3','P1')
+    #     spinor = pbar_right('V3','P1')
     #     FFV8_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
     #         + '      INPROD = {}\n'.format(left_prod('F2','V3'))\
     #         + '      F1(3) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
@@ -1667,7 +1667,7 @@ def vertex_replacer(text, vertex):
     #     linebreaks = get_symbols(text_copy, '\n')
     #     text_copy = text_copy[:linebreaks[-18]+1] + FFV8_1_replace + text_copy[linebreaks[-4]+1:]
     # if (vertex == 'FFV8_2'):
-    #     spinor = pslash_left('V3','P2')
+    #     spinor = pbar_left('V3','P2')
     #     FFV8_2_replace = '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
     #         + '      INPROD = {}\n'.format(right_prod('V3','F1'))\
     #         + '      F2(3) = 0\n'\
@@ -1678,7 +1678,7 @@ def vertex_replacer(text, vertex):
     #     linebreaks = get_symbols(text_copy, '\n')
     #     text_copy = text_copy[:linebreaks[-18]+1] + FFV8_2_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'LLV1_1'): 
-        spinor = pslash_right('V3','P1')
+        spinor = pbar_ket('V3','-1*P1')
         LLV1_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
             + '      INPROD = {}\n'.format(left_prod('F2','V3'))\
             + '      F1(3) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
@@ -1689,7 +1689,7 @@ def vertex_replacer(text, vertex):
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[-18]+1] + LLV1_1_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'LLV1_2'):
-        spinor = pslash_right('V3','P2')
+        spinor = pbar_ket('V3','P2')
         LLV1_2_replace = '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
             + '      INPROD = {}\n'.format(left_prod('F1','V3'))\
             + '      F2(3) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
@@ -1700,7 +1700,7 @@ def vertex_replacer(text, vertex):
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[-19]+1] + LLV1_2_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'RRV1_1'):
-        spinor = pslash_left('V3','P1')
+        spinor = pbar_bra('V3','-1*P1')
         RRV1_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
             + '      INPROD = {}\n'.format(right_prod('V3','F2'))\
             + '      F1(3) = 0\n'\
@@ -1711,7 +1711,7 @@ def vertex_replacer(text, vertex):
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[-18]+1] + RRV1_1_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'RRV1_2'):
-        spinor = pslash_left('V3','P2')
+        spinor = pbar_bra('V3','P2')
         RRV1_2_replace = '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
             + '      INPROD = {}\n'.format(right_prod('V3','F1'))\
             + '      F2(3) = 0\n'\
@@ -1730,139 +1730,87 @@ def postex_vertex_replacer(working_dir):
     "and replaces them by directly rewriting the vertex Fortran files (if any of them are intended to be chiral)"
     " The actual Fortran code replace occurs in the function vertex_replacer above"
     write_dir = pjoin(working_dir, 'Source', 'DHELAS')
+    # ZW: include the names of the fortran-files corresponding to any
+    # new vertices in vertex_list and this function will automatically
+    # open and rewrite the file using vertex_replacer
+    vertex_list = [ 'LRV1_0.f', 'RLV1_0.f', 'LRV1P0_3.f', 'RLV1P0_3.f',\
+        'LLV1_1.f', 'LLV1_2.f', 'RRV1_1.f', 'RRV1_2.f' ]
     onlyfiles = [f for f in os.listdir(write_dir) if os.path.isfile(os.path.join(write_dir, f))]
-    # if 'FFV7_0.f' in onlyfiles:
-    #     file = open(write_dir + '/FFV7_0.f', 'r')
-    #     FFV7_0_copy = file.read()
-    #     FFV7_0_copy = vertex_replacer(FFV7_0_copy, 'FFV7_0')
+    # if 'LRV1_0.f' in onlyfiles:
+    #     file = open(write_dir + '/LRV1_0.f', 'r')
+    #     LRV1_0_copy = file.read()
+    #     LRV1_0_copy = vertex_replacer(LRV1_0_copy, 'LRV1_0')
     #     file.close()
-    #     file = open(write_dir + '/FFV7_0.f', 'w')
-    #     file.write(FFV7_0_copy)
+    #     file = open(write_dir + '/LRV1_0.f', 'w')
+    #     file.write(LRV1_0_copy)
     #     file.close()
-    # if 'FFV8_0.f' in onlyfiles:
-    #     file = open(write_dir + '/FFV8_0.f', 'r')
-    #     FFV8_0_copy = file.read()
-    #     FFV8_0_copy = vertex_replacer(FFV8_0_copy, 'FFV8_0')
+    # if 'RLV1_0.f' in onlyfiles:
+    #     file = open(write_dir + '/RLV1_0.f', 'r')
+    #     RLV1_0_copy = file.read()
+    #     RLV1_0_copy = vertex_replacer(RLV1_0_copy, 'RLV1_0')
     #     file.close()
-    #     file = open(write_dir + '/FFV8_0.f', 'w')
-    #     file.write(FFV8_0_copy)
+    #     file = open(write_dir + '/RLV1_0.f', 'w')
+    #     file.write(RLV1_0_copy)
     #     file.close()
-    # if 'FFV7P0_3.f' in onlyfiles:
-    #     file = open(write_dir + '/FFV7P0_3.f', 'r')
-    #     FFV7P0_3_copy = file.read()
-    #     FFV7P0_3_copy = vertex_replacer(FFV7P0_3_copy, 'FFV7P0_3')
+    # if 'LRV1P0_3.f' in onlyfiles:
+    #     file = open(write_dir + '/LRV1P0_3.f', 'r')
+    #     LRV1P0_3_copy = file.read()
+    #     LRV1P0_3_copy = vertex_replacer(LRV1P0_3_copy, 'LRV1P0_3')
     #     file.close()
-    #     file = open(write_dir + '/FFV7P0_3.f', 'w')
-    #     file.write(FFV7P0_3_copy)
+    #     file = open(write_dir + '/LRV1P0_3.f', 'w')
+    #     file.write(LRV1P0_3_copy)
     #     file.close()
-    # if 'FFV8P0_3.f' in onlyfiles:
-    #     file = open(write_dir + '/FFV8P0_3.f', 'r')
-    #     FFV8P0_3_copy = file.read()
-    #     FFV8P0_3_copy = vertex_replacer(FFV8P0_3_copy, 'FFV8P0_3')
+    # if 'RLV1P0_3.f' in onlyfiles:
+    #     file = open(write_dir + '/RLV1P0_3.f', 'r')
+    #     RLV1P0_3_copy = file.read()
+    #     RLV1P0_3_copy = vertex_replacer(RLV1P0_3_copy, 'RLV1P0_3')
     #     file.close()
-    #     file = open(write_dir + '/FFV8P0_3.f', 'w')
-    #     file.write(FFV8P0_3_copy)
+    #     file = open(write_dir + '/RLV1P0_3.f', 'w')
+    #     file.write(RLV1P0_3_copy)
     #     file.close()
-    # if 'FFV7_1.f' in onlyfiles:
-    #     file = open(write_dir + '/FFV7_1.f', 'r')
-    #     FFV7_1_copy = file.read()
-    #     FFV7_1_copy = vertex_replacer(FFV7_1_copy, 'FFV7_1')
+    # if 'LLV1_1.f' in onlyfiles:
+    #     file = open(write_dir + '/LLV1_1.f', 'r')
+    #     LLV1_1_copy = file.read()
+    #     LLV1_1_copy = vertex_replacer(LLV1_1_copy, 'LLV1_1')
     #     file.close()
-    #     file = open(write_dir + '/FFV7_1.f', 'w')
-    #     file.write(FFV7_1_copy)
+    #     file = open(write_dir + '/LLV1_1.f', 'w')
+    #     file.write(LLV1_1_copy)
     #     file.close()
-    # if 'FFV7_2.f' in onlyfiles:
-    #     file = open(write_dir + '/FFV7_2.f', 'r')
-    #     FFV7_2_copy = file.read()
-    #     FFV7_2_copy = vertex_replacer(FFV7_2_copy, 'FFV7_2')
+    # if 'LLV1_2.f' in onlyfiles:
+    #     file = open(write_dir + '/LLV1_2.f', 'r')
+    #     LLV1_2_copy = file.read()
+    #     LLV1_2_copy = vertex_replacer(LLV1_2_copy, 'LLV1_2')
     #     file.close()
-    #     file = open(write_dir + '/FFV7_2.f', 'w')
-    #     file.write(FFV7_2_copy)
+    #     file = open(write_dir + '/LLV1_2.f', 'w')
+    #     file.write(LLV1_2_copy)
     #     file.close()
-    # if 'FFV8_1.f' in onlyfiles:
-    #     file = open(write_dir + '/FFV8_1.f', 'r')
-    #     FFV8_1_copy = file.read()
-    #     FFV8_1_copy = vertex_replacer(FFV8_1_copy, 'FFV8_1')
+    # if 'RRV1_1.f' in onlyfiles:
+    #     file = open(write_dir + '/RRV1_1.f', 'r')
+    #     RRV1_1_copy = file.read()
+    #     RRV1_1_copy = vertex_replacer(RRV1_1_copy, 'RRV1_1')
     #     file.close()
-    #     file = open(write_dir + '/FFV8_1.f', 'w')
-    #     file.write(FFV8_1_copy)
+    #     file = open(write_dir + '/RRV1_1.f', 'w')
+    #     file.write(RRV1_1_copy)
     #     file.close()
-    # if 'FFV8_2.f' in onlyfiles:
-    #     file = open(write_dir + '/FFV8_2.f', 'r')
-    #     FFV8_2_copy = file.read()
-    #     FFV8_2_copy = vertex_replacer(FFV8_2_copy, 'FFV8_2')
+    # if 'RRV1_2.f' in onlyfiles:
+    #     file = open(write_dir + '/RRV1_2.f', 'r')
+    #     RRV1_2_copy = file.read()
+    #     RRV1_2_copy = vertex_replacer(RRV1_2_copy, 'RRV1_2')
     #     file.close()
-    #     file = open(write_dir + '/FFV8_2.f', 'w')
-    #     file.write(FFV8_2_copy)
-    #     file.close()
-    if 'LRV1_0.f' in onlyfiles:
-        file = open(write_dir + '/LRV1_0.f', 'r')
-        LRV1_0_copy = file.read()
-        LRV1_0_copy = vertex_replacer(LRV1_0_copy, 'LRV1_0')
-        file.close()
-        file = open(write_dir + '/LRV1_0.f', 'w')
-        file.write(LRV1_0_copy)
-        file.close()
-    if 'RLV1_0.f' in onlyfiles:
-        file = open(write_dir + '/RLV1_0.f', 'r')
-        RLV1_0_copy = file.read()
-        RLV1_0_copy = vertex_replacer(RLV1_0_copy, 'RLV1_0')
-        file.close()
-        file = open(write_dir + '/RLV1_0.f', 'w')
-        file.write(RLV1_0_copy)
-        file.close()
-    if 'LRV1P0_3.f' in onlyfiles:
-        file = open(write_dir + '/LRV1P0_3.f', 'r')
-        LRV1P0_3_copy = file.read()
-        LRV1P0_3_copy = vertex_replacer(LRV1P0_3_copy, 'LRV1P0_3')
-        file.close()
-        file = open(write_dir + '/LRV1P0_3.f', 'w')
-        file.write(LRV1P0_3_copy)
-        file.close()
-    if 'RLV1P0_3.f' in onlyfiles:
-        file = open(write_dir + '/RLV1P0_3.f', 'r')
-        RLV1P0_3_copy = file.read()
-        RLV1P0_3_copy = vertex_replacer(RLV1P0_3_copy, 'RLV1P0_3')
-        file.close()
-        file = open(write_dir + '/RLV1P0_3.f', 'w')
-        file.write(RLV1P0_3_copy)
-        file.close()
-    if 'LLV1_1.f' in onlyfiles:
-        file = open(write_dir + '/LLV1_1.f', 'r')
-        LLV1_1_copy = file.read()
-        LLV1_1_copy = vertex_replacer(LLV1_1_copy, 'LLV1_1')
-        file.close()
-        file = open(write_dir + '/LLV1_1.f', 'w')
-        file.write(LLV1_1_copy)
-        file.close()
-    if 'LLV1_2.f' in onlyfiles:
-        file = open(write_dir + '/LLV1_2.f', 'r')
-        LLV1_2_copy = file.read()
-        LLV1_2_copy = vertex_replacer(LLV1_2_copy, 'LLV1_2')
-        file.close()
-        file = open(write_dir + '/LLV1_2.f', 'w')
-        file.write(LLV1_2_copy)
-        file.close()
-    if 'RRV1_1.f' in onlyfiles:
-        file = open(write_dir + '/RRV1_1.f', 'r')
-        RRV1_1_copy = file.read()
-        RRV1_1_copy = vertex_replacer(RRV1_1_copy, 'RRV1_1')
-        file.close()
-        file = open(write_dir + '/RRV1_1.f', 'w')
-        file.write(RRV1_1_copy)
-        file.close()
-    if 'RRV1_2.f' in onlyfiles:
-        file = open(write_dir + '/RRV1_2.f', 'r')
-        RRV1_2_copy = file.read()
-        RRV1_2_copy = vertex_replacer(RRV1_2_copy, 'RRV1_2')
-        file.close()
-        file = open(write_dir + '/RRV1_2.f', 'w')
-        file.write(RRV1_2_copy)
-        file.close()
+    #     file = open(write_dir + '/RRV1_2.f', 'w')
+    #     file.write(RRV1_2_copy)
+    #     file.close()ha
+    for vertex in vertex_list:
+        if vertex in onlyfiles:
+            file = open(write_dir + '/' + vertex, 'r')
+            copy = file.read()
+            copy = vertex_replacer(copy, vertex[:-2])
+            file.close()
+            file = open(write_dir + '/' + vertex, 'w')
+            file.write(copy)
+            file.close()
+            del copy
     return 
-
-
-
 
 class misc(object):
     @staticmethod

@@ -13,7 +13,6 @@
 from __future__ import division
 from object_library import all_particles, Particle
 import parameters as Param
-import propagators
 
 a = Particle(pdg_code = 90022,
              name = 'a',
@@ -29,7 +28,7 @@ a = Particle(pdg_code = 90022,
              LeptonNumber = 0,
              line='double',
              Y = 0)
-            
+
 ghA = Particle(pdg_code = 9000001,
                name = 'ghA',
                antiname = 'ghA~',

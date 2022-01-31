@@ -13,33 +13,27 @@ C###############################################################################
 
 
 
-C############################################
-C AL: New placeholder function which calculates external left-chiral fermion
-C wavefunctions
-C TODO: Write this wavefunction properly!!!!!!!!!!!
-C############################################
 
-      subroutine lxxxxx(p,fmass,nhel,nsf, fo)
+      subroutine lxxxxx(p,fmass,nhel,nsf, lf)
 c
-c This subroutine computes a fermion wavefunction with the flowing-OUT
-c fermion number.
+c This subroutine computes a left-handed fermion wavefunction
+c under the chirality-flow formalism
+c left-handed fermions are assumed to always be bras, i.e. to have inflowing chirality
 c
 c input:
 c       real    p(0:3)         : four-momentum of fermion
 c       real    fmass          : mass          of fermion
 c       integer nhel = -1 or 1 : helicity      of fermion
-c       integer nsf  = -1 or 1 : +1 for particle, -1 for anti-particle
+c       integer nsf  = -1 or 1 : +1 for outgoing, -1 incoming
 c
 c output:
-c       complex fo(6)          : fermion wavefunction               <fo|
+c       complex lf(6)          : left-handed fermion wavefunction               [lf|
 c
       implicit none
-      double complex fo(6),chi(2)
+      double complex lf(6),chi(2)
       double precision p(0:3),sf(2),sfomeg(2),omega(2),fmass,
-     &     pp,pp3,sqp0p3,sqm(0:1),pplus,pprefac
+     &     pp,pp3,sqp0p3,sqm(0:1)
       integer nhel,nsf,nh,ip,im
-
-      double complex ptrans,ptransconj
 
       double precision rZero, rHalf, rTwo
       parameter( rZero = 0.0d0, rHalf = 0.5d0, rTwo = 2.0d0 )
@@ -81,68 +75,63 @@ c         write(stdo,*) '             : nsf = ',nsf
 c      endif
 c#endif
 
-      fo(1) = dcmplx(p(0),p(3))*nsf
-      fo(2) = dcmplx(p(1),p(2))*nsf
+      lf(1) = dcmplx(p(0),p(3))*nsf
+      lf(2) = dcmplx(p(1),p(2))*nsf
 
       nh = nhel*nsf
 
       if(p(1).eq.0d0.and.p(2).eq.0d0.and.p(3).lt.0d0) then
          sqp0p3 = 0d0
       else
-         sqp0p3 = dsqrt(max(p(0)+p(3),rZero))*nsf
+         sqp0p3 = dsqrt(max(p(0)+p(3),rZero))
       end if
       chi(1) = dcmplx( sqp0p3 )
       if ( sqp0p3.eq.rZero ) then
-         chi(2) = dcmplx(-nhel )*dsqrt(rTwo*p(0))
+         chi(2) = dcmplx( dsqrt(rTwo*p(0)) )
       else
-         chi(2) = dcmplx( -nsf*p(1), -p(2) )/sqp0p3
+         chi(2) = dcmplx( p(1), -p(2) )/sqp0p3
       endif
 
-      if ( nhel.eq.1 ) then
-         fo(3) = dcmplx( rZero )
-         fo(4) = dcmplx( rZero )
-         fo(5) = dcmplx( rZero )
-         fo(6) = dcmplx( rZero )
+      if ( nh.eq.1 ) then
+         lf(3) = chi(1)
+         lf(4) = chi(2)
+         lf(5) = dcmplx( rZero )
+         lf(6) = dcmplx( rZero )
       else
-         fo(3) = chi(1)
-         fo(4) = chi(2)
-         fo(5) = dcmplx( rZero )
-         fo(6) = dcmplx( rZero )
+         lf(3) = dcmplx( rZero )
+         lf(4) = dcmplx( rZero )
+         lf(5) = dcmplx( rZero )
+         lf(6) = dcmplx( rZero )
       endif
-c      write(*,*) "the external left handed fermion is ", fo(3), fo(4)
+c      write(*,*) "the external left handed fermion is ", lf(3), lf(4)
       return
       end
 c
 
 
 
-C############################################
-C AL: New placeholder function which calculates external right-chiral fermion
-C wavefunctions
-C TODO: Write this wavefunction properly!!!!!!!!!!!
-C############################################
 
-      subroutine rxxxxx(p, fmass, nhel, nsf, fi)
+
+      subroutine rxxxxx(p, fmass, nhel, nsf, rf)
 c
-c This subroutine computes a fermion wavefunction with the flowing-IN
-c fermion number.
+c This subroutine computes a right-handed fermion wavefunction
+c under the chirality-flow formalism
+c right-handed fermions are assumed to always be kets, i.e. to have outflowing chirality
 c
 c input:
 c       real    p(0:3)         : four-momentum of fermion
 c       real    fmass          : mass          of fermion
 c       integer nhel = -1 or 1 : helicity      of fermion
-c       integer nsf  = -1 or 1 : +1 for particle, -1 for anti-particle
+c       integer nsf  = -1 or 1 : +1 outgoing, -1 incoming
 c
 c output:
-c       complex fi(6)          : fermion wavefunction               |fi>
+c       complex rf(6)          : fermion wavefunction               |rf>
 c
       implicit none
-      double complex fi(6),chi(2)
+      double complex rf(6),chi(2)
       double precision p(0:3),sf(2),sfomeg(2),omega(2),fmass,
-     &     pp,pp3,sqp0p3,sqm(0:1),pplus,pprefac
+     &     pp,pp3,sqp0p3,sqm(0:1)
       integer nhel,nsf,nh,ip,im
-
-      double complex ptrans,ptransconj
 
       double precision rZero, rHalf, rTwo
       parameter( rZero = 0.0d0, rHalf = 0.5d0, rTwo = 2.0d0 )
@@ -184,34 +173,34 @@ c         write(stdo,*) '             : nsf = ',nsf
 c      endif
 c#endif
 
-      fi(1) = dcmplx(p(0),p(3))*nsf
-      fi(2) = dcmplx(p(1),p(2))*nsf
+      rf(1) = dcmplx(p(0),p(3))*nsf
+      rf(2) = dcmplx(p(1),p(2))*nsf
 
       nh = nhel*nsf
 
       if(p(1).eq.0d0.and.p(2).eq.0d0.and.p(3).lt.0d0) then
          sqp0p3 = 0d0
       else
-         sqp0p3 = dsqrt(max(p(0)+p(3),rZero))*nsf
+         sqp0p3 = dsqrt(max(p(0)+p(3),rZero))
       endif
       chi(1) = dcmplx( sqp0p3 )
       if ( sqp0p3.eq.rZero ) then
-         chi(2) = dcmplx(-nhel )*dsqrt(rTwo*p(0))
+         chi(2) = dcmplx( dsqrt(rTwo*p(0)) )
       else
-         chi(2) = dcmplx( nsf*p(1), p(2) )/sqp0p3
+         chi(2) = dcmplx( p(1), p(2) )/sqp0p3
       endif
 
 
-      if ( nhel.eq.1 ) then
-         fi(3) = dcmplx( rZero )
-         fi(4) = dcmplx( rZero )
-         fi(5) = chi(1)
-         fi(6) = chi(2)
+      if ( nh.eq.1 ) then
+         rf(3) = dcmplx( rZero )
+         rf(4) = dcmplx( rZero )
+         rf(5) = dcmplx( rZero )
+         rf(6) = dcmplx( rZero )
       else
-         fi(3) = dcmplx( rZero )
-         fi(4) = dcmplx( rZero )
-         fi(5) = dcmplx( rZero )
-         fi(6) = dcmplx( rZero )
+         rf(3) = dcmplx( rZero )
+         rf(4) = dcmplx( rZero )
+         rf(5) = chi(1)
+         rf(6) = chi(2)
       endif
 
 c      write(*,*) "the external right handed fermion is ", fi(5), fi(6)
@@ -281,8 +270,8 @@ c         write(stdo,*) '             : nsf = ',nsf
 c      endif
 c#endif
 
-      fi(1) = dcmplx(p(0),p(3))*nsf
-      fi(2) = dcmplx(p(1),p(2))*nsf
+      fi(1) = dcmplx(p(0),p(3))*nsf*-1
+      fi(2) = dcmplx(p(1),p(2))*nsf*-1
 
       nh = nhel*nsf
 
@@ -296,12 +285,9 @@ c#endif
             sqm(1) = sign(sqm(0),fmass) ! possibility of negative fermion masses
             ip = (1+nh)/2
             im = (1-nh)/2
-c
+
             fi(3) = ip     * sqm(ip)
             fi(4) = im*nsf * sqm(ip)
-c
-c            fi(3) = dcmplx( rZero )
-c            fi(4) = dcmplx( rZero )
             fi(5) = ip*nsf * sqm(im)
             fi(6) = im     * sqm(im)
 
@@ -323,12 +309,8 @@ c            fi(4) = dcmplx( rZero )
                chi(2) = dcmplx( nh*p(1) , p(2) )/dsqrt(rTwo*pp*pp3)
             endif
 
-c
             fi(3) = sfomeg(1)*chi(im)
             fi(4) = sfomeg(1)*chi(ip)
-c
-c            fi(3) = dcmplx( rZero )
-c            fi(4) = dcmplx( rZero )
             fi(5) = sfomeg(2)*chi(im)
             fi(6) = sfomeg(2)*chi(ip)
 
@@ -353,17 +335,8 @@ c            fi(4) = dcmplx( rZero )
             fi(5) = chi(1)
             fi(6) = chi(2)
          else
-c
-c            fi(3) = chi(2)
-c            fi(4) = chi(1)
-c
-            fi(3) = chi(1)
-            fi(4) = chi(2)
-c
-c            write(*,*) "something is weird"
-c
-c            fi(3) = dcmplx( rZero )
-c            fi(4) = dcmplx( rZero )
+            fi(3) = chi(2)
+            fi(4) = chi(1)
             fi(5) = dcmplx( rZero )
             fi(6) = dcmplx( rZero )
          endif
@@ -496,6 +469,7 @@ c
       return
       end
 
+
       subroutine oxxxxx(p,fmass,nhel,nsf , fo)
 c
 c This subroutine computes a fermion wavefunction with the flowing-OUT
@@ -573,12 +547,8 @@ c#endif
             ip = nhel * -1 * ((1-nh)/2)
             fo(3) = im     * sqm(abs(ip))
             fo(4) = ip*nsf * sqm(abs(ip))
-c            fo(5) = dcmplx( rZero )
-c            fo(6) = dcmplx( rZero )
-c           
             fo(5) = im*nsf * sqm(abs(im))
             fo(6) = ip     * sqm(abs(im))
-c
          else
 
             pp = min(p(0),dsqrt(p(1)**2+p(2)**2+p(3)**2))
@@ -600,12 +570,8 @@ c
 
             fo(3) = sfomeg(2)*chi(im)
             fo(4) = sfomeg(2)*chi(ip)
-c            fo(5) = dcmplx( rZero )
-c            fo(6) = dcmplx( rZero )
-c
             fo(5) = sfomeg(1)*chi(im)
             fo(6) = sfomeg(1)*chi(ip)
-c
 
          endif
 
@@ -630,18 +596,8 @@ c
          else
             fo(3) = dcmplx( rZero )
             fo(4) = dcmplx( rZero )
-c
-c            write(*,*) "something is weird"
-c
-c            fo(5) = dcmplx( rZero )
-c            fo(6) = dcmplx( rZero )
-c
-c            fo(5) = chi(2)
-c            fo(6) = chi(1)
-c
-            fo(5) = chi(1)
-            fo(6) = chi(2)
-c
+            fo(5) = chi(2)
+            fo(6) = chi(1)
          endif
 
       endif

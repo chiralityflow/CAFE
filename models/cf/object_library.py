@@ -68,14 +68,13 @@ class Particle(UFOBaseClass):
 
     require_args=['pdg_code', 'name', 'antiname', 'spin', 'color', 'mass', 'width', 'texname', 'antitexname', 'charge']
 
-    require_args_all = ['pdg_code', 'name', 'antiname', 'spin', 'color', 'mass', 'width', 'texname', 'antitexname', 'charge', 'line', 'propagating', 'goldstoneboson', 'leftchirality', 'rightchirality']
+    require_args_all = ['pdg_code', 'name', 'antiname', 'spin', 'color', 'mass', 'width', 'texname', 'antitexname', 'charge', 'line', 'propagating', 'goldstoneboson']
 
     def __init__(self, pdg_code, name, antiname, spin, color, mass, width, texname,
-                 antitexname, charge , line=None, propagating=True, goldstoneboson=False, 
-                 leftchirality=int(0), rightchirality=int(0), **options):
+                 antitexname, charge , line=None, propagating=True, goldstoneboson=False, **options):
 
         args= (pdg_code, name, antiname, spin, color, mass, width, texname,
-                 antitexname, float(charge), leftchirality, rightchirality)
+                 antitexname, float(charge))
 
         UFOBaseClass.__init__(self, *args,  **options)
 
@@ -84,8 +83,6 @@ class Particle(UFOBaseClass):
 
         self.propagating = propagating
         self.goldstoneboson= goldstoneboson
-        self.leftchirality = leftchirality
-        self.rightchirality = rightchirality
 
         self.selfconjugate = (name == antiname)
         if 1: #not line:
@@ -140,8 +137,7 @@ class Particle(UFOBaseClass):
             newcolor = -self.color
                 
         return Particle(-self.pdg_code, self.antiname, self.name, self.spin, newcolor, self.mass, self.width,
-                        self.antitexname, self.texname, -self.charge, self.line, self.propagating, self.goldstoneboson, 
-                        self.rightchirality, self.leftchirality, **outdic)
+                        self.antitexname, self.texname, -self.charge, self.line, self.propagating, self.goldstoneboson, **outdic)
 
 
 
@@ -273,16 +269,3 @@ class FormFactor(UFOBaseClass):
         global all_form_factors
         all_form_factors.append(self)
 
-
-all_propagators = []
-
-class Propagator(UFOBaseClass):
-    
-    require_args = ['name','numerator','denominator']
-
-    def __init__(self, name, numerator, denominator=None, **opt):
-        args = (name, numerator, denominator)
-        UFOBaseClass.__init__(self, *args, **opt)
-
-        global all_propagators
-        all_propagators.append(self)

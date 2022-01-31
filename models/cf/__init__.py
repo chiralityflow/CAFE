@@ -2,7 +2,6 @@ import particles
 import couplings
 import lorentz
 import parameters
-import propagators
 import vertices
 import coupling_orders
 import function_library
@@ -28,7 +27,6 @@ all_lorentz = lorentz.all_lorentz
 all_parameters = parameters.all_parameters
 all_orders = coupling_orders.all_orders
 all_functions = function_library.all_functions
-all_propagators = propagators.all_propagators
 #all_decays = decays.all_decays
 
 

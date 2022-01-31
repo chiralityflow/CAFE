@@ -938,7 +938,8 @@ param_card.inc: ../Cards/param_card.dat\n\t../bin/madevent treatcards param\n'''
             cp(MG5DIR + '/aloha/template_files/aloha_functions.f', 
                                                  write_dir+'/aloha_functions.f')
         create_aloha.write_aloha_file_inc(write_dir, '.f', '.o')
-        misc.postex_vertex_replacer(self.dir_path) #Replaces vertices with corresponding chiral ones
+	#ZW: Replaces vertices with corresponding chiral ones
+        misc.postex_vertex_replacer(self.dir_path) 
     
 
         # Make final link in the Process
@@ -2229,7 +2230,7 @@ class ProcessExporterFortranSA(ProcessExporterFortran):
         logger.info("Running make for Helas")
         misc.compile(arg=['../lib/libdhelas.a'], cwd=source_dir, mode='fortran')
         logger.info("Running make for Model")
-        misc.compile(arg=['../lib/libmodel.a'], cwd=source_dir, mode='fortran'),
+        misc.compile(arg=['../lib/libmodel.a'], cwd=source_dir, mode='fortran')
 
     #===========================================================================
     # Create proc_card_mg5.dat for Standalone directory
@@ -6400,7 +6401,7 @@ class UFO_model_to_mg4(object):
             if str(part.get('mass')) in to_change:
                 part.set('mass', rep_pattern.sub(replace, str(part.get('mass'))))
             if str(part.get('width')) in to_change:
-                part.set('width', rep_pattern.sub(replace, str(part.get('width'))))       
+                part.set('width', rep_pattern.sub(replace, str(part.get('width'))))                
                 
     def refactorize(self, wanted_couplings = []):    
         """modify the couplings to fit with MG4 convention """
