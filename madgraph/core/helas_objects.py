@@ -613,6 +613,8 @@ class HelasWavefunction(base_objects.PhysicsObject):
         #                    due to a Majorana particle 
         # is_loop = logical true if this function builds a loop or belong
         #           to an external structure.
+        # AL: ref_mom = external particle used for reference momentum of gauge boson.
+        #               If not gauge boson, ref_mom = -1, else = external particle number
         self['state'] = 'initial'
         self['leg_state'] = True
         self['mothers'] = HelasWavefunctionList()
@@ -621,6 +623,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
         self['me_id'] = 0
         self['fermionflow'] = 1
         self['is_loop'] = False
+        self['ref_mom'] = -1
         # Some analytical information about the interaction and wavefunction
         # can be cached here in the form of a dictionary.
         # An example of a key of this dictionary is 'rank' which is used in the
@@ -661,12 +664,21 @@ class HelasWavefunction(base_objects.PhysicsObject):
                 leg = arguments[0]
                 interaction_id = arguments[1]
                 model = arguments[2]
+                # AL: updated arguments such that ref_momenta is the third one
+                if len(arguments) > 3:
+                    ref_momenta = arguments[3]
+                    # AL: if gauge boson, set reference momentum
+                    if leg.get('id') in [90023, 90024]:
+                        self.set('ref_mom', ref_momenta[leg.get('number')-1])
+                        misc.sprint(self.get('ref_mom'))
+
                 
                 # decay_ids is the pdg codes for particles with decay
                 # chains defined
                 decay_ids = []
-                if len(arguments) > 3:
-                    decay_ids = arguments[3]
+                # AL: updated this to be the 4th argument
+                if len(arguments) > 4:
+                    decay_ids = arguments[4]
                 self.set('particle', leg.get('id'), model)
                 self.set('number_external', leg.get('number'))
                 self.set('number', leg.get('number'))
@@ -704,6 +716,8 @@ class HelasWavefunction(base_objects.PhysicsObject):
                 else:
                     self.set('polarization', leg.get('polarization'))
                 self.set('interaction_id', interaction_id, model)
+
+
         elif arguments:
             super(HelasWavefunction, self).__init__(arguments[0])
         else:
@@ -946,6 +960,10 @@ class HelasWavefunction(base_objects.PhysicsObject):
 
     def is_boson(self):
         return not self.is_fermion()
+    
+    # AL: new function to check if gauge boson
+    def is_gauge_boson(self):
+        return self.get('spin') == 3
 
     # AL: new function to check if particle is a chiral fermion
     # AL TODO: update how this is done after changing pdg_ids
@@ -1502,11 +1520,15 @@ class HelasWavefunction(base_objects.PhysicsObject):
         return_dict['me_id'] = self.get('me_id')
         return_dict['number_external'] = self.get('number_external')
         return_dict['mass'] = self.get('mass')
-        if self.is_boson() or self.is_chiral:
+        # if self.is_boson() or self.is_chiral:
+        if self.is_boson():
             return_dict['state_id'] = (-1) ** (self.get('state') == 'initial')
         else:
             return_dict['state_id'] = -(-1) ** self.get_with_flow('is_part')
         return_dict['number_external'] = self.get('number_external')
+        if self.is_gauge_boson():
+            return_dict['ref_mom'] = self.get('ref_mom')
+            misc.sprint(return_dict)
         
         return return_dict
 
@@ -3691,6 +3713,46 @@ class HelasMatrixElement(base_objects.PhysicsObject):
        
 
         return model, vert_ids_to_pdg
+
+    # AL: New function to get reference momenta for each gauge boson
+    def get_ref_momenta(self, process):
+        """Get a list of reference momenta for each particle. 
+        For photons, the reference momenta is equal to the momenta of the first
+        fermion of opposite chirality"""
+
+        # return list of particle numbers (return -1 if not boson)
+        ref_moms = []
+
+        # First get all legs
+        legs = process.get('legs')
+
+        # find first left (anti)fermion and first right (anti)fermion
+        # TODO: update this when updating pdg conventions!
+        found_left_ferm = False
+        found_right_ferm = False
+        for leg in legs:
+            if abs(leg.get('id')) in [90001, 90005] and not found_left_ferm:
+                left_ferm = leg
+                found_left_ferm = True
+        
+            elif abs(leg.get('id')) in [90003, 90007] and not found_right_ferm:
+                right_ferm = leg
+                found_right_ferm = True
+            elif found_right_ferm and found_left_ferm:
+                break
+        
+        # find photons and update its reference momenta
+        for leg in legs:
+            # if left photon, append right fermion
+            if leg.get('id') == 90023:
+                ref_moms.append(right_ferm.get('number'))
+            # if right photon, append left fermion
+            elif leg.get('id') == 90024:
+                ref_moms.append(left_ferm.get('number'))
+            # else append -1
+            else: ref_moms.append(-1)
+            
+        return ref_moms
         
     def generate_helas_diagrams(self, amplitude, optimization=1,decay_ids=[]):
         """Starting from a list of Diagrams from the diagram
@@ -3725,10 +3787,14 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # Keep track of wavefunction number
         wf_number = 0
 
+        # AL: get list of wf numbers (better to give legs?) for ref momenta
+        ref_momenta = self.get_ref_momenta(process)
+        misc.sprint(ref_momenta)
+
         # Generate wavefunctions for the external particles
         external_wavefunctions = dict([(leg.get('number'),
                                         HelasWavefunction(leg, 0, model,
-                                                          decay_ids)) \
+                                                          ref_momenta, decay_ids)) \
                                        for leg in process.get('legs')])
 
         # Initially, have one wavefunction for each external leg.
