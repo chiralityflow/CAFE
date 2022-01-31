@@ -294,13 +294,14 @@ class HelasCallWriter(base_objects.PhysicsObject):
     # AL: Added a function to change the chiral external wavefunctions
     def get_chiral_wavefunction_call(self, wavefunction, call):
         """Return the wavefunction call for a chiral fermion as LXXXXX or RXXXXX
-        instead of IXXXXX or OXXXXX"""    
+        instead of IXXXXX or OXXXXX, and a chiral boson as VLXXXX or VRXXXX instead
+        of VXXXXX"""    
         
-        # AL: first get pdg_code. If left- or right-fermion, update call 
+        # AL: first get pdg_code. If left- or right-particle, update call 
         pdg_code = wavefunction.get('particle').get('pdg_code')
         nsv_new = wavefunction.get('leg_state')
         
-        # AL: update LH wavefunction
+        # AL: update LH spinor wavefunction
         if pdg_code in [90001, 90005]:
             # Change in/out label to left label
             call = call[:5] + 'L' + call[6:]
@@ -314,7 +315,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
                 io_new = '+' + io_old[1:]
                 call = call.replace(io_old, io_new)
         
-        # AL: update RH wavefunction
+        # AL: update RH spinor wavefunction
         elif pdg_code in [90003, 90007]:
             # Change in/out label to right label            
             call = call[:5] + 'R' + call[6:]
@@ -327,6 +328,14 @@ class HelasCallWriter(base_objects.PhysicsObject):
             else: 
                 io_new = '+' + io_old[1:]
                 call = call.replace(io_old, io_new)
+        
+        # AL: update LH vector wavefunction
+        elif pdg_code == 90023:
+            call = call[:6] + 'L' + call[7:]
+
+        # AL: update RH vector wavefunction
+        elif pdg_code == 90024:
+            call = call[:6] + 'R' + call[7:]
 
         return call
 

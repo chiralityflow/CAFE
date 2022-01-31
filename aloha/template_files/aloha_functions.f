@@ -318,6 +318,361 @@ c
       return
       end
 
+      subroutine vlxxxx(p,vmass,nhel,nsv , vc)
+c
+c This subroutine computes a left-chiral VECTOR wavefunction.
+c
+c input:
+c       real    p(0:3)         : four-momentum of vector boson
+c       real    vmass          : mass          of vector boson
+c       integer nhel = -1, 0, 1: helicity      of vector boson
+c                                (0 is forbidden if vmass=0.0)
+c       integer nsv  = -1 or 1 : +1 for final, -1 for initial
+c
+c output:
+c       complex vc(6)          : vector wavefunction       epsilon^mu(v)
+c
+      implicit none
+      double complex vc(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj
+      double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,pnorm,rnorm,prnorm,prprod
+      integer nhel,nsv,nsvahl,nsvhel
+      double precision refmom(4)
+
+      double precision rZero, rHalf, rOne, rTwo
+      parameter( rZero = 0.0d0, rHalf = 0.5d0 )
+      parameter( rOne = 1.0d0, rTwo = 2.0d0 )
+
+c#ifdef HELAS_CHECK
+c      double precision p2
+c      double precision epsi
+c      parameter( epsi = 2.0d-5 )
+c      integer stdo
+c      parameter( stdo = 6 )
+c#endif
+c
+c#ifdef HELAS_CHECK
+c      pp = sqrt(p(1)**2+p(2)**2+p(3)**2)
+c      if ( abs(p(0))+pp.eq.rZero ) then
+c         write(stdo,*)
+c     &        ' helas-error : p(0:3) in vxxxxx is zero momentum'
+c      endif
+c      if ( p(0).le.rZero ) then
+c         write(stdo,*)
+c     &        ' helas-error : p(0:3) in vxxxxx has non-positive energy'
+c         write(stdo,*)
+c     &        '             : p(0) = ',p(0)
+c      endif
+c      p2 = (p(0)+pp)*(p(0)-pp)
+c      if ( abs(p2-vmass**2).gt.p(0)**2*2.e-5 ) then
+c         write(stdo,*)
+c     &        ' helas-error : p(0:3) in vxxxxx has inappropriate mass'
+c         write(stdo,*)
+c     &        '             : p**2 = ',p2,' : vmass**2 = ',vmass**2
+c      endif
+c      if ( vmass.ne.rZero ) then
+c         if ( abs(nhel).gt.1 ) then
+c            write(stdo,*) ' helas-error : nhel in vxxxxx is not -1,0,1'
+c            write(stdo,*) '             : nhel = ',nhel
+c         endif
+c      else
+c         if ( abs(nhel).ne.1 ) then
+c            write(stdo,*) ' helas-error : nhel in vxxxxx is not -1,1'
+c            write(stdo,*) '             : nhel = ',nhel
+c         endif
+c      endif
+c      if ( abs(nsv).ne.1 ) then
+c         write(stdo,*) ' helas-error : nsv in vmxxxx is not -1,1'
+c         write(stdo,*) '             : nsv = ',nsv
+c      endif
+c#endif
+
+      sqh = dsqrt(rHalf)
+      hel = dble(nhel)
+      nsvahl = nsv*dabs(hel)
+      nsvhel = nsv*hel
+      pt2 = p(1)**2+p(2)**2
+      pp = min(p(0),dsqrt(pt2+p(3)**2))
+      pt = min(pp,dsqrt(pt2))
+
+      vc(1) = dcmplx(p(0),p(3))*nsv
+      vc(2) = dcmplx(p(1),p(2))*nsv
+
+c#ifdef HELAS_CHECK
+c nhel=4 option for scalar polarization
+c      if( nhel.eq.4 ) then
+c         if( vmass.eq.rZero ) then
+c            vc(1) = rOne
+c            vc(2) = p(1)/p(0)
+c            vc(3) = p(2)/p(0)
+c            vc(4) = p(3)/p(0)
+c         else
+c            vc(1) = p(0)/vmass
+c            vc(2) = p(1)/vmass
+c            vc(3) = p(2)/vmass
+c            vc(4) = p(3)/vmass
+c         endif
+c         return
+c      endif
+c#endif
+
+      if ( vmass.ne.rZero ) then
+
+         hel0 = rOne-dabs(hel)
+
+         if ( pp.eq.rZero ) then
+
+            vc(3) = dcmplx( rZero )
+            vc(4) = dcmplx(-hel*sqh )
+            vc(5) = dcmplx( rZero , nsvahl*sqh )
+            vc(6) = dcmplx( hel0 )
+
+         else
+
+            emp = p(0)/(vmass*pp)
+            vc(3) = dcmplx( hel0*pp/vmass )
+            vc(6) = dcmplx( hel0*p(3)*emp+hel*pt/pp*sqh )
+            if ( pt.ne.rZero ) then
+               pzpt = p(3)/(pp*pt)*sqh*hel
+               vc(4) = dcmplx( hel0*p(1)*emp-p(1)*pzpt ,
+     &                         -nsvahl*p(2)/pt*sqh       )
+               vc(5) = dcmplx( hel0*p(2)*emp-p(2)*pzpt ,
+     &                          nsvahl*p(1)/pt*sqh       )
+            else
+               vc(4) = dcmplx( -hel*sqh )
+               vc(5) = dcmplx( rZero , nsvahl*sign(sqh,p(3)) )
+            endif
+
+         endif
+
+      else
+
+c
+c         pp = p(0)
+c         pt = sqrt(p(1)**2+p(2)**2)
+c
+
+         refmom(1) = 1000*rOne
+         refmom(2) = 1000*rOne
+         refmom(3) = rZero
+         refmom(4) = rZero
+         rplus = refmom(1) + refmom(3)
+         rtrans = dcmplx(refmom(2),refmom(3))
+         rtransconj = dcmplx(refmom(2),-1*refmom(3))
+         pplus = p(0) + p(3)
+         ptrans = dcmplx(p(1),p(2))
+         ptransconj = dcmplx(p(1),-1*p(2))
+         pnorm = sqrt(pplus)
+         rnorm = sqrt(rplus)
+         prnorm = pnorm*rnorm
+c
+c         vc(3) = dcmplx( rZero )
+c         vc(6) = dcmplx( hel*pt/pp*sqh )
+c         if ( pt.ne.rZero ) then
+c            pzpt = p(3)/(pp*pt)*sqh*hel
+c            vc(4) = dcmplx( -p(1)*pzpt , -nsv*p(2)/pt*sqh )
+c            vc(5) = dcmplx( -p(2)*pzpt ,  nsv*p(1)/pt*sqh )
+c         else
+c            vc(4) = dcmplx( -hel*sqh )
+c            vc(5) = dcmplx( rZero , nsv*sign(sqh,p(3)) )
+c         endif
+c
+         if ( nsvhel.eq.rOne ) then
+            prprod = (rtrans*pplus - ptrans*rplus)/prnorm
+            vc(3) = ptransconj/(pnorm*prprod)
+            vc(4) = -1*pplus/(pnorm*prprod)
+            vc(5) = rtrans/(rnorm)
+            vc(6) = -1*rplus/(rnorm)
+         else
+            prprod = (pplus*rtransconj - rplus*ptransconj)/prnorm
+            vc(3) = rtransconj/(rnorm*prprod)
+            vc(4) = -1*rplus/(rnorm*prprod)
+            vc(5) = ptrans/(pnorm)
+            vc(6) = -1*pplus/(pnorm)
+         endif
+
+      endif
+c
+      return
+      end
+
+
+      subroutine vrxxxx(p,vmass,nhel,nsv , vc)
+c
+c This subroutine computes a right-chiral VECTOR wavefunction.
+c
+c input:
+c       real    p(0:3)         : four-momentum of vector boson
+c       real    vmass          : mass          of vector boson
+c       integer nhel = -1, 0, 1: helicity      of vector boson
+c                                (0 is forbidden if vmass=0.0)
+c       integer nsv  = -1 or 1 : +1 for final, -1 for initial
+c
+c output:
+c       complex vc(6)          : vector wavefunction       epsilon^mu(v)
+c
+      implicit none
+      double complex vc(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj
+      double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,pnorm,rnorm,prnorm,prprod
+      integer nhel,nsv,nsvahl,nsvhel
+      double precision refmom(4)
+
+      double precision rZero, rHalf, rOne, rTwo
+      parameter( rZero = 0.0d0, rHalf = 0.5d0 )
+      parameter( rOne = 1.0d0, rTwo = 2.0d0 )
+
+c#ifdef HELAS_CHECK
+c      double precision p2
+c      double precision epsi
+c      parameter( epsi = 2.0d-5 )
+c      integer stdo
+c      parameter( stdo = 6 )
+c#endif
+c
+c#ifdef HELAS_CHECK
+c      pp = sqrt(p(1)**2+p(2)**2+p(3)**2)
+c      if ( abs(p(0))+pp.eq.rZero ) then
+c         write(stdo,*)
+c     &        ' helas-error : p(0:3) in vxxxxx is zero momentum'
+c      endif
+c      if ( p(0).le.rZero ) then
+c         write(stdo,*)
+c     &        ' helas-error : p(0:3) in vxxxxx has non-positive energy'
+c         write(stdo,*)
+c     &        '             : p(0) = ',p(0)
+c      endif
+c      p2 = (p(0)+pp)*(p(0)-pp)
+c      if ( abs(p2-vmass**2).gt.p(0)**2*2.e-5 ) then
+c         write(stdo,*)
+c     &        ' helas-error : p(0:3) in vxxxxx has inappropriate mass'
+c         write(stdo,*)
+c     &        '             : p**2 = ',p2,' : vmass**2 = ',vmass**2
+c      endif
+c      if ( vmass.ne.rZero ) then
+c         if ( abs(nhel).gt.1 ) then
+c            write(stdo,*) ' helas-error : nhel in vxxxxx is not -1,0,1'
+c            write(stdo,*) '             : nhel = ',nhel
+c         endif
+c      else
+c         if ( abs(nhel).ne.1 ) then
+c            write(stdo,*) ' helas-error : nhel in vxxxxx is not -1,1'
+c            write(stdo,*) '             : nhel = ',nhel
+c         endif
+c      endif
+c      if ( abs(nsv).ne.1 ) then
+c         write(stdo,*) ' helas-error : nsv in vmxxxx is not -1,1'
+c         write(stdo,*) '             : nsv = ',nsv
+c      endif
+c#endif
+
+      sqh = dsqrt(rHalf)
+      hel = dble(nhel)
+      nsvahl = nsv*dabs(hel)
+      nsvhel = nsv*hel
+      pt2 = p(1)**2+p(2)**2
+      pp = min(p(0),dsqrt(pt2+p(3)**2))
+      pt = min(pp,dsqrt(pt2))
+
+      vc(1) = dcmplx(p(0),p(3))*nsv
+      vc(2) = dcmplx(p(1),p(2))*nsv
+
+c#ifdef HELAS_CHECK
+c nhel=4 option for scalar polarization
+c      if( nhel.eq.4 ) then
+c         if( vmass.eq.rZero ) then
+c            vc(1) = rOne
+c            vc(2) = p(1)/p(0)
+c            vc(3) = p(2)/p(0)
+c            vc(4) = p(3)/p(0)
+c         else
+c            vc(1) = p(0)/vmass
+c            vc(2) = p(1)/vmass
+c            vc(3) = p(2)/vmass
+c            vc(4) = p(3)/vmass
+c         endif
+c         return
+c      endif
+c#endif
+
+      if ( vmass.ne.rZero ) then
+
+         hel0 = rOne-dabs(hel)
+
+         if ( pp.eq.rZero ) then
+
+            vc(3) = dcmplx( rZero )
+            vc(4) = dcmplx(-hel*sqh )
+            vc(5) = dcmplx( rZero , nsvahl*sqh )
+            vc(6) = dcmplx( hel0 )
+
+         else
+
+            emp = p(0)/(vmass*pp)
+            vc(3) = dcmplx( hel0*pp/vmass )
+            vc(6) = dcmplx( hel0*p(3)*emp+hel*pt/pp*sqh )
+            if ( pt.ne.rZero ) then
+               pzpt = p(3)/(pp*pt)*sqh*hel
+               vc(4) = dcmplx( hel0*p(1)*emp-p(1)*pzpt ,
+     &                         -nsvahl*p(2)/pt*sqh       )
+               vc(5) = dcmplx( hel0*p(2)*emp-p(2)*pzpt ,
+     &                          nsvahl*p(1)/pt*sqh       )
+            else
+               vc(4) = dcmplx( -hel*sqh )
+               vc(5) = dcmplx( rZero , nsvahl*sign(sqh,p(3)) )
+            endif
+
+         endif
+
+      else
+
+c
+c         pp = p(0)
+c         pt = sqrt(p(1)**2+p(2)**2)
+c
+
+         refmom(1) = 1000*rOne
+         refmom(2) = 1000*rOne
+         refmom(3) = rZero
+         refmom(4) = rZero
+         rplus = refmom(1) + refmom(3)
+         rtrans = dcmplx(refmom(2),refmom(3))
+         rtransconj = dcmplx(refmom(2),-1*refmom(3))
+         pplus = p(0) + p(3)
+         ptrans = dcmplx(p(1),p(2))
+         ptransconj = dcmplx(p(1),-1*p(2))
+         pnorm = sqrt(pplus)
+         rnorm = sqrt(rplus)
+         prnorm = pnorm*rnorm
+c
+c         vc(3) = dcmplx( rZero )
+c         vc(6) = dcmplx( hel*pt/pp*sqh )
+c         if ( pt.ne.rZero ) then
+c            pzpt = p(3)/(pp*pt)*sqh*hel
+c            vc(4) = dcmplx( -p(1)*pzpt , -nsv*p(2)/pt*sqh )
+c            vc(5) = dcmplx( -p(2)*pzpt ,  nsv*p(1)/pt*sqh )
+c         else
+c            vc(4) = dcmplx( -hel*sqh )
+c            vc(5) = dcmplx( rZero , nsv*sign(sqh,p(3)) )
+c         endif
+c
+         if ( nsvhel.eq.rOne ) then
+            prprod = (rtrans*pplus - ptrans*rplus)/prnorm
+            vc(3) = ptransconj/(pnorm*prprod)
+            vc(4) = -1*pplus/(pnorm*prprod)
+            vc(5) = rtrans/(rnorm)
+            vc(6) = -1*rplus/(rnorm)
+         else
+            prprod = (pplus*rtransconj - rplus*ptransconj)/prnorm
+            vc(3) = rtransconj/(rnorm*prprod)
+            vc(4) = -1*rplus/(rnorm*prprod)
+            vc(5) = ptrans/(pnorm)
+            vc(6) = -1*pplus/(pnorm)
+         endif
+
+      endif
+c
+      return
+      end
+
 
 
       subroutine ixxxxx(p, fmass, nhel, nsf ,fi)

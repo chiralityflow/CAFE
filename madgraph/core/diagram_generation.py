@@ -1234,6 +1234,20 @@ class Amplitude(base_objects.PhysicsObject):
                     # separate routine, to allow overloading by
                     # daughter classes
                     new_leg_vert_ids = []
+                    # misc.sprint(leg_vert_ids)
+
+                    # AL: remove left and right photon propagators from combined legs
+                    # This should only remove off-shell regular photons, so the on-shell (external)
+                    # ones will be unchanged.
+                    leg_ids = [leg[0] for leg in leg_vert_ids]
+                    if leg_ids == [90022, 90023, 90024]:
+                        leg_vert_ids = [leg_vert_ids[0]]
+
+                    # # AL: alternative option, keep say right photon in propagator
+                    # if leg_ids == [90022, 90023, 90024] or leg_ids == [90023, 90024]:
+                    #     leg_vert_ids = [leg_vert_ids[-1]]
+
+
                     if leg_vert_ids:
                         new_leg_vert_ids = self.get_combined_legs(entry,
                                                                   leg_vert_ids,

@@ -3502,22 +3502,24 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # loop over wf pdg numbers 
         for key in ext_wfs.keys():
             pdg_code = ext_wfs[key]['particle']['pdg_code']
-            # All chiral particle numbers between 90000 and 90021
+            # All chiral particle numbers between 90000 and 90024
             # TODO: Update this after choosing a consistent set of conventions!!
-            if pdg_code > 90000 and pdg_code < 90022:
+            if pdg_code > 90000 and pdg_code < 90025:
                 return True
         
         # Haven't found a chiral particle, return false
         return False
 
-    # AL: New function to get the chiral particles in a process
-    def get_chiral_particles(self, ext_wfs):
+    # AL: New function to get the chiral fermions in a process
+    def get_chiral_fermions(self, ext_wfs):
+        """A function to return the first instance of each chiral fermion in 
+        a process and which particle number they are"""
         # loop over wf pdg numbers 
         pdg_codes = []
         ext_nums = []
         for ikey, key in enumerate(ext_wfs.keys()):
             pdg_code = ext_wfs[key]['particle']['pdg_code']
-            # All chiral particle numbers between 90000 and 90021
+            # All chiral fermion numbers between 90000 and 90021
             # TODO: Update this after choosing a consistent set of conventions!!
             if pdg_code > 90000 and pdg_code < 90022:
                 pdg_code = ext_wfs[key]['particle']['pdg_code']
@@ -3592,94 +3594,100 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # I now create the new vertices in a loop. For both LL and RR, 
         # and for each type of chiral particle in the process,
         # I want a particle-antiparticle vertex, and an antiparticle-particle vertex.
-        # First I get the chiral particles in the process.
+        # First I get the chiral fermions in the process.
         # Then I go through each LR combination and add the four relevant vertices
 
-        # Get chiral particles in process
-        chir_particles, ext_nums = self.get_chiral_particles(ext_wfs)
+        # Get chiral fermions in process
+        chir_fermions, ext_nums = self.get_chiral_fermions(ext_wfs)
 
-        # Loop through chiral particles to get the new vertices
-        for ipart, part in enumerate(chir_particles):
-            # get name of particle we're considering, add it to vertex names
+        # Loop through chiral fermions to get the new vertices
+        for ipart, part in enumerate(chir_fermions):
+            # get name of fermion we're considering, add it to vertex names
             # TODO: update this function to be more flexible when not just QED vertices!!
+
+            # get fermion name and chirality
             part_name = ext_wfs[ext_nums[ipart]].get('name')
             chirality = part_name[-2]
             if chirality != 'l' and chirality != 'r':
                 raise self.PhysicsObjectError("%s is not a valid chirality" % str(chirality))
+
+            # loop over bosons which could be in the vertex
+            bosons = ['a','al','ar']
+            boson_ids = [90022, 90023, 90024]
+            for iboson, boson in enumerate(bosons):
+                if part_name[-1] == '+':
+                    orig_vtx = part_name + part_name[:-2]
+                    if chirality == 'l': 
+                        orig_vtx += 'r-' + boson
+                    else: 
+                        orig_vtx += 'l-' + boson
+                    part_name_p = part_name
+                    part_name_m = part_name[:-1] + '-'
             
-            if part_name[-1] == '+':
-                orig_vtx = part_name + part_name[:-2]
-                if chirality == 'l': 
-                    orig_vtx += 'r-a'
+                elif part_name[-1] == '-':
+                    orig_vtx = part_name[:-2] 
+                    if chirality == 'l': 
+                        orig_vtx += 'r+' + part_name + boson
+                    else: 
+                        orig_vtx += 'l+' + part_name + boson
+                    part_name_p = part_name[:-1] + '+'
+                    part_name_m = part_name
+
+                # Use below names to increase and output new vert_to_id_dict
+                new_vtx_mp = part_name_m + part_name_p + boson
+                new_vtx_pm = part_name_p + part_name_m + boson
+            
+                # Get new interaction that we'll add to dictionary
+                new_int_mp = copy.deepcopy(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]])
+                new_int_pm = copy.deepcopy(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]])
+
+                # AL: Give interaction an unused id
+                n_ints_in_model = len(model.get('interaction_dict'))
+                new_int_mp['id'] = n_ints_in_model + 1
+                new_int_pm['id'] = n_ints_in_model + 2
+
+                # Put in dictionary vert_ids_to_pdg
+                # TODO: Update this function when new bosons are available for third particle
+                if part < 0:
+                    # mp vertex
+                    vert_ids_to_pdg[n_ints_in_model + 1] = [-part, part, boson_ids[iboson]]
+                    # pm vertex
+                    vert_ids_to_pdg[n_ints_in_model + 2] = [part, -part, boson_ids[iboson]]
+                else:
+                    # mp vertex
+                    vert_ids_to_pdg[n_ints_in_model + 1] = [part, -part, boson_ids[iboson]]
+                    # pm vertex
+                    vert_ids_to_pdg[n_ints_in_model + 2] = [-part, part, boson_ids[iboson]]
+
+                # AL: for RR, use RRV1, for LL, use LLV1
+                if chirality == 'r':
+                    new_int_mp['lorentz'] = ['RRV1']
+                    new_int_pm['lorentz'] = ['RRV1']
                 else: 
-                    orig_vtx += 'l-a'
-                part_name_p = part_name
-                part_name_m = part_name[:-1] + '-'
+                    new_int_mp['lorentz'] = ['LLV1']
+                    new_int_pm['lorentz'] = ['LLV1']
             
-            elif part_name[-1] == '-':
-                orig_vtx = part_name[:-2] 
-                if chirality == 'l': 
-                    orig_vtx += 'r+' + part_name + 'a'
-                else: 
-                    orig_vtx += 'l+' + part_name + 'a'
-                part_name_p = part_name[:-1] + '+'
-                part_name_m = part_name
+                # AL: update particles in interaction
+                if new_int_mp['particles'][0]['pdg_code'] == part:
+                    new_int_mp['particles'][1] = copy.copy(new_int_mp['particles'][0])
+                elif new_int_mp['particles'][1]['pdg_code'] == part:
+                    new_int_mp['particles'][0] = copy.copy(new_int_mp['particles'][1])
+                if new_int_pm['particles'][0]['pdg_code'] == part:
+                    new_int_pm['particles'][1] = copy.copy(new_int_pm['particles'][0])
+                elif new_int_pm['particles'][1]['pdg_code'] == part:
+                    new_int_pm['particles'][0] = copy.copy(new_int_pm['particles'][1])
 
-            # Use below names to increase and output new vert_to_id_dict
-            new_vtx_mp = part_name_m + part_name_p + 'a'
-            new_vtx_pm = part_name_p + part_name_m + 'a'
+                # AL: update which is particle, antiparticle
+                new_int_mp['particles'][0]['is_part'] = True
+                new_int_mp['particles'][1]['is_part'] = False
+                new_int_pm['particles'][0]['is_part'] = False
+                new_int_pm['particles'][1]['is_part'] = True
             
-            # Get new interaction that we'll add to dictionary
-            new_int_mp = copy.deepcopy(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]])
-            new_int_pm = copy.deepcopy(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]])
-
-            # AL: Give interaction an unused id
-            n_ints_in_model = len(model.get('interaction_dict'))
-            new_int_mp['id'] = n_ints_in_model + 1
-            new_int_pm['id'] = n_ints_in_model + 2
-
-            # Put in dictionary vert_ids_to_pdg
-            # TODO: Update this function when new bosons are available for third particle
-            if part < 0:
-                # mp vertex
-                vert_ids_to_pdg[n_ints_in_model + 1] = [-part, part, 90022]
-                # pm vertex
-                vert_ids_to_pdg[n_ints_in_model + 2] = [part, -part, 90022]
-            else:
-                # mp vertex
-                vert_ids_to_pdg[n_ints_in_model + 1] = [part, -part, 90022]
-                # pm vertex
-                vert_ids_to_pdg[n_ints_in_model + 2] = [-part, part, 90022]
-
-            # AL: for RR, use RRV1, for LL, use LLV1
-            if chirality == 'r':
-                new_int_mp['lorentz'] = ['RRV1']
-                new_int_pm['lorentz'] = ['RRV1']
-            else: 
-                new_int_mp['lorentz'] = ['LLV1']
-                new_int_pm['lorentz'] = ['LLV1']
-            
-            # AL: update particles in interaction
-            if new_int_mp['particles'][0]['pdg_code'] == part:
-                new_int_mp['particles'][1] = copy.copy(new_int_mp['particles'][0])
-            elif new_int_mp['particles'][1]['pdg_code'] == part:
-                new_int_mp['particles'][0] = copy.copy(new_int_mp['particles'][1])
-            if new_int_pm['particles'][0]['pdg_code'] == part:
-                new_int_pm['particles'][1] = copy.copy(new_int_pm['particles'][0])
-            elif new_int_pm['particles'][1]['pdg_code'] == part:
-                new_int_pm['particles'][0] = copy.copy(new_int_pm['particles'][1])
-
-            # AL: update which is particle, antiparticle
-            new_int_mp['particles'][0]['is_part'] = True
-            new_int_mp['particles'][1]['is_part'] = False
-            new_int_pm['particles'][0]['is_part'] = False
-            new_int_pm['particles'][1]['is_part'] = True
-            
-            # AL: add new interaction to the interaction_dict and interactions
-            model.get('interaction_dict')[n_ints_in_model + 1] = new_int_mp
-            model.get('interactions').append(new_int_mp)
-            model.get('interaction_dict')[n_ints_in_model + 2] = new_int_pm
-            model.get('interactions').append(new_int_pm)
+                # AL: add new interaction to the interaction_dict and interactions
+                model.get('interaction_dict')[n_ints_in_model + 1] = new_int_mp
+                model.get('interactions').append(new_int_mp)
+                model.get('interaction_dict')[n_ints_in_model + 2] = new_int_pm
+                model.get('interactions').append(new_int_pm)
        
 
         return model, vert_ids_to_pdg
