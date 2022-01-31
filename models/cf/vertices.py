@@ -22,6 +22,7 @@ V_2 = Vertex(name = 'V_2',
               color = [ '1' ],
               lorentz = [ L.LRV1 ],
               couplings = {(0,0):C.GC_3})
+              
 
 V_3 = Vertex(name = 'V_3',
               particles = [ P.muR__plus__, P.muL__minus__, P.a ],
@@ -31,6 +32,64 @@ V_3 = Vertex(name = 'V_3',
 
 V_4 = Vertex(name = 'V_4',
               particles = [ P.muL__plus__, P.muR__minus__, P.a ],
+              color = [ '1' ],
+              lorentz = [ L.LRV1 ],
+              couplings = {(0,0):C.GC_3})
+
+
+####################################################
+# AL: Same vertices as above but with chiral photons
+####################################################
+
+# TODO: Check if lorentz structure will need any updating (I don't think it will)
+
+V_5 = Vertex(name = 'V_5',
+              particles = [ P.eR__plus__, P.eL__minus__, P.aL ],
+              color = [ '1' ],
+              lorentz = [ L.RLV1 ],
+              couplings = {(0,0):C.GC_3})
+
+V_6 = Vertex(name = 'V_6',
+              particles = [ P.eR__plus__, P.eL__minus__, P.aR ],
+              color = [ '1' ],
+              lorentz = [ L.RLV1 ],
+              couplings = {(0,0):C.GC_3})
+
+
+V_7 = Vertex(name = 'V_7',
+              particles = [ P.eL__plus__, P.eR__minus__, P.aL ],
+              color = [ '1' ],
+              lorentz = [ L.LRV1 ],
+              couplings = {(0,0):C.GC_3})
+
+V_8 = Vertex(name = 'V_8',
+              particles = [ P.eL__plus__, P.eR__minus__, P.aR ],
+              color = [ '1' ],
+              lorentz = [ L.LRV1 ],
+              couplings = {(0,0):C.GC_3})
+
+
+V_9 = Vertex(name = 'V_9',
+              particles = [ P.muR__plus__, P.muL__minus__, P.aL ],
+              color = [ '1' ],
+              lorentz = [ L.RLV1 ],
+              couplings = {(0,0):C.GC_3})
+
+V_10 = Vertex(name = 'V_10',
+              particles = [ P.muR__plus__, P.muL__minus__, P.aR ],
+              color = [ '1' ],
+              lorentz = [ L.RLV1 ],
+              couplings = {(0,0):C.GC_3})
+
+
+V11 = Vertex(name = 'V_11',
+              particles = [ P.muL__plus__, P.muR__minus__, P.aL ],
+              color = [ '1' ],
+              lorentz = [ L.LRV1 ],
+              couplings = {(0,0):C.GC_3})
+
+V_12 = Vertex(name = 'V_12',
+              particles = [ P.muL__plus__, P.muR__minus__, P.aR ],
               color = [ '1' ],
               lorentz = [ L.LRV1 ],
               couplings = {(0,0):C.GC_3})

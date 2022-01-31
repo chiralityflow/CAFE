@@ -688,7 +688,8 @@ class HelasWavefunction(base_objects.PhysicsObject):
                 # Set fermion flow state. Initial particle and final
                 # antiparticle are incoming, and vice versa for
                 # outgoing
-                if self.is_fermion() and not self.is_chiral:
+                # if self.is_fermion() and not self.is_chiral:
+                if self.is_fermion():
                     if leg.get('polarization'):
                         pol = list(leg.get('polarization'))
                         self.set('polarization', pol) 
@@ -3548,14 +3549,14 @@ class HelasMatrixElement(base_objects.PhysicsObject):
 
         return vert_to_id_dict
 
-    # # AL: New function to get names of particles in vertex from pdg_codes in vertex
+    # AL: New function to reset the vertex id if LL or RR vertex
     def set_new_vertex_id(self, vertex, pdg_codes, vert_id_to_pdgs_dict):
-        """A function to return the vertex idthe pdg_codes"""
-         # First sort the ids (fermions before boson in QED)
-        # TODO: Update this if we have e.g. W- with pdg_code < pdg_code(fermions)
+        """A function to update the vertex id if chiral LL or RR vertex"""
+        # First sort the ids (fermions before boson in QED)
+        # TODO: Update this when we have new pdg_codes convention with e.g. left < right
         pdg_codes.sort()
         
-        # If not all-outgoing, then we have LL or RR vertex
+        # If not all-outgoing, then we have an LL or RR vertex
         if not pdg_codes[0]*pdg_codes[1] < 0:
             # change to all outgoing particles
             pdg_codes[0] = -pdg_codes[0]
@@ -3564,7 +3565,6 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             vertex.set('id', list(vert_id_to_pdgs_dict.keys())\
                 [list(vert_id_to_pdgs_dict.values()).index(pdg_codes)])
         
-
         return vertex
 
     # AL: New function to add LL and RR vertices to model after diagrams already generated
