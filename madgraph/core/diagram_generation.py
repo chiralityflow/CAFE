@@ -670,6 +670,15 @@ class Amplitude(base_objects.PhysicsObject):
                              model.get('ref_dict_to1').keys()])
 
 
+
+        # AL: get reference momenta so we can remove diagrams which disappear after gauge choice
+        # misc.sprint(leglist)
+        # ref_momenta = self.get_ref_momenta(leglist)
+        # misc.sprint(ref_momenta)
+        # AL: new bool to say if first iteration of algorithm
+        is_first_it = True
+
+
         # Reduce the leg list and return the corresponding
         # list of vertices
 
@@ -690,6 +699,8 @@ class Amplitude(base_objects.PhysicsObject):
             reduced_leglist = self.reduce_leglist(leglist,
                                                   max_multi_to1,
                                                   ref_dict_to0,
+                                                #   ref_momenta,
+                                                  is_first_it,
                                                   is_decay_proc,
                                                   process.get('orders'))
         else:
@@ -699,6 +710,7 @@ class Amplitude(base_objects.PhysicsObject):
             # AL: delete old left/left or right/right fermions from dict
             # AL: TODO: Update this to write a function which automatically finds 
             # all chiral particles and changes the ref_dict_to0 for them
+            # AL: TODO: make this only occur if it's chirality flow? Or will this not affect normal madgraph?
             ref_dict_to0.pop((90001,-90001),None)
             ref_dict_to0[(90001,-90003)] = [0]
             ref_dict_to0.pop((-90001,90001),None)
@@ -716,13 +728,15 @@ class Amplitude(base_objects.PhysicsObject):
             ref_dict_to0.pop((-90007,90007),None)
             ref_dict_to0[(-90007,90005)] = [0]
 
-
             reduced_leglist = self.reduce_leglist(leglist,
                                                   max_multi_to1,
                                                 #   model.get('ref_dict_to0'),
                                                   ref_dict_to0,
+                                                  is_first_it,
+                                                #   ref_momenta,
                                                   is_decay_proc,
                                                   process.get('orders'))
+
         #In LoopAmplitude the function below is overloaded such that it
         #converts back all DGLoopLegs to Legs. In the default tree-level
         #diagram generation, this does nothing.
@@ -985,7 +999,56 @@ class Amplitude(base_objects.PhysicsObject):
         return base_objects.LegList(\
                 [ copy.copy(leg) for leg in legs ])
 
+    # AL: new function to get combinations of particles which will vanish
+    def get_vanishing_combs(self,ext_legs):
+        """Function which gets combinations of chiral photons and chiral 
+        fermions which will vanish after our standardised choice of gauge reference momentum
+        (standard choice is first appearing (anti)fermion of opposite chirality to the gauge boson)"""
+
+        # return list of particle numbers (return -1 if not boson)
+        vanishing_combs = []
+
+        # # First get all legs
+        # legs = process.get('legs')
+
+        # find first left (anti)fermion and first right (anti)fermion
+        # TODO: update this when updating pdg conventions!
+        found_left_ferm = False
+        found_right_ferm = False
+        for leg in ext_legs:
+            if abs(leg.get('id')) in [90001, 90005] and not found_left_ferm:
+                left_ferm = leg
+                found_left_ferm = True
+        
+            elif abs(leg.get('id')) in [90003, 90007] and not found_right_ferm:
+                right_ferm = leg
+                found_right_ferm = True
+            elif found_right_ferm and found_left_ferm:
+                break
+        
+        # find photons and update its reference momenta
+        for leg in ext_legs:
+            # if left photon, append right (anti)fermion
+            if leg.get('id') == 90023:
+                # ensure order is order of particle number
+                if leg.get('number') < right_ferm.get('number'):
+                    vanishing_combs.append((leg, right_ferm))
+                else:
+                    vanishing_combs.append((right_ferm, leg))
+            # if right photon, append left (anti)fermion
+            elif leg.get('id') == 90024:
+                if leg.get('number') < left_ferm.get('number'):
+                    vanishing_combs.append((leg, left_ferm))
+                else:
+                    vanishing_combs.append((left_ferm, leg))
+
+        # now order the combinations in order of particle number
+        
+            
+        return vanishing_combs
+
     def reduce_leglist(self, curr_leglist, max_multi_to1, ref_dict_to0,
+                       is_first_it, 
                        is_decay_proc = False, coupling_orders = None):
         """Recursive function to reduce N LegList to N-1
            For algorithm, see doc for generate_diagrams.
@@ -1004,18 +1067,21 @@ class Amplitude(base_objects.PhysicsObject):
         model = self.get('process').get('model')
         ref_dict_to1 = self.get('process').get('model').get('ref_dict_to1')
 
+        ext_legs = self.get('process').get('legs')
 
         # If all legs can be combined in one single vertex, add this
         # vertex to res and continue.
         # Special treatment for decay chain legs
 
+        # AL: TODO: put is_first_it here in case of e.g. 4-gluon amplitude
+        
         if curr_leglist.can_combine_to_0(ref_dict_to0, is_decay_proc):
             # Extract the interaction id associated to the vertex 
             
             vertex_ids = self.get_combined_vertices(curr_leglist,
                        copy.copy(ref_dict_to0[tuple(sorted([leg.get('id') for \
                                                        leg in curr_leglist]))]))
-
+                                                    
             final_vertices = [base_objects.Vertex({'legs':curr_leglist,
                                                    'id':vertex_id}) for \
                               vertex_id in vertex_ids]
@@ -1033,16 +1099,35 @@ class Amplitude(base_objects.PhysicsObject):
                 return None
 
         # Create a list of all valid combinations of legs
-        comb_lists = self.combine_legs(curr_leglist,
-                                       ref_dict_to1, max_multi_to1)
-        # misc.sprint(comb_lists)
+        comb_lists = self.combine_legs(curr_leglist, ref_dict_to1, 
+                                    max_multi_to1)
+
+
+        # AL: now remove from comb_lists those processes which vanish due to ref momentum
+        vanishing_combs = self.get_vanishing_combs(ext_legs)
+        if (is_first_it): 
+
+            # AL: temporary switch to turn off removal of vanishing combinations
+            remove_combs = True
+
+            # AL: remove combinations which vanish
+            if remove_combs:
+                for van_comb in vanishing_combs:
+                    for icomb, comb_list in enumerate(comb_lists):
+                        for comb in comb_list:
+                            if van_comb == comb:
+                                del comb_lists[icomb]
+
+        # AL: no longer 1st iteration (either wasn't anyway, 
+        # or we have now combined particles the first time in comb_lists)
+        is_first_it = False
+
         # Create a list of leglists/vertices by merging combinations
         leg_vertex_list = self.merge_comb_legs(comb_lists, ref_dict_to1)
-        # misc.sprint(leg_vertex_list)
 
+        res_length = len(res)
         # Consider all the pairs
         for leg_vertex_tuple in leg_vertex_list:
-            # misc.sprint(leg_vertex_tuple)
 
             # Remove forbidden particles
             if self.get('process').get('forbidden_particles') and \
@@ -1065,10 +1150,13 @@ class Amplitude(base_objects.PhysicsObject):
             reduced_diagram = self.reduce_leglist(leg_vertex_tuple[0],
                                                   max_multi_to1,
                                                   ref_dict_to0,
+                                                  is_first_it,
                                                   is_decay_proc,
                                                   new_coupling_orders)
+            
             # If there is a reduced diagram
             if reduced_diagram:
+                misc.sprint(reduced_diagram)
                 vertex_list_list = [list(leg_vertex_tuple[1])]
                 vertex_list_list.append(reduced_diagram)
                 expanded_list = expand_list_list(vertex_list_list)
@@ -1118,6 +1206,8 @@ class Amplitude(base_objects.PhysicsObject):
                 
         return present_couplings
 
+
+    
     def combine_legs(self, list_legs, ref_dict_to1, max_multi_to1):
         """Recursive function. Take a list of legs as an input, with
         the reference dictionary n-1->1, and output a list of list of
@@ -1159,7 +1249,6 @@ class Amplitude(base_objects.PhysicsObject):
 
                 # Check if the combination is valid
                 if base_objects.LegList(comb).can_combine_to_1(ref_dict_to1):
-                    # misc.sprint(comb)
 
                     # Identify the rest, create a list [comb,rest] and
                     # add it to res
@@ -1188,6 +1277,8 @@ class Amplitude(base_objects.PhysicsObject):
                     for item in self.combine_legs(res_list2,
                                                   ref_dict_to1,
                                                   max_multi_to1):
+                                                #   ,
+                                                #   ref_momenta):
                         final_res_list = copy.copy(res_list)
                         final_res_list.extend(item)
                         res.append(final_res_list)

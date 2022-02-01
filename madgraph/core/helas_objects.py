@@ -3743,10 +3743,10 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         
         # find photons and update its reference momenta
         for leg in legs:
-            # if left photon, append right fermion
+            # if left photon, append right (anti)fermion
             if leg.get('id') == 90023:
                 ref_moms.append(right_ferm.get('number'))
-            # if right photon, append left fermion
+            # if right photon, append left (anti)fermion
             elif leg.get('id') == 90024:
                 ref_moms.append(left_ferm.get('number'))
             # else append -1

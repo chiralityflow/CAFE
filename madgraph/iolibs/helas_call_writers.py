@@ -297,9 +297,11 @@ class HelasCallWriter(base_objects.PhysicsObject):
         instead of IXXXXX or OXXXXX, and a chiral boson as VLXXXX or VRXXXX instead
         of VXXXXX"""    
         
-        # AL: first get pdg_code. If left- or right-particle, update call 
+        # AL: first get pdg_code. If left- or right-particle, 
+        # ref momentum for gauge boson, then update call 
         pdg_code = wavefunction.get('particle').get('pdg_code')
         nsv_new = wavefunction.get('leg_state')
+        ref_mom = wavefunction.get('ref_mom')
         
         # AL: update LH spinor wavefunction
         if pdg_code in [90001, 90005]:
@@ -331,11 +333,25 @@ class HelasCallWriter(base_objects.PhysicsObject):
         
         # AL: update LH vector wavefunction
         elif pdg_code == 90023:
+            # update name
             call = call[:6] + 'L' + call[7:]
+
+            # insert reference momentum as argument
+            call_lhs = ','.join(call.split(',')[:-2])
+            call_rhs = ','.join(call.split(',')[-2:])
+            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
 
         # AL: update RH vector wavefunction
         elif pdg_code == 90024:
+            # update name
             call = call[:6] + 'R' + call[7:]
+
+            # insert reference momentum as argument
+            call_lhs = ','.join(call.split(',')[:-2])
+            call_rhs = ','.join(call.split(',')[-2:])
+            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
+
+        misc.sprint(call)
 
         return call
 

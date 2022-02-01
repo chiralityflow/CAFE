@@ -172,7 +172,7 @@ C wavefunctions
 C TODO: Write this wavefunction properly!!!!!!!!!!!
 C############################################
 
-      subroutine rxxxxx(p, fmass, nhel, nsf ,fi)
+      subroutine rxxxxx(p, fmass, nhel, nsf , fi)
 c
 c This subroutine computes a fermion wavefunction with the flowing-IN
 c fermion number.
@@ -318,7 +318,7 @@ c
       return
       end
 
-      subroutine vlxxxx(p,vmass,nhel,nsv , vc)
+      subroutine vlxxxx(p,vmass,nhel,nsv,r,vc)
 c
 c This subroutine computes a left-chiral VECTOR wavefunction.
 c
@@ -328,13 +328,14 @@ c       real    vmass          : mass          of vector boson
 c       integer nhel = -1, 0, 1: helicity      of vector boson
 c                                (0 is forbidden if vmass=0.0)
 c       integer nsv  = -1 or 1 : +1 for final, -1 for initial
+c       real    r(0:3)         : four-momentum of reference vector
 c
 c output:
 c       complex vc(6)          : vector wavefunction       epsilon^mu(v)
 c
       implicit none
       double complex vc(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj
-      double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,pnorm,rnorm,prnorm,prprod
+      double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,pnorm,rnorm,prnorm,prprod,r(0:3)
       integer nhel,nsv,nsvahl,nsvhel
       double precision refmom(4)
 
@@ -496,7 +497,7 @@ c
       end
 
 
-      subroutine vrxxxx(p,vmass,nhel,nsv , vc)
+      subroutine vrxxxx(p,vmass,nhel,nsv,r,vc)
 c
 c This subroutine computes a right-chiral VECTOR wavefunction.
 c
@@ -506,13 +507,14 @@ c       real    vmass          : mass          of vector boson
 c       integer nhel = -1, 0, 1: helicity      of vector boson
 c                                (0 is forbidden if vmass=0.0)
 c       integer nsv  = -1 or 1 : +1 for final, -1 for initial
+c       real    r(0:3)         : four-momentum of reference vector
 c
 c output:
 c       complex vc(6)          : vector wavefunction       epsilon^mu(v)
 c
       implicit none
       double complex vc(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj
-      double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,pnorm,rnorm,prnorm,prprod
+      double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,pnorm,rnorm,prnorm,prprod,r(0:3)
       integer nhel,nsv,nsvahl,nsvhel
       double precision refmom(4)
 
