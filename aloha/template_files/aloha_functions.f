@@ -24,7 +24,7 @@ c input:
 c       real    p(0:3)         : four-momentum of fermion
 c       real    fmass          : mass          of fermion
 c       integer nhel = -1 or 1 : helicity      of fermion
-c       integer nsf  = -1 or 1 : +1 for outgoing, -1 incoming
+c       integer nsf  = -1 or 1 : +1 for final state, -1 initial state
 c
 c output:
 c       complex lf(6)          : left-handed fermion wavefunction               [lf|
@@ -122,7 +122,7 @@ c input:
 c       real    p(0:3)         : four-momentum of fermion
 c       real    fmass          : mass          of fermion
 c       integer nhel = -1 or 1 : helicity      of fermion
-c       integer nsf  = -1 or 1 : +1 outgoing, -1 incoming
+c       integer nsf  = -1 or 1 : +1 final state, -1 initial state
 c
 c output:
 c       complex rf(6)          : fermion wavefunction               |rf>
@@ -1141,8 +1141,8 @@ c
          pplus = p(0) + p(3)
          ptrans = dcmplx(p(1),p(2))
          ptransconj = dcmplx(p(1),-1*p(2))
-         pnorm = sqrt(pplus)
-         rnorm = sqrt(rplus)
+         pnorm = sqrt(abs(pplus))
+         rnorm = sqrt(abs(rplus))
          prnorm = pnorm*rnorm
 c
 c         vc(3) = dcmplx( rZero )
@@ -1157,17 +1157,17 @@ c            vc(5) = dcmplx( rZero , nsv*sign(sqh,p(3)) )
 c         endif
 c
          if ( nsvhel.eq.rOne ) then
-            prprod = (rtrans*pplus - ptrans*rplus)
-            vc(3) = ptransconj/(prprod)
-            vc(4) = -1*pplus/(prprod)
-            vc(5) = rtrans
-            vc(6) = -1*rplus
+            prprod = (rtrans*pplus - rplus*ptrans)/prnorm
+            vc(3) = ptransconj/(prprod*pnorm)
+            vc(4) = -1*pplus/(prprod*pnorm)
+            vc(5) = rtrans/(rnorm)
+            vc(6) = -1*rplus/(rnorm)
          else
-            prprod = (pplus*rtransconj - rplus*ptransconj)
-            vc(3) = rtransconj/(prprod)
-            vc(4) = -1*rplus/(prprod)
-            vc(5) = ptrans
-            vc(6) = -1*pplus
+            prprod = (pplus*rtransconj - ptransconj*rplus)/prnorm
+            vc(3) = rtransconj/(prprod*rnorm)
+            vc(4) = -1*rplus/(prprod*rnorm)
+            vc(5) = ptrans/(pnorm)
+            vc(6) = -1*pplus/(pnorm)
          endif
 
          
