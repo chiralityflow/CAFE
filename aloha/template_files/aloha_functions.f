@@ -1014,58 +1014,13 @@ c
       double complex vc(6),pplus,ptrans,ptransconj,rplus,rtrans
       double complex rtransconj
       double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh
-      double precision pnorm,rnorm,prnorm,prprod
+      double precision pnorm,rnorm,prnorm,prprod, rpprod
       integer nhel,nsv,nsvahl,nsvhel
       double precision refmom(0:3)
 
       double precision rZero, rHalf, rOne, rTwo
       parameter( rZero = 0.0d0, rHalf = 0.5d0 )
       parameter( rOne = 1.0d0, rTwo = 2.0d0 )
-
-c#ifdef HELAS_CHECK
-c      double precision p2
-c      double precision epsi
-c      parameter( epsi = 2.0d-5 )
-c      integer stdo
-c      parameter( stdo = 6 )
-c#endif
-c
-c#ifdef HELAS_CHECK
-c      pp = sqrt(p(1)**2+p(2)**2+p(3)**2)
-c      if ( abs(p(0))+pp.eq.rZero ) then
-c         write(stdo,*)
-c     &        ' helas-error : p(0:3) in vxxxxx is zero momentum'
-c      endif
-c      if ( p(0).le.rZero ) then
-c         write(stdo,*)
-c     &        ' helas-error : p(0:3) in vxxxxx has non-positive energy'
-c         write(stdo,*)
-c     &        '             : p(0) = ',p(0)
-c      endif
-c      p2 = (p(0)+pp)*(p(0)-pp)
-c      if ( abs(p2-vmass**2).gt.p(0)**2*2.e-5 ) then
-c         write(stdo,*)
-c     &        ' helas-error : p(0:3) in vxxxxx has inappropriate mass'
-c         write(stdo,*)
-c     &        '             : p**2 = ',p2,' : vmass**2 = ',vmass**2
-c      endif
-c      if ( vmass.ne.rZero ) then
-c         if ( abs(nhel).gt.1 ) then
-c            write(stdo,*) ' helas-error : nhel in vxxxxx is not -1,0,1'
-c            write(stdo,*) '             : nhel = ',nhel
-c         endif
-c      else
-c         if ( abs(nhel).ne.1 ) then
-c            write(stdo,*) ' helas-error : nhel in vxxxxx is not -1,1'
-c            write(stdo,*) '             : nhel = ',nhel
-c         endif
-c      endif
-c      if ( abs(nsv).ne.1 ) then
-c         write(stdo,*) ' helas-error : nsv in vmxxxx is not -1,1'
-c         write(stdo,*) '             : nsv = ',nsv
-c      endif
-c#endif
-
       sqh = dsqrt(rHalf)
       hel = dble(nhel)
       nsvahl = nsv*dabs(hel)
@@ -1074,26 +1029,10 @@ c#endif
       pp = min(p(0),dsqrt(pt2+p(3)**2))
       pt = min(pp,dsqrt(pt2))
 
+c AL: vc(1,2) look correct 220201
       vc(1) = dcmplx(p(0),p(3))*nsv
       vc(2) = dcmplx(p(1),p(2))*nsv
 
-c#ifdef HELAS_CHECK
-c nhel=4 option for scalar polarization
-c      if( nhel.eq.4 ) then
-c         if( vmass.eq.rZero ) then
-c            vc(1) = rOne
-c            vc(2) = p(1)/p(0)
-c            vc(3) = p(2)/p(0)
-c            vc(4) = p(3)/p(0)
-c         else
-c            vc(1) = p(0)/vmass
-c            vc(2) = p(1)/vmass
-c            vc(3) = p(2)/vmass
-c            vc(4) = p(3)/vmass
-c         endif
-c         return
-c      endif
-c#endif
 
       if ( vmass.ne.rZero ) then
 
@@ -1126,46 +1065,51 @@ c#endif
 
       else
 
-c
-c         pp = p(0)
-c         pt = sqrt(p(1)**2+p(2)**2)
-c
 
+c AL: refmom = massless
          refmom(0) = 13*rOne
          refmom(1) = 12*rOne
          refmom(2) = 4*rOne
          refmom(3) = 3*rOne
-         rplus = refmom(0) + refmom(3)
-         rtrans = dcmplx(refmom(1),refmom(2))
-         rtransconj = dcmplx(refmom(1),-1*refmom(2))
+
+c rplus = r^0 + r^3
+         rplus = refmom(0) + refmom(3) 
          pplus = p(0) + p(3)
+c rtrans = r^1 + i*r^2         
+         rtrans = dcmplx(refmom(1),refmom(2))
          ptrans = dcmplx(p(1),p(2))
+c rtransconj = r^1 -i*r^2
+         rtransconj = dcmplx(refmom(1),-1*refmom(2))
          ptransconj = dcmplx(p(1),-1*p(2))
+
+c pnorm = sqrt(|p^0 + p^3|) = sqrt(|p^+|)
          pnorm = sqrt(abs(pplus))
          rnorm = sqrt(abs(rplus))
+c prnorm = sqrt(|p^+||r^+|)
          prnorm = pnorm*rnorm
-c
-c         vc(3) = dcmplx( rZero )
-c         vc(6) = dcmplx( hel*pt/pp*sqh )
-c         if ( pt.ne.rZero ) then
-c            pzpt = p(3)/(pp*pt)*sqh*hel
-c            vc(4) = dcmplx( -p(1)*pzpt , -nsv*p(2)/pt*sqh )
-c            vc(5) = dcmplx( -p(2)*pzpt ,  nsv*p(1)/pt*sqh )
-c         else
-c            vc(4) = dcmplx( -hel*sqh )
-c            vc(5) = dcmplx( rZero , nsv*sign(sqh,p(3)) )
-c         endif
-c
+
+c nsvhel == 1 is left chiral
+c |p]<r|/<rp>
+c AL: TODO: update for when p^+ or r^+ = 0!!!!
          if ( nsvhel.eq.rOne ) then
-            prprod = (rtrans*pplus - rplus*ptrans)/prnorm
-            vc(3) = ptransconj/(prprod*pnorm)
-            vc(4) = -1*pplus/(prprod*pnorm)
+c prprod = <rp> look ok
+            rpprod = (rtrans*pplus - rplus*ptrans)/prnorm
+c vc(3,4) = |p]/<rp> looks good
+            vc(3) = ptransconj/(rpprod*pnorm)
+            vc(4) = -1*pplus/(rpprod*pnorm)
+c vc(5,6) = <r| looks good
             vc(5) = rtrans/(rnorm)
             vc(6) = -1*rplus/(rnorm)
+
+c else nsvhel == -1 is right chiral         
+c |r]<p|/[pr]
          else
+c prprod = [pr] looks good
             prprod = (pplus*rtransconj - ptransconj*rplus)/prnorm
+c vc(3,4) = |r]/[pr] looks good
             vc(3) = rtransconj/(prprod*rnorm)
             vc(4) = -1*rplus/(prprod*rnorm)
+c vc(5,6) = <r| looks good
             vc(5) = ptrans/(pnorm)
             vc(6) = -1*pplus/(pnorm)
          endif
