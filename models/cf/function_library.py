@@ -30,10 +30,6 @@ im = Function(name = 'im',
               arguments = ('z',),
               expression = 'z.imag')
 
-abs = Function(name = 'im',
-               arguments = ('x',),
-               expression = 'x.abs')
-
 
 # New functions (trigonometric)
 

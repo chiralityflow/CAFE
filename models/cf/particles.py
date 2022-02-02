@@ -13,7 +13,6 @@
 from __future__ import division
 from object_library import all_particles, Particle
 import parameters as Param
-import propagators
 
 # AL: Photons first
 

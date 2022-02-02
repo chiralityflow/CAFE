@@ -970,6 +970,12 @@ class HelasWavefunction(base_objects.PhysicsObject):
         return abs(self.get('pdg_code')) < 90010 and \
              abs(self.get('pdg_code')) > 90000
 
+    # AL: new function to check if particle is a chiral fermion
+    # AL TODO: update how this is done after changing pdg_ids
+    def is_chiral(self):
+        return abs(self.get('pdg_code')) < 90010 and \
+             abs(self.get('pdg_code')) > 90000
+
     def is_majorana(self):
         return self.is_fermion() and self.get('self_antipart')
 

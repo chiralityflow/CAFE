@@ -1510,8 +1510,7 @@ def sprint(*args, **opt):
     return
 
 def get_symbols(words,symbols):
-    """Finds the positions where a substring appears in a string"""
-    start_pos = 0
+    """ ZW: Finds the positions where a substring appears in a string"""
     pos_list = []
     for i in range(len(words)):
         if words[i] == symbols:
@@ -1519,10 +1518,10 @@ def get_symbols(words,symbols):
     return pos_list
 
 def get_particles(interaction):
-    "Determines which particles are included in a given interaction, using the get_process_info_lines() convention"
+    "ZW: Determines which particles are included in a given interaction, using the get_process_info_lines() convention"
     linebreaks = get_symbols(interaction,'\n')
-    # We only take the first interaction in a given list of interactions. 
-    # Need to distinguish the formatting if there are several interactions or only one
+    # ZW: We only take the first interaction in a given list of interactions. 
+    # ZW: Need to distinguish the formatting if there are several interactions or only one
     if len(linebreaks) == 0:
         r = interaction.find('WEIGHTED')
         first_interac = interaction[11:r]
@@ -1538,407 +1537,279 @@ def get_particles(interaction):
             k = i+1
     return(part_list)
 
-def get_particles_outgoing(interaction):
-    "Determines which particles are included in a given interaction, using the get_process_info_lines() convention"
-    "All particles are treated as outgoing"
-    linebreaks = get_symbols(interaction,'\n')
-    # We only take the first interaction in a given list of interactions. 
-    # Need to distinguish the formatting if there are several interactions or only one
-    if len(linebreaks) == 0:
-        r = interaction.find('WEIGHTED')
-        first_interac = interaction[11:r]
-    else:
-        first_interac = interaction[11:linebreaks[0]]
-    interac_break = first_interac.find('>')
-    ingoing_parts = first_interac[:interac_break]
-    outgoing_parts = first_interac[interac_break+2:]
-    ingoing_part_list = []
-    outgoing_part_list = []
-    k = 0
-    for i in range(len(ingoing_parts)):
-        if (ingoing_parts[i] == ' '):
-            ingoing_part_list.append(ingoing_parts[k:i])
-            k = i+1
-    for i in range(len(ingoing_part_list)):
-        if (len(ingoing_part_list[i]) > 2):
-            if ingoing_part_list[i][-1] == '+':
-                ingoing_part_list[i] = ingoing_part_list[i][:-1] + '-'
-            elif ingoing_part_list[i][-1] == '-':
-                ingoing_part_list[i] = ingoing_part_list[i][:-1] + '+'
-            if ingoing_part_list[i][-2] == 'l':
-                ingoing_part_list[i] = ingoing_part_list[i][:-2] + 'r' + ingoing_part_list[i][-1:]
-            elif ingoing_part_list[i][-2] == 'r':
-                ingoing_part_list[i] = ingoing_part_list[i][:-2] + 'l' + ingoing_part_list[i][-1:]
-    k = 0
-    for i in range(len(outgoing_parts)):
-        if (outgoing_parts[i] == ' '):
-            outgoing_part_list.append(outgoing_parts[k:i])
-            k = i+1
-    return(ingoing_part_list + outgoing_part_list)
+def left_prod(p1,p2):
+    "ZW: Writes out the explicit left inner product of particles p1 and p2"
+    "and returns the inner product as a string in the HELAS Fortran convention"
+    "Function assumed that the input spinors include one bra and one ket"
+    inprod = '({}(3)*{}(3) + {}(4)*{}(4))'.format(p1,p2,p1,p2)
+    return inprod
 
-def get_vertices(interaction, matrix_element):
-    "Determines which vertices are included in a given interaction, using the helas_calls convention"
-    helas = interaction.copy()
-    (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
-    vertex_info = []
-    vertex_pos = []
-    for i in range(nexternal,len(helas)):
-        if (helas[i][0] != '#'):
-            vertex_info.append(helas[i][5:])
-            vertex_pos.append(i)
+def right_prod(p1,p2):
+    "ZW: Writes out the explicit right inner product of particles p1 and p2"
+    "and returns the inner product as a string in the HELAS Fortran convention"
+    "Function assumed that the input spinors include one bra and one ket"
+    inprod = '({}(5)*{}(5) + {}(6)*{}(6))'.format(p1,p2,p1,p2)
+    return inprod
 
-    return [vertex_info,vertex_pos]
+def levi_left_prod(p1,p2):
+    "ZW: Writes out the explicit left inner product of particles p1 and p2"
+    "multiplied by the upper index Levi-Civita tensor acting on p1"
+    # ZW: Unused, but created in case it ever comes up
+    inprod = '({}(4)*{}(3) - {}(3)*{}(4))'.format(p1,p2,p1,p2)
+    return inprod
 
-def find_vertex(text):
-    "Determines the current vertex in an aloha output file"
-    vertex = text
-    spaces = get_symbols(vertex, ' ')
-    parentheses = get_symbols(vertex, '(')
-    vertex = vertex[spaces[0]+1:parentheses[0]]
-    return vertex
+def levi_right_prod(p1,p2):
+    "ZW: Writes out the explicit right inner product of particles p1 and p2"
+    "multiplied by the upper index Levi-Civita tensor acting on p1"
+    inprod = '({}(6)*{}(5) - {}(5)*{}(6))'.format(p1,p2,p1,p2)
+    # ZW: Unused, but created in case it ever comes up
+    return inprod
+
+def pbar_ket(bra,p):
+    "ZW: writes out the explicit multiplication of"
+    "a right-handed bra with the p-slash matrix in the HELAS Fortrant convention"
+    "returns a two-component list, corresponding to the output left-handed spinor"
+    comp1 = '({}(5)*({}(0) + {}(3)) + {}(6)*({}(1) + CI*{}(2)))'.format(bra,p,p,bra,p,p)
+    comp2 = '({}(5)*({}(1) - CI*{}(2)) + {}(6)*({}(0) - {}(3)))'.format(bra,p,p,bra,p,p)
+    return [comp1,comp2]
+
+def pbar_bra(ket,p):
+    "ZW: writes out the explicit multiplication of"
+    "a left-handed ket with the p-slash matrix in the HELAS Fortrant convention"
+    "returns a two-component list, corresponding to the output right-handed spinor"
+    comp1 = '(({}(0) + {}(3))*{}(3) + ({}(1) - CI*{}(2))*{}(4))'.format(p,p,ket,p,p,ket)
+    comp2 = '(({}(1) + CI*{}(2))*{}(3) + ({}(0) - {}(3))*{}(4))'.format(p,p,ket,p,p,ket)
+    return [comp1,comp2]
 
 def vertex_replacer(text, vertex):
-    "Function which takes the text of a Fortran vertex file as well as the vertex name as an input"
+    "ZW: Function which takes the text of a Fortran vertex file as well as the vertex name as an input"
     "and outputs the corresponding chiral vertex Fortran file"
     text_copy = text
     linebreaks = get_symbols(text_copy, '\n')
-    if (vertex == 'FFV7_0'):
+    # if (vertex == 'FFV7_0'):
+    #     equality = get_symbols(text_copy, '=')
+    #     p = text_copy[equality[-2]-2]
+    #     FFV7_0_replace = ' TMP{} = {}*{}\n'.format(p,left_prod('F1','V3'),right_prod('V3','F2'))
+    #     text_copy = text_copy[:equality[-2]-6] + FFV7_0_replace + text_copy[linebreaks[-5]+1:]
+    # if (vertex == 'FFV8_0'):
+    #     equality = get_symbols(text_copy, '=')
+    #     p = text_copy[equality[-2]-2]
+    #     FFV8_0_replace =  ' TMP{} = {}*{}\n'.format(p,left_prod('F1','V3'),right_prod('V3','F2'))
+    #     equality = get_symbols(text_copy, '=')
+    #     text_copy = text_copy[:equality[-2]-6] + FFV8_0_replace + text_copy[linebreaks[-5]+1:]
+    # if (vertex == 'FFV7P0_3'):
+    #     FFV7P0_3_replace = '      V3(3) = 2*DENOM*F1(4)\n'\
+    #         + '      V3(4) = -2*DENOM*F1(3)\n'\
+    #         + '      V3(5) = F2(6)\n'\
+    #         + '      V3(6) = -1*F2(5)\n'
+    #     text_copy = text_copy[:linebreaks[-8]+1] + FFV7P0_3_replace + text_copy[linebreaks[-4]+1:]
+    # if (vertex == 'FFV8P0_3'):
+    #     FFV8P0_3_replace = '      V3(3) = 2*DENOM*F1(4)\n'\
+    #         + '      V3(4) = -2*DENOM*F1(3)\n'\
+    #         + '      V3(5) = F2(6)\n'\
+    #         + '      V3(6) = -1*F2(5)\n'
+    #     text_copy = text_copy[:linebreaks[-8]+1] + FFV8P0_3_replace + text_copy[linebreaks[-4]+1:]
+    if (vertex == 'LRV1_0'):
         equality = get_symbols(text_copy, '=')
         p = text_copy[equality[-2]-2]
-        FFV7_0_replace = ' TMP' + p + ' = (F1(3)*V3(3) + F1(4)*V3(4))*(F2(5)*V3(5) + F2(6)*V3(6))\n'
-        text_copy = text_copy[:equality[-2]-6] + FFV7_0_replace + text_copy[linebreaks[-5]+1:]
-    if (vertex == 'FFV8_0'):
+        LRV1_0_replace = ' TMP{} = -CI*{}*{}\n'.format(p,left_prod('F1','V3'),right_prod('V3','F2'))
+        text_copy = text_copy[:equality[-2]-6] + LRV1_0_replace + text_copy[linebreaks[-5]+1:]
+    if (vertex == 'RLV1_0'):
         equality = get_symbols(text_copy, '=')
         p = text_copy[equality[-2]-2]
-        FFV8_0_replace =  ' TMP' + p + ' = (F1(3)*V3(3) + F1(4)*V3(4))*(F2(5)*V3(5) + F2(6)*V3(6))\n'
+        RLV1_0_replace =  ' TMP{} = -CI*{}*{}\n'.format(p,left_prod('F2','V3'),right_prod('V3','F1'))
         equality = get_symbols(text_copy, '=')
-        text_copy = text_copy[:equality[-2]-6] + FFV8_0_replace + text_copy[linebreaks[-5]+1:]
-    if (vertex == 'FFV7P0_3'):
-        FFV7P0_3_replace = '      V3(3)= 2*DENOM*F1(4)\n'\
-            + '      V3(4)= 2*DENOM*F1(3)\n'\
-            + '      V3(5)= F2(6)\n'\
-            + '      V3(6)= -1*F2(5)\n'
-        text_copy = text_copy[:linebreaks[-8]+1] + FFV7P0_3_replace + text_copy[linebreaks[-4]+1:]
-    if (vertex == 'FFV8P0_3'):
-        FFV8P0_3_replace = '      V3(3)= 2*DENOM*F1(4)\n'\
-            + '      V3(4)= -2*DENOM*F1(3)\n'\
-            + '      V3(5)= F2(6)\n'\
-            + '      V3(6)= -1*F2(5)\n'
-        text_copy = text_copy[:linebreaks[-8]+1] + FFV8P0_3_replace + text_copy[linebreaks[-4]+1:]
+        text_copy = text_copy[:equality[-2]-6] + RLV1_0_replace + text_copy[linebreaks[-5]+1:]
+    if (vertex == 'LRV1P0_3'):
+        LRV1P0_3_replace = '      V3(3) = 2*DENOM*F1(4)\n'\
+            + '      V3(4) = -2*DENOM*F1(3)\n'\
+            + '      V3(5) = F2(6)\n'\
+            + '      V3(6) = -1*F2(5)\n'
+        text_copy = text_copy[:linebreaks[-8]+1] + LRV1P0_3_replace + text_copy[linebreaks[-4]+1:]
+    if (vertex == 'RLV1P0_3'):
+        RLV1P0_3_replace = '      V3(3) = 2*DENOM*F2(4)\n'\
+            + '      V3(4) = -2*DENOM*F2(3)\n'\
+            + '      V3(5) = F1(6)\n'\
+            + '      V3(6) = -1*F1(5)\n'
+        text_copy = text_copy[:linebreaks[-8]+1] + RLV1P0_3_replace + text_copy[linebreaks[-4]+1:]
     # if (vertex == 'FFV7_1'):
+    #     spinor = pbar_left('V3','P1')
     #     FFV7_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
-    #         + '      PVEC = SQRT(P1(1)**2 + P1(2)**2 + P1(3)**2)\n'\
-    #         + '      PHAT(1) = -P1(1)/PVEC\n'\
-    #         + '      PHAT(2) = -P1(2)/PVEC\n'\
-    #         + '      PHAT(3) = -P1(3)/PVEC\n'\
-    #         + '      PTRANS = DCMPLX(PHAT(1),PHAT(2))\n'\
-    #         + '      PTRANSCONJ = DCMPLX(PHAT(1),-1*PHAT(2))\n'\
-    #         + '      FPREFAC = (P1(0) + PVEC)/(2*(1 + PHAT(3)))\n'\
-    #         + '      BPREFAC = (P1(0) - PVEC)/(2*(1 - PHAT(3)))\n'\
-    #         + '      if ( ( F2(5).eq.rZerComp ) .AND. ( F2(6).eq.rZerComp ) ) then\n'\
-    #         + '            INPROD = 2*(V3(3)*F2(3)+V3(4)*F2(4))\n'\
-    #         + '            FPROD = FPREFAC*(V3(5)*(1 + PHAT(3)) + V3(6)*PTRANS)\n'\
-    #         + '            BPROD = BPREFAC*(V3(5)*(1 - PHAT(3)) - V3(6)*PTRANS)\n'\
-    #         + '            F1(3) = DENOM*INPROD*(FPROD*(1 + PHAT(3)) + BPROD*(1 - PHAT(3)))\n'\
-    #         + '            F1(4) = DENOM*INPROD*(FPROD*PTRANSCONJ - BPROD*PTRANSCONJ)\n'\
-    #         + '            F1(5) = 0\n'\
-    #         + '            F1(6) = 0\n'\
-    #         + '      else\n'\
-    #         + '            INPROD = 2*(V3(5)*F2(5)+V3(6)*F2(6))\n'\
-    #         + '            FPROD = FPREFAC*(V3(3)*PTRANSCONJ - V3(4)*(1 + PHAT(3)))\n'\
-    #         + '            BPROD = BPREFAC*(-1*V3(3)*PTRANSCONJ - V3(4)*(1 - PHAT(3)))\n'\
-    #         + '            F1(3) = 0\n'\
-    #         + '            F1(4) = 0\n'\
-    #         + '            F1(5) = DENOM*INPROD*(FPROD*PTRANS - BPROD*PTRANS)\n'\
-    #         + '            F1(6) = DENOM*INPROD*(-1*FPROD*(1+PHAT(3)) - BPROD*(1 - PHAT(3)))\n'\
-    #         + '      endif\n'
-    #     text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n'\
-    #         + '      REAL*8 PVEC\n'\
-    #         + '      REAL*8 PHAT(3)\n'\
-    #         + '      COMPLEX*16 PTRANS\n'\
-    #         + '      COMPLEX*16 PTRANSCONJ\n'\
-    #         + '      COMPLEX*16 FPREFAC\n'\
-    #         + '      COMPLEX*16 BPREFAC\n'\
-    #         + '      COMPLEX*16 FPROD\n'\
-    #         + '      COMPLEX*16 BPROD\n'\
-    #         + '      double precision rZero\n'\
-    #         + '      double complex rZerComp\n'\
-    #         + '      parameter ( rZero = 0.0d0 )\n'\
-    #         + '      rZerComp = dcmplx ( rZero )\n' + text_copy[linebreaks[15]+1:]
+    #         + '      INPROD = {}\n'.format(right_prod('V3','F2'))\
+    #         + '      F1(3) = 0\n'\
+    #         + '      F1(4) = 0\n'\
+    #         + '      F1(5) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
+    #         + '      F1(6) = DENOM*CI*INPROD*{}\n'.format(spinor[1])
+    #     text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
     #     linebreaks = get_symbols(text_copy, '\n')
     #     text_copy = text_copy[:linebreaks[-18]+1] + FFV7_1_replace + text_copy[linebreaks[-4]+1:]
     # if (vertex == 'FFV7_2'):
+    #     spinor = pbar_right('V3','P2')
     #     FFV7_2_replace = '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
-    #         + '      PVEC = SQRT(P2(1)**2 + P2(2)**2 + P2(3)**2)\n'\
-    #         + '      PHAT(1) = -P2(1)/PVEC\n'\
-    #         + '      PHAT(2) = -P2(2)/PVEC\n'\
-    #         + '      PHAT(3) = -P2(3)/PVEC\n'\
-    #         + '      PTRANS = DCMPLX(PHAT(1),PHAT(2))\n'\
-    #         + '      PTRANSCONJ = DCMPLX(PHAT(1),-1*PHAT(2))\n'\
-    #         + '      FPREFAC = (P2(0) + PVEC)/(2*(1 + PHAT(3)))\n'\
-    #         + '      BPREFAC = (P2(0) - PVEC)/(2*(1 - PHAT(3)))\n'\
-    #         + '      if ( ( F1(5).eq.rZerComp ) .AND. ( F1(6).eq.rZerComp ) ) then\n'\
-    #         + '            INPROD = 2*(V3(3)*F1(3)+V3(4)*F1(4))\n'\
-    #         + '            FPROD = FPREFAC*(V3(5)*(1 + PHAT(3)) + V3(6)*PTRANS)\n'\
-    #         + '            BPROD = BPREFAC*(V3(5)*(1 - PHAT(3)) - V3(6)*PTRANS)\n'\
-    #         + '            F2(3) = DENOM*INPROD*(FPROD*(1 + PHAT(3)) + BPROD*(1 - PHAT(3)))\n'\
-    #         + '            F2(4) = DENOM*INPROD*(FPROD*PTRANSCONJ - BPROD*PTRANSCONJ)\n'\
-    #         + '            F2(5) = 0\n'\
-    #         + '            F2(6) = 0\n'\
-    #         + '      else\n'\
-    #         + '            INPROD = 2*(V3(5)*F1(5)+V3(6)*F1(6))\n'\
-    #         + '            FPROD = FPREFAC*(V3(3)*PTRANSCONJ - V3(4)*(1 + PHAT(3)))\n'\
-    #         + '            BPROD = BPREFAC*(-1*V3(3)*PTRANSCONJ - V3(4)*(1 - PHAT(3)))\n'\
-    #         + '            F2(3) = 0\n'\
-    #         + '            F2(4) = 0\n'\
-    #         + '            F2(5) = DENOM*INPROD*(FPROD*PTRANS - BPROD*PTRANS)\n'\
-    #         + '            F2(6) = DENOM*INPROD*(-1*FPROD*(1+PHAT(3)) - BPROD*(1 - PHAT(3)))\n'\
-    #         + '      endif\n'
-    #     text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n'\
-    #         + '      REAL*8 PVEC\n'\
-    #         + '      REAL*8 PHAT(3)\n'\
-    #         + '      COMPLEX*16 PTRANS\n'\
-    #         + '      COMPLEX*16 PTRANSCONJ\n'\
-    #         + '      COMPLEX*16 FPREFAC\n'\
-    #         + '      COMPLEX*16 BPREFAC\n'\
-    #         + '      COMPLEX*16 FPROD\n'\
-    #         + '      COMPLEX*16 BPROD\n'\
-    #         + '      double precision rZero\n'\
-    #         + '      double complex rZerComp\n'\
-    #         + '      parameter ( rZero = 0.0d0 )\n'\
-    #         + '      rZerComp = dcmplx ( rZero )\n' + text_copy[linebreaks[15]+1:]
+    #         + '      INPROD = {}\n'.format(left_prod('F1','V3'))\
+    #         + '      F2(3) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
+    #         + '      F2(4) = DENOM*CI*INPROD*{}\n'.format(spinor[1])\
+    #         + '      F2(5) = 0\n'\
+    #         + '      F2(6) = 0\n'
+    #     text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
     #     linebreaks = get_symbols(text_copy, '\n')
     #     text_copy = text_copy[:linebreaks[-19]+1] + FFV7_2_replace + text_copy[linebreaks[-4]+1:]
     # if (vertex == 'FFV8_1'): 
+    #     spinor = pbar_right('V3','P1')
     #     FFV8_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
-    #         + '      PVEC = SQRT(P1(1)**2 + P1(2)**2 + P1(3)**2)\n'\
-    #         + '      PHAT(1) = -P1(1)/PVEC\n'\
-    #         + '      PHAT(2) = -P1(2)/PVEC\n'\
-    #         + '      PHAT(3) = -P1(3)/PVEC\n'\
-    #         + '      PTRANS = DCMPLX(PHAT(1),PHAT(2))\n'\
-    #         + '      PTRANSCONJ = DCMPLX(PHAT(1),-1*PHAT(2))\n'\
-    #         + '      FPREFAC = (P1(0) + PVEC)/(2*(1 + PHAT(3)))\n'\
-    #         + '      BPREFAC = (P1(0) - PVEC)/(2*(1 - PHAT(3)))\n'\
-    #         + '      if ( ( F2(5).eq.rZerComp ) .AND. ( F2(6).eq.rZerComp ) ) then\n'\
-    #         + '            INPROD = 2*(V3(3)*F2(3)+V3(4)*F2(4))\n'\
-    #         + '            FPROD = FPREFAC*(V3(5)*(1 + PHAT(3)) + V3(6)*PTRANS)\n'\
-    #         + '            BPROD = BPREFAC*(V3(5)*(1 - PHAT(3)) - V3(6)*PTRANS)\n'\
-    #         + '            F1(3) = DENOM*INPROD*(FPROD*(1 + PHAT(3)) + BPROD*(1 - PHAT(3)))\n'\
-    #         + '            F1(4) = DENOM*INPROD*(FPROD*PTRANSCONJ - BPROD*PTRANSCONJ)\n'\
-    #         + '            F1(5) = 0\n'\
-    #         + '            F1(6) = 0\n'\
-    #         + '      else\n'\
-    #         + '            INPROD = 2*(V3(5)*F2(5)+V3(6)*F2(6))\n'\
-    #         + '            FPROD = FPREFAC*(V3(3)*PTRANSCONJ - V3(4)*(1 + PHAT(3)))\n'\
-    #         + '            BPROD = BPREFAC*(-1*V3(3)*PTRANSCONJ - V3(4)*(1 - PHAT(3)))\n'\
-    #         + '            F1(3) = 0\n'\
-    #         + '            F1(4) = 0\n'\
-    #         + '            F1(5) = DENOM*INPROD*(FPROD*PTRANS - BPROD*PTRANS)\n'\
-    #         + '            F1(6) = DENOM*INPROD*(-1*FPROD*(1+PHAT(3)) - BPROD*(1 - PHAT(3)))\n'\
-    #         + '      endif\n'
-    #     text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n'\
-    #         + '      REAL*8 PVEC\n'\
-    #         + '      REAL*8 PHAT(3)\n'\
-    #         + '      COMPLEX*16 PTRANS\n'\
-    #         + '      COMPLEX*16 PTRANSCONJ\n'\
-    #         + '      COMPLEX*16 FPREFAC\n'\
-    #         + '      COMPLEX*16 BPREFAC\n'\
-    #         + '      COMPLEX*16 FPROD\n'\
-    #         + '      COMPLEX*16 BPROD\n'\
-    #         + '      double precision rZero\n'\
-    #         + '      double complex rZerComp\n'\
-    #         + '      parameter ( rZero = 0.0d0 )\n'\
-    #         + '      rZerComp = dcmplx ( rZero )\n' + text_copy[linebreaks[15]+1:]
+    #         + '      INPROD = {}\n'.format(left_prod('F2','V3'))\
+    #         + '      F1(3) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
+    #         + '      F1(4) = DENOM*CI*INPROD*{}\n'.format(spinor[1])\
+    #         + '      F1(5) = 0\n'\
+    #         + '      F1(6) = 0\n'
+    #     text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
     #     linebreaks = get_symbols(text_copy, '\n')
     #     text_copy = text_copy[:linebreaks[-18]+1] + FFV8_1_replace + text_copy[linebreaks[-4]+1:]
     # if (vertex == 'FFV8_2'):
+    #     spinor = pbar_left('V3','P2')
     #     FFV8_2_replace = '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
-    #         + '      PVEC = SQRT(P2(1)**2 + P2(2)**2 + P2(3)**2)\n'\
-    #         + '      PHAT(1) = -P2(1)/PVEC\n'\
-    #         + '      PHAT(2) = -P2(2)/PVEC\n'\
-    #         + '      PHAT(3) = -P2(3)/PVEC\n'\
-    #         + '      PTRANS = DCMPLX(PHAT(1),PHAT(2))\n'\
-    #         + '      PTRANSCONJ = DCMPLX(PHAT(1),-1*PHAT(2))\n'\
-    #         + '      FPREFAC = (P2(0) + PVEC)/(2*(1 + PHAT(3)))\n'\
-    #         + '      BPREFAC = (P2(0) - PVEC)/(2*(1 - PHAT(3)))\n'\
-    #         + '      if ( ( F1(5).eq.rZerComp ) .AND. ( F1(6).eq.rZerComp ) )then\n'\
-    #         + '            INPROD = 2*(V3(3)*F1(3)+V3(4)*F1(4))\n'\
-    #         + '            FPROD = FPREFAC*(V3(5)*(1 + PHAT(3)) + V3(6)*PTRANS)\n'\
-    #         + '            BPROD = BPREFAC*(V3(5)*(1 - PHAT(3)) - V3(6)*PTRANS)\n'\
-    #         + '            F2(3) = DENOM*INPROD*(FPROD*(1 + PHAT(3)) + BPROD*(1 - PHAT(3)))\n'\
-    #         + '            F2(4) = DENOM*INPROD*(FPROD*PTRANSCONJ - BPROD*PTRANSCONJ)\n'\
-    #         + '            F2(5) = 0\n'\
-    #         + '            F2(6) = 0\n'\
-    #         + '      else\n'\
-    #         + '            INPROD = 2*(V3(5)*F1(5)+V3(6)*F1(6))\n'\
-    #         + '            FPROD = FPREFAC*(V3(3)*PTRANSCONJ - V3(4)*(1 + PHAT(3)))\n'\
-    #         + '            BPROD = BPREFAC*(-1*V3(3)*PTRANSCONJ - V3(4)*(1 - PHAT(3)))\n'\
-    #         + '            F2(3) = 0\n'\
-    #         + '            F2(4) = 0\n'\
-    #         + '            F2(5) = DENOM*INPROD*(FPROD*PTRANS - BPROD*PTRANS)\n'\
-    #         + '            F2(6) = DENOM*INPROD*(-1*FPROD*(1+PHAT(3)) - BPROD*(1 - PHAT(3)))\n'\
-    #         + '      endif\n'
-    #     text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n'\
-    #         + '      REAL*8 PVEC\n'\
-    #         + '      REAL*8 PHAT(3)\n'\
-    #         + '      COMPLEX*16 PTRANS\n'\
-    #         + '      COMPLEX*16 PTRANSCONJ\n'\
-    #         + '      COMPLEX*16 FPREFAC\n'\
-    #         + '      COMPLEX*16 BPREFAC\n'\
-    #         + '      COMPLEX*16 FPROD\n'\
-    #         + '      COMPLEX*16 BPROD\n'\
-    #         + '      double precision rZero\n'\
-    #         + '      double complex rZerComp\n'\
-    #         + '      parameter ( rZero = 0.0d0 )\n'\
-    #         + '      rZerComp = dcmplx ( rZero )\n' + text_copy[linebreaks[15]+1:]
+    #         + '      INPROD = {}\n'.format(right_prod('V3','F1'))\
+    #         + '      F2(3) = 0\n'\
+    #         + '      F2(4) = 0\n'\
+    #         + '      F2(5) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
+    #         + '      F2(6) = DENOM*CI*INPROD*{}\n'.format(spinor[1])
+    #     text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
     #     linebreaks = get_symbols(text_copy, '\n')
     #     text_copy = text_copy[:linebreaks[-18]+1] + FFV8_2_replace + text_copy[linebreaks[-4]+1:]
-    if (vertex == 'FFV7_1'):
-        FFV7_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
-            + '      PTRANS = DCMPLX(P1(1),P1(2))\n'\
-            + '      PTRANSCONJ = DCMPLX(P1(1),-1*P1(2))\n'\
-            + '      INPROD = 2*(V3(5)*F2(5)+V3(6)*F2(6))\n'\
-            + '      F1(3) = 0\n'\
-            + '      F1(4) = 0\n'\
-            + '      F1(5) = DENOM*CI*INPROD*((P1(0) + P1(3))*V3(3) + PTRANSCONJ*V3(4))\n'\
-            + '      F1(6) = DENOM*CI*INPROD*(PTRANS*V3(3) + (P1(0) - P1(3))*V3(4))\n'
-        text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n'\
-            + '      COMPLEX*16 PTRANS\n'\
-            + '      COMPLEX*16 PTRANSCONJ\n' + text_copy[linebreaks[15]+1:]
-        linebreaks = get_symbols(text_copy, '\n')
-        text_copy = text_copy[:linebreaks[-18]+1] + FFV7_1_replace + text_copy[linebreaks[-4]+1:]
-    if (vertex == 'FFV7_2'):
-        FFV7_2_replace = '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
-            + '      PTRANS = DCMPLX(P2(1),P2(2))\n'\
-            + '      PTRANSCONJ = DCMPLX(P2(1),-1*P2(2))\n'\
-            + '      INPROD = 2*(V3(3)*F1(3)+V3(4)*F1(4))\n'\
-            + '      F2(3) = DENOM*CI*INPROD*(V3(5)*(P2(0) + P2(3)) + V3(6)*PTRANS)\n'\
-            + '      F2(4) = DENOM*CI*INPROD*(V3(5)*PTRANSCONJ + V3(6)*(P2(0) - P2(3)))\n'\
-            + '      F2(5) = 0\n'\
-            + '      F2(6) = 0\n'
-        text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n'\
-            + '      COMPLEX*16 PTRANS\n'\
-            + '      COMPLEX*16 PTRANSCONJ\n' + text_copy[linebreaks[15]+1:]
-        linebreaks = get_symbols(text_copy, '\n')
-        text_copy = text_copy[:linebreaks[-19]+1] + FFV7_2_replace + text_copy[linebreaks[-4]+1:]
-    if (vertex == 'FFV8_1'): 
-        FFV8_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
-            + '      PTRANS = DCMPLX(P1(1),P1(2))\n'\
-            + '      PTRANSCONJ = DCMPLX(P1(1),-1*P1(2))\n'\
-            + '      INPROD = 2*(V3(3)*F2(3)+V3(4)*F2(4))\n'\
-            + '      F1(3) = DENOM*CI*INPROD*(V3(5)*(P1(0) + P1(3)) + V3(6)*PTRANS)\n'\
-            + '      F1(4) = DENOM*CI*INPROD*(V3(5)*PTRANSCONJ + V3(6)*(P1(0) - P1(3)))\n'\
+    if (vertex == 'LLV1_1'): 
+        spinor = pbar_ket('V3','-1*P1')
+        LLV1_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
+            + '      INPROD = {}\n'.format(left_prod('F2','V3'))\
+            + '      F1(3) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
+            + '      F1(4) = DENOM*CI*INPROD*{}\n'.format(spinor[1])\
             + '      F1(5) = 0\n'\
             + '      F1(6) = 0\n'
-        text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n'\
-            + '      COMPLEX*16 PTRANS\n'\
-            + '      COMPLEX*16 PTRANSCONJ\n' + text_copy[linebreaks[15]+1:]
+        text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
         linebreaks = get_symbols(text_copy, '\n')
-        text_copy = text_copy[:linebreaks[-18]+1] + FFV8_1_replace + text_copy[linebreaks[-4]+1:]
-    if (vertex == 'FFV8_2'):
-        FFV8_2_replace = '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
-            + '      PTRANS = DCMPLX(P2(1),P2(2))\n'\
-            + '      PTRANSCONJ = DCMPLX(P2(1),-1*P2(2))\n'\
-            + '      INPROD = 2*(V3(5)*F1(5)+V3(6)*F1(6))\n'\
+        text_copy = text_copy[:linebreaks[-18]+1] + LLV1_1_replace + text_copy[linebreaks[-4]+1:]
+    if (vertex == 'LLV1_2'):
+        spinor = pbar_ket('V3','P2')
+        LLV1_2_replace = '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
+            + '      INPROD = {}\n'.format(left_prod('F1','V3'))\
+            + '      F2(3) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
+            + '      F2(4) = DENOM*CI*INPROD*{}\n'.format(spinor[1])\
+            + '      F2(5) = 0\n'\
+            + '      F2(6) = 0\n'
+        text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
+        linebreaks = get_symbols(text_copy, '\n')
+        text_copy = text_copy[:linebreaks[-19]+1] + LLV1_2_replace + text_copy[linebreaks[-4]+1:]
+    if (vertex == 'RRV1_1'):
+        spinor = pbar_bra('V3','-1*P1')
+        RRV1_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
+            + '      INPROD = {}\n'.format(right_prod('V3','F2'))\
+            + '      F1(3) = 0\n'\
+            + '      F1(4) = 0\n'\
+            + '      F1(5) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
+            + '      F1(6) = DENOM*CI*INPROD*{}\n'.format(spinor[1])
+        text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
+        linebreaks = get_symbols(text_copy, '\n')
+        text_copy = text_copy[:linebreaks[-18]+1] + RRV1_1_replace + text_copy[linebreaks[-4]+1:]
+    if (vertex == 'RRV1_2'):
+        spinor = pbar_bra('V3','P2')
+        RRV1_2_replace = '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
+            + '      INPROD = {}\n'.format(right_prod('V3','F1'))\
             + '      F2(3) = 0\n'\
             + '      F2(4) = 0\n'\
-            + '      F2(5) = DENOM*CI*INPROD*((P2(0) + P2(3))*V3(3) + PTRANSCONJ*V3(4))\n'\
-            + '      F2(6) = DENOM*CI*INPROD*(PTRANS*V3(3) + (P2(0) - P2(3))*V3(4))\n'
-        text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n'\
-            + '      COMPLEX*16 PTRANS\n'\
-            + '      COMPLEX*16 PTRANSCONJ\n' + text_copy[linebreaks[15]+1:]
+            + '      F2(5) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
+            + '      F2(6) = DENOM*CI*INPROD*{}\n'.format(spinor[1])
+        text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
         linebreaks = get_symbols(text_copy, '\n')
-        text_copy = text_copy[:linebreaks[-18]+1] + FFV8_2_replace + text_copy[linebreaks[-4]+1:]
+        text_copy = text_copy[:linebreaks[-18]+1] + RRV1_2_replace + text_copy[linebreaks[-4]+1:]
     text_copy = 'C     This file was automatically generated by ALOHA\n'\
         + 'C     but has been modified by CAFE\n' + text_copy[linebreaks[3]:]
     return text_copy
 
-
 def postex_vertex_replacer(working_dir):
-    "Function which checks the working directory to see what vertices are used in a given process"
+    "ZW: Function which checks the working directory to see what vertices are used in a given process"
     "and replaces them by directly rewriting the vertex Fortran files (if any of them are intended to be chiral)"
+    " The actual Fortran code replace occurs in the function vertex_replacer above"
     write_dir = pjoin(working_dir, 'Source', 'DHELAS')
-    #proc_dir = pjoin(working_dir, 'SubProcesses')
-    #list_subfolders_with_paths = [f.path for f in os.scandir(proc_dir) if f.is_dir()]
-    #misc.sprint(list_subfolders_with_paths)
+    # ZW: include the names of the fortran-files corresponding to any
+    # new vertices in vertex_list and this function will automatically
+    # open and rewrite the file using vertex_replacer
+    vertex_list = [ 'LRV1_0.f', 'RLV1_0.f', 'LRV1P0_3.f', 'RLV1P0_3.f',\
+        'LLV1_1.f', 'LLV1_2.f', 'RRV1_1.f', 'RRV1_2.f' ]
     onlyfiles = [f for f in os.listdir(write_dir) if os.path.isfile(os.path.join(write_dir, f))]
-    #sprint(onlyfiles)
-    if 'FFV7_0.f' in onlyfiles:
-        file = open(write_dir + '/FFV7_0.f', 'r')
-        FFV7_0_copy = file.read()
-        #sprint(FFV7_0_copy)
-        FFV7_0_copy = vertex_replacer(FFV7_0_copy, 'FFV7_0')
-        #sprint(FFV7_0_copy)
-        file.close()
-        file = open(write_dir + '/FFV7_0.f', 'w')
-        file.write(FFV7_0_copy)
-        file.close()
-    if 'FFV8_0.f' in onlyfiles:
-        file = open(write_dir + '/FFV8_0.f', 'r')
-        FFV8_0_copy = file.read()
-        #sprint(FFV8_0_copy)
-        FFV8_0_copy = vertex_replacer(FFV8_0_copy, 'FFV8_0')
-        #sprint(FFV8_0_copy)
-        file.close()
-        file = open(write_dir + '/FFV8_0.f', 'w')
-        file.write(FFV8_0_copy)
-        file.close()
-    if 'FFV7P0_3.f' in onlyfiles:
-        file = open(write_dir + '/FFV7P0_3.f', 'r')
-        FFV7P0_3_copy = file.read()
-        #sprint(FFV7P0_3_copy)
-        FFV7P0_3_copy = vertex_replacer(FFV7P0_3_copy, 'FFV7P0_3')
-        #sprint(FFV7P0_3_copy)
-        file.close()
-        file = open(write_dir + '/FFV7P0_3.f', 'w')
-        file.write(FFV7P0_3_copy)
-        file.close()
-    if 'FFV8P0_3.f' in onlyfiles:
-        file = open(write_dir + '/FFV8P0_3.f', 'r')
-        FFV8P0_3_copy = file.read()
-        #sprint(FFV8P0_3_copy)
-        FFV8P0_3_copy = vertex_replacer(FFV8P0_3_copy, 'FFV8P0_3')
-        #sprint(FFV8P0_3_copy)
-        file.close()
-        file = open(write_dir + '/FFV8P0_3.f', 'w')
-        file.write(FFV8P0_3_copy)
-        file.close()
-    if 'FFV7_1.f' in onlyfiles:
-        file = open(write_dir + '/FFV7_1.f', 'r')
-        FFV7_1_copy = file.read()
-        FFV7_1_copy = vertex_replacer(FFV7_1_copy, 'FFV7_1')
-        file.close()
-        file = open(write_dir + '/FFV7_1.f', 'w')
-        file.write(FFV7_1_copy)
-        file.close()
-    if 'FFV7_2.f' in onlyfiles:
-        file = open(write_dir + '/FFV7_2.f', 'r')
-        FFV7_2_copy = file.read()
-        FFV7_2_copy = vertex_replacer(FFV7_2_copy, 'FFV7_2')
-        file.close()
-        file = open(write_dir + '/FFV7_2.f', 'w')
-        file.write(FFV7_2_copy)
-        file.close()
-    if 'FFV8_1.f' in onlyfiles:
-        file = open(write_dir + '/FFV8_1.f', 'r')
-        FFV8_1_copy = file.read()
-        FFV8_1_copy = vertex_replacer(FFV8_1_copy, 'FFV8_1')
-        file.close()
-        file = open(write_dir + '/FFV8_1.f', 'w')
-        file.write(FFV8_1_copy)
-        file.close()
-    if 'FFV8_2.f' in onlyfiles:
-        file = open(write_dir + '/FFV8_2.f', 'r')
-        FFV8_2_copy = file.read()
-        FFV8_2_copy = vertex_replacer(FFV8_2_copy, 'FFV8_2')
-        file.close()
-        file = open(write_dir + '/FFV8_2.f', 'w')
-        file.write(FFV8_2_copy)
-        file.close()
+    # if 'LRV1_0.f' in onlyfiles:
+    #     file = open(write_dir + '/LRV1_0.f', 'r')
+    #     LRV1_0_copy = file.read()
+    #     LRV1_0_copy = vertex_replacer(LRV1_0_copy, 'LRV1_0')
+    #     file.close()
+    #     file = open(write_dir + '/LRV1_0.f', 'w')
+    #     file.write(LRV1_0_copy)
+    #     file.close()
+    # if 'RLV1_0.f' in onlyfiles:
+    #     file = open(write_dir + '/RLV1_0.f', 'r')
+    #     RLV1_0_copy = file.read()
+    #     RLV1_0_copy = vertex_replacer(RLV1_0_copy, 'RLV1_0')
+    #     file.close()
+    #     file = open(write_dir + '/RLV1_0.f', 'w')
+    #     file.write(RLV1_0_copy)
+    #     file.close()
+    # if 'LRV1P0_3.f' in onlyfiles:
+    #     file = open(write_dir + '/LRV1P0_3.f', 'r')
+    #     LRV1P0_3_copy = file.read()
+    #     LRV1P0_3_copy = vertex_replacer(LRV1P0_3_copy, 'LRV1P0_3')
+    #     file.close()
+    #     file = open(write_dir + '/LRV1P0_3.f', 'w')
+    #     file.write(LRV1P0_3_copy)
+    #     file.close()
+    # if 'RLV1P0_3.f' in onlyfiles:
+    #     file = open(write_dir + '/RLV1P0_3.f', 'r')
+    #     RLV1P0_3_copy = file.read()
+    #     RLV1P0_3_copy = vertex_replacer(RLV1P0_3_copy, 'RLV1P0_3')
+    #     file.close()
+    #     file = open(write_dir + '/RLV1P0_3.f', 'w')
+    #     file.write(RLV1P0_3_copy)
+    #     file.close()
+    # if 'LLV1_1.f' in onlyfiles:
+    #     file = open(write_dir + '/LLV1_1.f', 'r')
+    #     LLV1_1_copy = file.read()
+    #     LLV1_1_copy = vertex_replacer(LLV1_1_copy, 'LLV1_1')
+    #     file.close()
+    #     file = open(write_dir + '/LLV1_1.f', 'w')
+    #     file.write(LLV1_1_copy)
+    #     file.close()
+    # if 'LLV1_2.f' in onlyfiles:
+    #     file = open(write_dir + '/LLV1_2.f', 'r')
+    #     LLV1_2_copy = file.read()
+    #     LLV1_2_copy = vertex_replacer(LLV1_2_copy, 'LLV1_2')
+    #     file.close()
+    #     file = open(write_dir + '/LLV1_2.f', 'w')
+    #     file.write(LLV1_2_copy)
+    #     file.close()
+    # if 'RRV1_1.f' in onlyfiles:
+    #     file = open(write_dir + '/RRV1_1.f', 'r')
+    #     RRV1_1_copy = file.read()
+    #     RRV1_1_copy = vertex_replacer(RRV1_1_copy, 'RRV1_1')
+    #     file.close()
+    #     file = open(write_dir + '/RRV1_1.f', 'w')
+    #     file.write(RRV1_1_copy)
+    #     file.close()
+    # if 'RRV1_2.f' in onlyfiles:
+    #     file = open(write_dir + '/RRV1_2.f', 'r')
+    #     RRV1_2_copy = file.read()
+    #     RRV1_2_copy = vertex_replacer(RRV1_2_copy, 'RRV1_2')
+    #     file.close()
+    #     file = open(write_dir + '/RRV1_2.f', 'w')
+    #     file.write(RRV1_2_copy)
+    #     file.close()ha
+    for vertex in vertex_list:
+        if vertex in onlyfiles:
+            file = open(write_dir + '/' + vertex, 'r')
+            copy = file.read()
+            copy = vertex_replacer(copy, vertex[:-2])
+            file.close()
+            file = open(write_dir + '/' + vertex, 'w')
+            file.write(copy)
+            file.close()
+            del copy
     return 
-
-
-
 
 class misc(object):
     @staticmethod

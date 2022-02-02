@@ -12,3 +12,10 @@ bin/MG5_debug
 input/.autoupdate
 *PROC*
 cards/*
+*.BASE
+*.OTHER
+*.THIS
+cardList*
+folderList*
+MG5_debug
+test_*

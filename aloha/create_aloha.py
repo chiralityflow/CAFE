@@ -279,17 +279,7 @@ in presence of majorana particle/flow violation"""
         if (outgoing + 1) // 2 in self.conjg:
             #flip the outgoing tag if in conjugate
             outgoing = outgoing + outgoing % 2 - (outgoing +1) % 2
-        # if (self.name.startswith("SSS2") or self.name.startswith("SSS3")):
-        #     self.spins = [2, 2, 3]
-        #     if (self.outgoing != 0):
-        #         self.tag.append('P0')
-        # if (self.name == "SSS2"):
-        #     self.name = "FFV2"
-        #     self.lorentz_expr = "Gamma(3,2,-1)*ProjM(-1,1)"
-        # if (self.name == "SSS3"):
-        #     self.name = "FFV6"
-        #     self.lorentz_expr = "Gamma(3,2,-1)*ProjP(-1,1)"
-        attribs = vars(self)
+        
         if not self.routine_kernel:
             AbstractRoutineBuilder.counter += 1
             if self.tag == []:
@@ -298,12 +288,9 @@ in presence of majorana particle/flow violation"""
                 logger.debug('aloha creates %s set of routines with options: %s' \
                             % (self.name, ','.join(self.tag)) )
             try:
-                lorentz = self.parse_expression()
-                #misc.sprint(type(lorentz),lorentz)
+                lorentz = self.parse_expression()  
                 self.routine_kernel = lorentz
-                #misc.sprint(type(lorentz),lorentz)
                 lorentz = eval(lorentz)
-                #misc.sprint(type(lorentz),lorentz)
             except NameError as error:
                 logger.error('unknow type in Lorentz Evaluation:%s'%str(error))
                 raise ALOHAERROR('unknow type in Lorentz Evaluation: %s ' % str(error)) 
@@ -393,7 +380,7 @@ in presence of majorana particle/flow violation"""
                     else:
                         spin_id = id
                     lorentz *= Spinor(spin_id, id)
-                elif spin == 3:  
+                elif spin == 3:        
                     lorentz *= Vector(id, id)
                 elif spin == 4:
                     # shift the tag if we multiply by C matrices
@@ -414,9 +401,7 @@ in presence of majorana particle/flow violation"""
             lorentz *= complex(0,-1)
             # Propagator are taken care separately
         
-        #misc.sprint(type(lorentz),lorentz,self.lorentz_expr)
         lorentz = lorentz.simplify()
-        #misc.sprint(type(lorentz),lorentz)
         
         # Modify the expression in case of loop-pozzorini
         if any((tag.startswith('L') for tag in self.tag if len(tag)>1)):
@@ -557,8 +542,6 @@ in presence of majorana particle/flow violation"""
         if spin ==4:
             return eval(numerator) * propaR
         else:
-            #misc.sprint(numerator,eval(numerator))
-            #misc.sprint(type(numerator),type(eval(numerator)))
             return eval(numerator)
         
     
@@ -1324,6 +1307,7 @@ def write_aloha_file_inc(aloha_dir,file_ext, comp_ext):
     text="ALOHARoutine = "
     text += ' '.join(aloha_files)
     text +='\n'
+    
 
     open(os.path.join(aloha_dir, 'aloha_file.inc'), 'w').write(text) 
 

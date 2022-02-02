@@ -914,6 +914,8 @@ param_card.inc: ../Cards/param_card.dat\n\t../bin/madevent treatcards param\n'''
         aloha_model.add_Lorentz_object(model.get('lorentz'))
 
         # Compute the subroutiness
+        #misc.sprint(wanted_lorentz)
+        #if we want to add vertices, we do it here
         if wanted_lorentz:
             aloha_model.compute_subset(wanted_lorentz)
         else:
@@ -936,7 +938,8 @@ param_card.inc: ../Cards/param_card.dat\n\t../bin/madevent treatcards param\n'''
             cp(MG5DIR + '/aloha/template_files/aloha_functions.f', 
                                                  write_dir+'/aloha_functions.f')
         create_aloha.write_aloha_file_inc(write_dir, '.f', '.o')
-        misc.postex_vertex_replacer(self.dir_path) #Replaces vertices with corresponding chiral ones
+	#ZW: Replaces vertices with corresponding chiral ones
+        misc.postex_vertex_replacer(self.dir_path) 
     
 
         # Make final link in the Process
@@ -2227,7 +2230,7 @@ class ProcessExporterFortranSA(ProcessExporterFortran):
         logger.info("Running make for Helas")
         misc.compile(arg=['../lib/libdhelas.a'], cwd=source_dir, mode='fortran')
         logger.info("Running make for Model")
-        misc.compile(arg=['../lib/libmodel.a'], cwd=source_dir, mode='fortran'),
+        misc.compile(arg=['../lib/libmodel.a'], cwd=source_dir, mode='fortran')
 
     #===========================================================================
     # Create proc_card_mg5.dat for Standalone directory
@@ -2685,7 +2688,7 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         helas_calls = fortran_model.get_matrix_element_calls(\
                     matrix_element)
         #Check and correct chirality-flow charges
-        helas_calls = self.chirality_flow_charge_checker(helas_calls, matrix_element) 
+        #helas_calls = self.chirality_flow_charge_checker(helas_calls, matrix_element) 
         #helas_calls = helas_calls_2
 
 
@@ -2711,6 +2714,11 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         # Extract helicity lines
         helicity_lines = self.get_helicity_lines(matrix_element)
         replace_dict['helicity_lines'] = helicity_lines
+        # ZW: replaces helicity_lines and ncomb to remove sums
+        # that are necessarily zero based on helicity configurations
+        helicity_lines_2 = self.helicity_lines_replacer(helicity_lines, helas_calls, process_lines, ncomb)
+        replace_dict['ncomb'] = helicity_lines_2[1]
+        replace_dict['helicity_lines'] = helicity_lines_2[0]
 
         # Extract overall denominator
         # Averaging initial state color, spin, and identical FS particles
@@ -2860,249 +2868,135 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         else:
             return replace_dict
 
-    #===========================================================================
-    # mg_to_chirality_flow_calls
-    #===========================================================================
-    def mg_to_chirality_flow_calls(self, helas_calls, matrix_element):
-        """Change helas_calls to give chirality-flow helas objects"""  
-        helas_calls_copy = copy.copy(helas_calls)
-        # get process
-        process_lines = self.get_process_info_lines(matrix_element)
-        # get list of particles in process
-        parts_list = misc.get_particles(process_lines)
-        # for particle in process, get chirality flow charge
-        # here, x_list[i] = 0 means the particle has no x-charge,
-        # x_list[i] = 1 means the particle has x-charge and has positive electric charge,
-        # and x_list[i] = -1 means the particle has x-charge and has negative electric charge
-        left_list = []
-        right_list = []
-        for i in range(len(parts_list)):
-            left_list.append(0)
-            right_list.append(0)
-            # checks whether the particle is a scalar that should be exchanged in our notation,
-            # where the last 3 characters denote chiral charge, scalar status, and electric charge
-            if (parts_list[i][-2] == 'f'):
-                if (parts_list[i][-3] == 'l'):
-                    left_list[i] = 1
-                elif (parts_list[i][-3] == 'r'):
-                    right_list[i] = 1
-                if ((parts_list[i][-1] == '-')):
-                    left_list[i] = -1*left_list[i]
-                    right_list[i] = -1*right_list[i]
-        fermionic_list_left = [i for i, e in enumerate(left_list) if e != 0]
-        fermionic_list_right = [i for i, e in enumerate(right_list) if e != 0]
-        fermionic_change = True
-        if (len(fermionic_list_left) == 0) and (len(fermionic_list_right) == 0):
-            fermionic_change = False
 
-        # change the external wavefuntions
-        # treat incoming and outgoing particles independently, since an incoming fermion is equivalent
-        # with an outgoing anti-fermion and vice versa
-        (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
-        for i in range(ninitial):
-            misc.sprint('I am changing in/out flowing wfs')
-            if ((left_list[i] == 1) and (right_list[i] == 0)):
-                # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:19] + \
-                'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
-            elif ((left_list[i] == 0) and (right_list[i] == 1)):
-                # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:19] + \
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:19] + \
-                'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
-            elif ((left_list[i] == -1) and (right_list[i] == 0)):
-                #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ILH' + helas_calls_copy[i][8:19] + \
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:19] + \
-                'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
-            elif ((left_list[i] == 0) and (right_list[i] == -1)):
-                #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:19] + \
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:19] + \
-                'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
-        for i in range(ninitial,nexternal):
-            if ((left_list[i] == -1) and (right_list[i] == 0)):
-                #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:19] + \
-                'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
-            elif ((left_list[i] == 0) and (right_list[i] == -1)):
-                #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:19] + \
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:19] + \
-                'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
-            elif ((left_list[i] == 1) and (right_list[i] == 0)):
-                #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ILH' + helas_calls_copy[i][8:19] + \
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:19] + \
-                'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
-            elif ((left_list[i] == 0) and (right_list[i] == 1)):
-                #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:19] + \
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:19] + \
-                'ZERO,NHEL(' + str(i+1) + '),' + helas_calls_copy[i][20:]
-        # generate er- el+ > mul- mur+
-        # 'CALL FFV6P0_3(W(1,1),W(1,2),GC_3,ZERO,ZERO,W(1,5))', '# Amplitude(s) for diagram number 1', 'CALL FFV2_0(W(1,4),W(1,3),W(1,5),GC_3,AMP(1))'
-        # 'SSS3_3(W(1,1),W(1,2),GC_3,ZERO,ZERO,W(1,5))', 'SSS2_0(W(1,4),W(1,3),W(1,5),GC_3,AMP(1))'
-        # change the vertex functions??
-        helas_calls_2py = helas_calls_copy
-        if fermionic_change == True:
-            vertex_info = misc.get_vertices(helas_calls, matrix_element)
-            for i in range(len(vertex_info[1])):
-                if vertex_info[0][i].startswith("SSS2"):
-                    helas_calls_2py[vertex_info[1][i]] = helas_calls_copy[vertex_info[1][i]][:5]\
-                         + 'FFV2' + helas_calls_copy[vertex_info[1][i]][9:]
-                elif vertex_info[0][i].startswith("SSS3"):
-                    helas_calls_2py[vertex_info[1][i]] = helas_calls_copy[vertex_info[1][i]][:5]\
-                         + 'FFV6' + helas_calls_copy[vertex_info[1][i]][9:]
-                commas = misc.get_symbols(vertex_info[0][i],',')
-                if vertex_info[0][i][commas[-2]+1].startswith("W"):
-                    parentheses = misc.get_symbols(helas_calls_2py[vertex_info[1][i]],'(')
-                    helas_calls_2py[vertex_info[1][i]] = helas_calls_2py[vertex_info[1][i]][:parentheses[0] - 2]\
-                         + "P0" + helas_calls_2py[vertex_info[1][i]][parentheses[0] - 2:]
-                    
-        return(helas_calls_2py)
-    
     #===========================================================================
-    # mg_to_chirality_flow_calls
+    # helicity_lines_replacer
     #===========================================================================
-    def mg_to_chirality_flow_calls_2(self, helas_calls, matrix_element):
-        """Change helas_calls to give chirality-flow helas objects,"""
-        """by replacing fermionic particles with 2-component spinors"""
-        helas_calls_copy = copy.copy(helas_calls)
-        # get process
-        process_lines = self.get_process_info_lines(matrix_element)
-        # get list of particles in process
+    """ ZW: Function which takes as input the helicity_lines of a process
+            and removes any which are directly zero in the explicitly chiral case"""
+    def helicity_lines_replacer(self, helicity_lines, helas_calls, process_lines, ncomb):
+        # ZW: Find external particles in the process
         parts_list = misc.get_particles(process_lines)
-        # for particle in process, get chirality flow charge
-        # here, x_list[i] = 0 means the particle has no x-charge,
-        # x_list[i] = 1 means the particle has x-charge and has positive electric charge,
-        # and x_list[i] = -1 means the particle has x-charge and has negative electric charge
-        left_list = []
-        right_list = []
-        for i in range(len(parts_list)):
-            left_list.append(0)
-            right_list.append(0)
-            # checks whether the particle is a scalar that should be exchanged in our notation,
-            # where the last 3 characters denote chiral charge, scalar status, and electric charge
-            if (parts_list[i][-2] == 'l'):
-                left_list[i] = 1
-            elif (parts_list[i][-2] == 'r'):
-                right_list[i] = 1
-            if ((parts_list[i][-1] == '-')):
-                left_list[i] = -1*left_list[i]
-                right_list[i] = -1*right_list[i]
-        fermionic_list_left = [i for i, e in enumerate(left_list) if e != 0]
-        fermionic_list_right = [i for i, e in enumerate(right_list) if e != 0]
+        plushel_list = []
+        minushel_list = []
+        # ZW: Based on naming convention of external particles in the UFO file,
+        # where the second to last character of the name is assumed to denote chirality,
+        # finds which helicities will contribute non-zero terms to the helicity sum
+        # I.e. for a final-state left-handed particle, only terms where the particle
+        # has helicity +1 will contribute
+        for k in range(len(parts_list)):
+            if (len(parts_list[k]) > 1):
+                if (parts_list[k][-2] == 'l'):
+                    icpos = helas_calls[k].find('*IC(')
+                    state_status = helas_calls[k][icpos-2:icpos]
+                    if (state_status == '+1'):
+                        plushel_list.append(k)
+                    elif (state_status == '-1'):
+                        minushel_list.append(k)
+                elif (parts_list[k][-2] == 'r'):
+                    icpos = helas_calls[k].find('*IC(')
+                    state_status = helas_calls[k][icpos-2:icpos]
+                    if (state_status == '+1'):
+                        minushel_list.append(k)
+                    elif (state_status == '-1'):
+                        plushel_list.append(k)
+        # ZW: If no chiral particles are found, returns the original helicity_lines
+        if (len(plushel_list) == 0) and (len(minushel_list) == 0):
+            return (helicity_lines, ncomb)
+        # ZW: Split the helicity_lines string into its rows
+        helicity_rows = [-1] + misc.get_symbols(helicity_lines,'\n')
+        helicity_rows.append(-1)
+        prop_helicity_lines = []
+        # ZW: Now check whether a term in the helicity sum will contribute or not
+        for n in range(len(helicity_rows) - 1):
+            # ZW: Treating only a single row in the helicity_lines string
+            curr_row = helicity_lines[helicity_rows[n]+1:helicity_rows[n+1]]
+            # ZW: The helicity-array is formated as eg / 1,-1,-1, 1/,
+            # so we search for the beginning of this array
+            slashes = misc.get_symbols(curr_row, '/')
+            curr_hel = curr_row[slashes[0]:]
+            # ZW: Helicities are written as either 1 or -1
+            ones = misc.get_symbols(curr_hel,'1')
+            left_cor = True
+            right_cor = True
+            for p in plushel_list:
+                if (curr_hel[ones[p]-1:ones[p]] != ' '):
+                    left_cor = False
+            for q in minushel_list:
+                if (curr_hel[ones[q]-1:ones[q]] != '-'):
+                    right_cor = False
+            if (left_cor) and (right_cor):
+                prop_helicity_lines.append(curr_row)
+        # ZW: Now make sure that we number the contributing helicity lines properly,
+        # i.e. we want to make sure that these lines correspond to the first lines
+        # of the helicity array in the matrix.f file
+        for r in range(len(prop_helicity_lines)):
+            curr_line = prop_helicity_lines[r]
+            arg_start = prop_helicity_lines[r].find('(I,')
+            arg_end = prop_helicity_lines[r].find('),I=')
+            curr_val = str(r+1)
+            while len(curr_val) < 4:
+                curr_val = ' ' + curr_val
+            curr_line = curr_line[:arg_start+3] + curr_val+ curr_line[arg_end:]
+            prop_helicity_lines[r] = curr_line
+        nu_helicity_lines = prop_helicity_lines[0] + '\n'
+        # ZW: NCOMB is the number of helicity configurations which contribute,
+        # ie the number of helicity configurations we sum over in the helicity sum
+        nucomb = len(prop_helicity_lines)
+        for k in range(1,nucomb):
+            nu_helicity_lines = nu_helicity_lines + prop_helicity_lines[k]
+            if (nu_helicity_lines[-1] != '/'):
+                nu_helicity_lines = nu_helicity_lines + '/'
+            nu_helicity_lines = nu_helicity_lines + '\n'
+        nu_helicity_lines = nu_helicity_lines[:-1]
+        if (nu_helicity_lines[-1] != '/'):
+            nu_helicity_lines = nu_helicity_lines + '/'
+        return (nu_helicity_lines, nucomb)
 
-        (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
-        for i in range(ninitial):
-            if ((left_list[i] == 1) and (right_list[i] == 0)):
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:]
-            elif ((left_list[i] == 0) and (right_list[i] == 1)):
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:]
-            elif ((left_list[i] == -1) and (right_list[i] == 0)):
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ILH' + helas_calls_copy[i][8:]
-            elif ((left_list[i] == 0) and (right_list[i] == -1)):
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:]
-        for i in range(ninitial,nexternal):
-            if ((left_list[i] == -1) and (right_list[i] == 0)):
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:]
-            elif ((left_list[i] == 0) and (right_list[i] == -1)):
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:]
-            elif ((left_list[i] == 1) and (right_list[i] == 0)):
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ILH' + helas_calls_copy[i][8:]
-            elif ((left_list[i] == 0) and (right_list[i] == 1)):
-                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:]
-        
-        return helas_calls_copy
-    
+
     #===========================================================================
     # chirality_flow_charge_checker
     #===========================================================================
     def chirality_flow_charge_checker(self, helas_calls, matrix_element):
-        # AL: removing this function temporarily
-        return(helas_calls)
-        
+        # ZW: legacy function. was used to change HELAS calls to once we desired,
+        # but with AL's diagram generation method the HELAS calls no longer need modification
         """Change helas_calls to give correct chirality flow lines"""  
         helas_calls_copy = copy.copy(helas_calls)
-        # get process
+        # ZW: get process
         process_lines = self.get_process_info_lines(matrix_element)
-        # get list of particles in process
+        # ZW: get list of particles in process
         parts_list = misc.get_particles(process_lines)
-        # for particle in process, get chirality flow charge
+        # ZW: for particle in process, get chirality flow charge
         # here, x_list[i] = 0 means the particle has no x-charge,
-        # x_list[i] = 1 means the particle has x-charge and has positive electric charge,
-        # and x_list[i] = -1 means the particle has x-charge and has negative electric charge
+        # and x_list[i] = 1 means the particle has x-charge
+        # furthermore, int_phot_list and amp_calcs keep track of offshell photons and amplitude calculations
+        # where the arguments need to be ordered
         left_list = []
         right_list = []
-        for i in range(len(parts_list)):
-            left_list.append(0)
-            right_list.append(0)
-            # checks whether the particle is a fermion with chiral charge,
-            # where the last 2 characters denote chiral charge and electric charge
-            if (len(parts_list[i]) > 2):
-                if (parts_list[i][-2] == 'l'):
-                    left_list[i] = 1
-                elif (parts_list[i][-2] == 'r'):
-                    right_list[i] = 1
-                # if ((parts_list[i][-1] == '-')):
-                #     left_list[i] = -1*left_list[i]
-                #     right_list[i] = -1*right_list[i]
-        fermionic_list_left = [i for i, e in enumerate(left_list) if e != 0]
-        fermionic_list_right = [i for i, e in enumerate(right_list) if e != 0]
-        fermionic_change = True
-        # checks whether the sum of all chiral charges in external fermions adds up to zero
-        # if (sum(left_list) == 0) and (sum(right_list) == 0):
-        #     fermionic_change = False
-        
-
-        # if the sum of external fermionic chiral charges is non-zero, replace external spinors
-        # until the chirality flow among the fermions sums to zero
-        # if fermionic_change == True:
-        #     #misc.sprint("Changing some fermions")
-        #     k = sum(left_list)/2.
-        #     l = sum(right_list)/2.
-        #     if k > 0.5:
-        #         for i in range(len(left_list)):
-        #             if left_list[i] == 1:
-        #                 left_list[i] = 0
-        #                 k -= 1.
-        #                 if k < 0.5:
-        #                     break
-        #     if k < -0.5:
-        #         for i in range(len(left_list)):
-        #             if left_list[i] == -1:
-        #                 left_list[i] = 0
-        #                 k += 1.
-        #                 if k > -0.5:
-        #                     break
-        #     if l > 0.5:
-        #         for i in range(len(right_list)):
-        #             if right_list[i] == 1:
-        #                 right_list[i] = 0
-        #                 k -= 1.
-        #                 if k < 0.5:
-        #                     break
-        #     if l < -0.5:
-        #         for i in range(len(right_list)):
-        #             if right_list[i] == -1:
-        #                 right_list[i] = 0
-        #                 k += 1.
-        #                 if k > -0.5:
-        #                     break
-        lleft_list = []
-        rright_list = []
         int_phot_list = []
         wfs_calls = []
         amp_calcs = []
         for iwf in range(len(helas_calls_copy)):
             # Get list of wfs in helas_calls_copy[iwf]
             curr_call_wfs_pieces = helas_calls_copy[iwf].split(')')[:-2]
-            lleft_list.append(0)
-            rright_list.append(0)
+            left_list.append(0)
+            right_list.append(0)
             int_phot_list.append(0)
             amp_calcs.append(0)
             if(len(curr_call_wfs_pieces) > 0):
+                #ZW: goes through to check whether a given HELAS call is an offshell fermion, an offshell photon, or an amplitude
                 if (curr_call_wfs_pieces[0][5:11] == 'FFV7_1') or (curr_call_wfs_pieces[0][5:11] == 'FFV8_2'):
-                    lleft_list[iwf] = 0
-                    rright_list[iwf] = 1
+                    left_list[iwf] = 0
+                    right_list[iwf] = 1
                 elif (curr_call_wfs_pieces[0][5:11] == 'FFV7_2') or (curr_call_wfs_pieces[0][5:11] == 'FFV8_1'):
-                    lleft_list[iwf] = 1
-                    rright_list[iwf] = 0
+                    left_list[iwf] = 1
+                    right_list[iwf] = 0
+                elif (curr_call_wfs_pieces[0][5:11] == 'LLV1_1') or (curr_call_wfs_pieces[0][5:11] == 'LLV1_2'):
+                    left_list[iwf] = 1
+                    right_list[iwf] = 0
+                elif (curr_call_wfs_pieces[0][5:11] == 'RRV1_1') or (curr_call_wfs_pieces[0][5:11] == 'RRV1_2'):
+                    left_list[iwf] = 0
+                    right_list[iwf] = 1
                 elif (curr_call_wfs_pieces[0][5:13] == 'FFV7P0_3') or (curr_call_wfs_pieces[0][5:13] == 'FFV8P0_3'):
                     int_phot_list[iwf] = 1
                 elif (curr_call_wfs_pieces[0][5:11] == 'FFV7_0') or (curr_call_wfs_pieces[0][5:11] == 'FFV8_0'):
@@ -3110,76 +3004,44 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
             curr_call_wfs = [i[-1] for i in curr_call_wfs_pieces]
             wfs_calls.append(curr_call_wfs)
         for i in range(len(parts_list)):
-            # checks whether the particle is a fermion with chiral charge,
+            #ZW: checks whether external particles are fermions with chiral charge from the particle name,
             # where the last 2 characters denote chiral charge and electric charge
             if (len(parts_list[i]) > 2):
                 if (parts_list[i][-2] == 'l'):
-                    lleft_list[i] = 1
+                    left_list[i] = 1
                 elif (parts_list[i][-2] == 'r'):
-                    rright_list[i] = 1
+                    right_list[i] = 1
         (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
-        # for k in range(ninitial): # uncomment this for-loop to switch initial state fermion chiralities
-        #     if (lleft_list[k] == 1) and (rright_list[k] == 0):
-        #         lleft_list[k] = 0
-        #         rright_list[k] = 1
-        #     elif (lleft_list[k] == 0) and (rright_list[k] == 1):
-        #         lleft_list[k] = 1
-        #         rright_list[k] = 0
         for q in range(len(int_phot_list)):
             if int_phot_list[q] == 1:
+                # ZW: for offshell photons, order the arguments such that
+                # left-handed fermions are particle 1 and right-handed fermions
+                # are particle 2
                 wf1 = int(wfs_calls[q][0])
                 wf2 = int(wfs_calls[q][1])
-                if (lleft_list[wf1 - 1] == 0) and (rright_list[wf2 - 1] == 0):
+                if (left_list[wf1 - 1] == 0) and (right_list[wf2 - 1] == 0):
                     endparenths = misc.get_symbols(helas_calls_copy[q],')')
                     helas_calls_2py = helas_calls_copy[q][:endparenths[0] - 1] + str(wf2) + helas_calls_copy[q][endparenths[0]:endparenths[1] - 1]\
                         + str(wf1) + helas_calls_copy[q][endparenths[1]:]
-                    # misc.sprint(helas_calls_copy[q],helas_calls_2py)
                     helas_calls_copy[q] = helas_calls_2py
             elif amp_calcs[q] == 1:
+                # ZW: for amplitudes, order the arguments such that
+                # left-handed fermions are particle 1 and right-handed fermions
+                # are particle 2. vectors remain particle 3
                 wf1 = int(wfs_calls[q][0])
                 wf2 = int(wfs_calls[q][1])
-                if (lleft_list[wf1 - 1] == 0) and (rright_list[wf2 - 1] == 0):
+                if (left_list[wf1 - 1] == 0) and (right_list[wf2 - 1] == 0):
                     endparenths = misc.get_symbols(helas_calls_copy[q],')')
                     helas_calls_2py = helas_calls_copy[q][:endparenths[0] - 1] + str(wf2) + helas_calls_copy[q][endparenths[0]:endparenths[1] - 1]\
                         + str(wf1) + helas_calls_copy[q][endparenths[1]:]
                     # misc.sprint(helas_calls_copy[q],helas_calls_2py)
                     helas_calls_copy[q] = helas_calls_2py
-        # change the external wavefuntions
-        if fermionic_change == True:
-            # for i in range(ninitial):
-            #     if ((left_list[i] == 1) and (right_list[i] == 0)):
-            #         # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
-            #         helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:]
-            #     elif ((left_list[i] == 0) and (right_list[i] == 1)):
-            #         # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:19] + \
-            #         helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]
-            for i in range(nexternal):
-                misc.sprint('I am changing in/out flowing wfs')
-                if ((lleft_list[i] == 1) and (rright_list[i] == 0)):
-                    # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
-                    helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]
-                elif ((lleft_list[i] == 0) and (rright_list[i] == 1)):
-                    # helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:19] + \
-                    helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:]
-                # elif ((left_list[i] == -1) and (right_list[i] == 0)):
-                #     #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ILH' + helas_calls_copy[i][8:19] + \
-                #     helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]
-                # elif ((left_list[i] == 0) and (right_list[i] == -1)):
-                #     #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:19] + \
-                #     helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]
-            # for i in range(ninitial,nexternal):
-            #     if ((left_list[i] == -1) and (right_list[i] == 0)):
-            #         #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'OLH' + helas_calls_copy[i][8:19] + \
-            #         helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:]
-            #     elif ((left_list[i] == 0) and (right_list[i] == -1)):
-            #         #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ORH' + helas_calls_copy[i][8:19] + \
-            #         helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:]
-            #     elif ((left_list[i] == 1) and (right_list[i] == 0)):
-            #         #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'ILH' + helas_calls_copy[i][8:19] + \
-            #         helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]
-            #     elif ((left_list[i] == 0) and (right_list[i] == 1)):
-            #         #helas_calls_copy[i] = helas_calls_copy[i][:5] + 'IRH' + helas_calls_copy[i][8:19] + \
-            #         helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]
+        # ZW: change the external wavefuntions
+        for i in range(nexternal):
+            if ((left_list[i] == 1) and (right_list[i] == 0)):
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'O' + helas_calls_copy[i][6:]
+            elif ((left_list[i] == 0) and (right_list[i] == 1)):
+                helas_calls_copy[i] = helas_calls_copy[i][:5] + 'I' + helas_calls_copy[i][6:]
         return(helas_calls_copy)
 
 
@@ -6630,7 +6492,7 @@ class UFO_model_to_mg4(object):
             if str(part.get('mass')) in to_change:
                 part.set('mass', rep_pattern.sub(replace, str(part.get('mass'))))
             if str(part.get('width')) in to_change:
-                part.set('width', rep_pattern.sub(replace, str(part.get('width'))))       
+                part.set('width', rep_pattern.sub(replace, str(part.get('width'))))                
                 
     def refactorize(self, wanted_couplings = []):    
         """modify the couplings to fit with MG4 convention """

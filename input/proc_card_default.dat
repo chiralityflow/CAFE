@@ -20,10 +20,6 @@
 #************************************************************
 import model sm
 # Define multiparticle labels
-define es- = eLs- eRs-
-define es+ = eLs+ eRs+
-define mus- = muLs- muRs-
-define mus+ = muLs+ muRs+
 define e- = el- er-
 define e+ = el+ er+
 define mu- = mul- mur-

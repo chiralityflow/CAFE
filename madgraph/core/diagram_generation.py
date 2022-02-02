@@ -736,7 +736,6 @@ class Amplitude(base_objects.PhysicsObject):
                                                 #   ref_momenta,
                                                   is_decay_proc,
                                                   process.get('orders'))
-
         #In LoopAmplitude the function below is overloaded such that it
         #converts back all DGLoopLegs to Legs. In the default tree-level
         #diagram generation, this does nothing.
@@ -1147,10 +1146,12 @@ class Amplitude(base_objects.PhysicsObject):
 
         # Create a list of leglists/vertices by merging combinations
         leg_vertex_list = self.merge_comb_legs(comb_lists, ref_dict_to1)
+        # misc.sprint(leg_vertex_list)
 
         res_length = len(res)
         # Consider all the pairs
         for leg_vertex_tuple in leg_vertex_list:
+            # misc.sprint(leg_vertex_tuple)
 
             # Remove forbidden particles
             if self.get('process').get('forbidden_particles') and \
@@ -1272,6 +1273,7 @@ class Amplitude(base_objects.PhysicsObject):
 
                 # Check if the combination is valid
                 if base_objects.LegList(comb).can_combine_to_1(ref_dict_to1):
+                    # misc.sprint(comb)
 
                     # Identify the rest, create a list [comb,rest] and
                     # add it to res
