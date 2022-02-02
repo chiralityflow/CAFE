@@ -1032,24 +1032,22 @@ class Amplitude(base_objects.PhysicsObject):
                 break
         
         # find photons and update its reference momenta
-        for leg in ext_legs:
-            # if left photon, append right (anti)fermion
-            if leg.get('id') == 90023:
-                # ensure order is order of particle number
-                if leg.get('number') < right_ferm.get('number'):
-                    vanishing_combs.append((leg, right_ferm))
-                else:
-                    vanishing_combs.append((right_ferm, leg))
-            # if right photon, append left (anti)fermion
-            elif leg.get('id') == 90024:
-                if leg.get('number') < left_ferm.get('number'):
-                    vanishing_combs.append((leg, left_ferm))
-                else:
-                    vanishing_combs.append((left_ferm, leg))
+        if found_left_ferm and found_right_ferm:
+            for leg in ext_legs:
+                # if left photon, append right (anti)fermion
+                if leg.get('id') == 90023:
+                    # ensure order is order of particle number
+                    if leg.get('number') < right_ferm.get('number'):
+                        vanishing_combs.append((leg, right_ferm))
+                    else:
+                        vanishing_combs.append((right_ferm, leg))
+                # if right photon, append left (anti)fermion
+                elif leg.get('id') == 90024:
+                    if leg.get('number') < left_ferm.get('number'):
+                        vanishing_combs.append((leg, left_ferm))
+                    else:
+                        vanishing_combs.append((left_ferm, leg))
 
-        # now order the combinations in order of particle number
-        
-            
         return vanishing_combs
 
     def reduce_leglist(self, curr_leglist, max_multi_to1, ref_dict_to0,

@@ -1,76 +1,64 @@
 ##############################################
-# TODO: Put your own directory here!!
-co_dir=~/Physics/ChiralityFlowMG/ChiralityFlowMG
+# This implicitly assumes GenProc.sh sits in 
+# and is run from the madgraph home directory
+co_dir=$(pwd)
 #############################################
 cd $co_dir
+# write the process cards
 python  card_write.py
-# get list of cards and folders to consider
+
+# get list of cards (processes) to consider
 cList=$(python -c 'import card_write as c; print(c.getCList())')
-fList=$(python -c 'import card_write as c; print(c.getFList())')
+
 # echo "$cList"
 # proc=$(cat $cList)
 # echo "$proc"
-# dir=$(cat $fList)
-# echo "$dir"
 
 # loop over processes
 while [ -s $cList ]; do
-  # get first process
+  # get process
   cardUsed=$(tail -1 $cList)
   printf "\n-----------------------------"
-  printf "\nProcessing ${cardUsed}\n"
-  printf "-----------------------------\n"
-  #echo "$cardUsed"
+  printf "\nProcessing ${cardUsed}"
+  printf "\n-----------------------------\n"
+
+  # get directory card outputted using last line of cardUsed
+  cd $co_dir/cards
+  dir=$(tail -1 $cardUsed)
+  prefix="output standalone "
+  dir="${dir#"$prefix"}/SubProcesses"
+
+  # go back to main directory to run madgraph
+  cd $co_dir
 
   # generate the process
-  dir=$(tail -1 $fList)
-  # echo "$dir"
   printf "\nTesting time to generate files"
   # time (./bin/mg5 cards/$cardUsed > log; cd ${co_dir}/${dir}; caffeinate -i make check > log)
   time ./bin/mg5_amc cards/$cardUsed > log; 
 
-  # for the first subprocess check how long it takes to compile and evaluate
-  printf "\nTesting time to compile subprocess"
-  cd ${co_dir}/${dir}
-  time make check > log
-  printf "\nTesting time to evaluate subprocess"
-  cd ${co_dir}/${dir}
-  time ./check > log
-  # print matrix element to screen
-  tail -2 log
-  cd ${co_dir}
+  # go into all SubProcess folders (P1_...). For each folder run the subprocess
+  cd $co_dir/$dir
+  for d in */ ; do
+    # tell user which process we are considering
+    cd $co_dir/$dir/$d
+    printf "\nIn SubProcess $d\n"
 
-  # remove subprocess from flist
-  ghead -n -1 $fList > temp
-  mv temp $fList
-
-  # loop through all other subprocesses
-  for i in {1..100}; do
-    # get the subprocess
-    dir=$(tail -1 $fList)
-    printf "\n$dir"
-    # check if the subprocesses has finished, if it has, remove it and end this loop
-    if [ "$dir" == "endProc" ]
-    then
-      ghead -n -1 $fList > temp
-      mv temp $fList  
-      break
-    fi   
-    # test compile and evaluation time for this subprocess
+    # compile subprocess
     printf "\nTesting time to compile subprocess"
-    cd ${co_dir}/${dir}
     time make check > log
+
+    # run subprocess
     printf "\nTesting time to evaluate subprocess"
-    cd ${co_dir}/${dir}
-    time ./check > log
-    # print matrix element to screen
+    time ./check | cat > log
+    # for some reason mac monterey doesn't always write to file, so quick workaround
+    # was to pipe in cat first. Quicker is just to write to file so uncomment below instead if on Linux
+    # time ./check > log
     tail -2 log
-    # remove subprocess from flist
-    cd ${co_dir}
-    ghead -n -1 $fList > temp
-    mv temp $fList
+
   done
+
   # remove process from list
+  cd $co_dir
   ghead -n -1 $cList > temp
   mv temp $cList  
 done
