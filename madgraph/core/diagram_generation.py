@@ -1017,11 +1017,17 @@ class Amplitude(base_objects.PhysicsObject):
         found_right_ferm = False
         for leg in ext_legs:
             if abs(leg.get('id')) in [90001, 90005] and not found_left_ferm:
-                left_ferm = leg
+                left_ferm = copy.copy(leg)
+                # if incoming particle, flip to outgoing id
+                if left_ferm.get('state') == False:
+                    left_ferm['id'] = -left_ferm['id']
                 found_left_ferm = True
         
             elif abs(leg.get('id')) in [90003, 90007] and not found_right_ferm:
-                right_ferm = leg
+                right_ferm = copy.copy(leg)
+                # if incoming particle, flip to outgoing id
+                if right_ferm.get('state') == False:
+                    right_ferm['id'] = -right_ferm['id']
                 found_right_ferm = True
             elif found_right_ferm and found_left_ferm:
                 break
@@ -1112,11 +1118,28 @@ class Amplitude(base_objects.PhysicsObject):
 
             # AL: remove combinations which vanish
             if remove_combs:
-                for van_comb in vanishing_combs:
-                    for icomb, comb_list in enumerate(comb_lists):
+
+                # array of indices to delete from comb_lists
+                to_remove = []
+
+                # loop over all initial combinations of external particles, 
+                # if a combination is identical to a vanishing one, add it to to_remove 
+                # and check the next comb_list
+                for icomb, comb_list in enumerate(comb_lists):
+                    is_removed = False
+                    for van_comb in vanishing_combs:
                         for comb in comb_list:
                             if van_comb == comb:
-                                del comb_lists[icomb]
+                                to_remove.append(comb_lists[icomb])
+                                is_removed = True
+                                break
+                        if is_removed: 
+                            break
+                
+                # now delete the combinations which are not allowed
+                comb_lists = [c_list for c_list in comb_lists if \
+                              c_list not in to_remove]
+                        
 
         # AL: no longer 1st iteration (either wasn't anyway, 
         # or we have now combined particles the first time in comb_lists)
@@ -1156,7 +1179,7 @@ class Amplitude(base_objects.PhysicsObject):
             
             # If there is a reduced diagram
             if reduced_diagram:
-                misc.sprint(reduced_diagram)
+                # misc.sprint(reduced_diagram)
                 vertex_list_list = [list(leg_vertex_tuple[1])]
                 vertex_list_list.append(reduced_diagram)
                 expanded_list = expand_list_list(vertex_list_list)

@@ -1,5 +1,7 @@
+##############################################
 # TODO: Put your own directory here!!
 co_dir=~/Physics/ChiralityFlowMG/ChiralityFlowMG
+#############################################
 cd $co_dir
 python  card_write.py
 # get list of cards and folders to consider

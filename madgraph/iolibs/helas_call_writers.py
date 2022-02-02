@@ -351,8 +351,6 @@ class HelasCallWriter(base_objects.PhysicsObject):
             call_rhs = ','.join(call.split(',')[-2:])
             call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
 
-        misc.sprint(call)
-
         return call
 
     def get_amplitude_call(self, amplitude):
