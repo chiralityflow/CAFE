@@ -38,43 +38,6 @@ c
       double precision rZero, rHalf, rTwo
       parameter( rZero = 0.0d0, rHalf = 0.5d0, rTwo = 2.0d0 )
 
-c#ifdef HELAS_CHECK
-c      double precision p2
-c      double precision epsi
-c      parameter( epsi = 2.0d-5 )
-c      integer stdo
-c      parameter( stdo = 6 )
-c#endif
-c
-c#ifdef HELAS_CHECK
-c      pp = sqrt(p(1)**2+p(2)**2+p(3)**2)
-c      if ( abs(p(0))+pp.eq.rZero ) then
-c         write(stdo,*)
-c     &        ' helas-error : p(0:3) in oxxxxx is zero momentum'
-c      endif
-c      if ( p(0).le.rZero ) then
-c         write(stdo,*)
-c     &        ' helas-error : p(0:3) in oxxxxx has non-positive energy'
-c         write(stdo,*)
-c     &        '         : p(0) = ',p(0)
-c      endif
-c      p2 = (p(0)-pp)*(p(0)+pp)
-c      if ( abs(p2-fmass**2).gt.p(0)**2*epsi ) then
-c         write(stdo,*)
-c     &        ' helas-error : p(0:3) in oxxxxx has inappropriate mass'
-c         write(stdo,*)
-c     &        '             : p**2 = ',p2,' : fmass**2 = ',fmass**2
-c      endif
-c      if ( abs(nhel).ne.1 ) then
-c         write(stdo,*) ' helas-error : nhel in oxxxxx is not -1,1'
-c         write(stdo,*) '             : nhel = ',nhel
-c      endif
-c      if ( abs(nsf).ne.1 ) then
-c         write(stdo,*) ' helas-error : nsf in oxxxxx is not -1,1'
-c         write(stdo,*) '             : nsf = ',nsf
-c      endif
-c#endif
-
       lf(1) = dcmplx(p(0),p(3))*nsf
       lf(2) = dcmplx(p(1),p(2))*nsf
 
@@ -103,7 +66,7 @@ c#endif
          lf(5) = dcmplx( rZero )
          lf(6) = dcmplx( rZero )
       endif
-c      write(*,*) "the external left handed fermion is ", lf(3), lf(4)
+
       return
       end
 c
@@ -136,43 +99,6 @@ c
       double precision rZero, rHalf, rTwo
       parameter( rZero = 0.0d0, rHalf = 0.5d0, rTwo = 2.0d0 )
 
-c#ifdef HELAS_CHECK
-c      double precision p2
-c      double precision epsi
-c      parameter( epsi = 2.0d-5 )
-c      integer stdo
-c      parameter( stdo = 6 )
-c#endif
-c
-c#ifdef HELAS_CHECK
-c      pp = sqrt(p(1)**2+p(2)**2+p(3)**2)
-c      if ( abs(p(0))+pp.eq.rZero ) then
-c         write(stdo,*)
-c     &        ' helas-error : p(0:3) in ixxxxx is zero momentum'
-c      endif
-c      if ( p(0).le.rZero ) then
-c         write(stdo,*)
-c     &        ' helas-error : p(0:3) in ixxxxx has non-positive energy'
-c         write(stdo,*)
-c     &        '             : p(0) = ',p(0)
-c      endif
-c      p2 = (p(0)-pp)*(p(0)+pp)
-c      if ( abs(p2-fmass**2).gt.p(0)**2*epsi ) then
-c         write(stdo,*)
-c     &        ' helas-error : p(0:3) in ixxxxx has inappropriate mass'
-c         write(stdo,*)
-c     &        '             : p**2 = ',p2,' : fmass**2 = ',fmass**2
-c      endif
-c      if (abs(nhel).ne.1) then
-c         write(stdo,*) ' helas-error : nhel in ixxxxx is not -1,1'
-c         write(stdo,*) '             : nhel = ',nhel
-c      endif
-c      if (abs(nsf).ne.1) then
-c         write(stdo,*) ' helas-error : nsf in ixxxxx is not -1,1'
-c         write(stdo,*) '             : nsf = ',nsf
-c      endif
-c#endif
-
       rf(1) = dcmplx(p(0),p(3))*nsf
       rf(2) = dcmplx(p(1),p(2))*nsf
 
@@ -203,8 +129,6 @@ c#endif
          rf(6) = chi(2)
       endif
 
-c      write(*,*) "the external right handed fermion is ", fi(5), fi(6)
-c
       return
       end
 
@@ -1011,12 +935,12 @@ c output:
 c       complex vc(6)          : vector wavefunction       epsilon^mu(v)
 c
       implicit none
-      double complex vc(6),pplus,ptrans,ptransconj,rplus,rtrans
+      double complex vc(6),chi(2),xi(2),pplus,ptrans,ptransconj,rplus,rtrans
       double complex rtransconj
-      double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh
+      double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,sqp0p3,sqr0r3
       double precision pnorm,rnorm,prnorm,prprod, rpprod
       integer nhel,nsv,nsvahl,nsvhel
-      double precision refmom(0:3)
+      double precision r(0:3)
 
       double precision rZero, rHalf, rOne, rTwo
       parameter( rZero = 0.0d0, rHalf = 0.5d0 )
@@ -1066,20 +990,20 @@ c AL: vc(1,2) look correct 220201
       else
 
 
-c AL: refmom = massless
-         refmom(0) = 13*rOne
-         refmom(1) = 12*rOne
-         refmom(2) = 4*rOne
-         refmom(3) = 3*rOne
+c AL: r = massless
+         r(0) = 13*rOne
+         r(1) = 12*rOne
+         r(2) = 4*rOne
+         r(3) = 3*rOne
 
 c rplus = r^0 + r^3
-         rplus = refmom(0) + refmom(3) 
+         rplus = r(0) + r(3) 
          pplus = p(0) + p(3)
 c rtrans = r^1 + i*r^2         
-         rtrans = dcmplx(refmom(1),refmom(2))
+         rtrans = dcmplx(r(1),r(2))
          ptrans = dcmplx(p(1),p(2))
 c rtransconj = r^1 -i*r^2
-         rtransconj = dcmplx(refmom(1),-1*refmom(2))
+         rtransconj = dcmplx(r(1),-1*r(2))
          ptransconj = dcmplx(p(1),-1*p(2))
 
 c pnorm = sqrt(|p^0 + p^3|) = sqrt(|p^+|)
@@ -1088,31 +1012,85 @@ c pnorm = sqrt(|p^0 + p^3|) = sqrt(|p^+|)
 c prnorm = sqrt(|p^+||r^+|)
          prnorm = pnorm*rnorm
 
+         if(p(1).eq.0d0.and.p(2).eq.0d0.and.p(3).lt.0d0) then
+            sqp0p3 = 0d0
+         else
+            sqp0p3 = dsqrt(max(p(0)+p(3),rZero))
+         endif
+         chi(2) = dcmplx( - sqp0p3 )
+         if(r(1).eq.0d0.and.r(2).eq.0d0.and.r(3).lt.0d0) then
+            sqr0r3 = 0d0
+         else
+            sqr0r3 = dsqrt(max(r(0)+r(3),rZero))
+         endif
+         xi(2) = dcmplx ( - sqr0r3 )
+
+         if ( nsvhel.eq.rOne ) then
+            rpprod = (rtrans*pplus - rplus*ptrans)/prnorm
+            if ( sqp0p3.eq.rZero ) then
+               chi(1) = dcmplx( dsqrt(rTwo*p(0)) )
+            else
+               chi(1) = ptransconj/sqp0p3
+            endif
+            if ( sqr0r3.eq.rZero ) then
+               xi(1) = dcmplx( dsqrt(rTwo*p(0)) )
+            else
+               xi(1) = rtrans/sqr0r3
+            endif
+            vc(3) = chi(1)/rpprod
+            vc(4) = chi(2)/rpprod
+            vc(5) = xi(1)
+            vc(6) = xi(2)
+         else
+            prprod = (pplus*rtransconj - ptransconj*rplus)/prnorm
+            if ( sqp0p3.eq.rZero ) then
+               chi(1) = dcmplx( dsqrt(rTwo*p(0)) )
+            else
+               chi(1) = ptrans/sqp0p3
+            endif
+            if ( sqr0r3.eq.rZero ) then
+               xi(1) = dcmplx( dsqrt(rTwo*p(0)) )
+            else
+               xi(1) = rtransconj/sqr0r3
+            endif
+            vc(3) = xi(1)/prprod
+            vc(4) = xi(2)/prprod
+            vc(5) = chi(1)
+            vc(6) = chi(2)
+         endif
+
+
+
+c         if ( sqp0p3.eq.rZero ) then
+c            chi(2) = dcmplx( dsqrt(rTwo*p(0)) )
+c         else
+c            chi(2) = dcmplx( p(1), -p(2) )/sqp0p3
+c         endif
 c nsvhel == 1 is left chiral
 c |p]<r|/<rp>
 c AL: TODO: update for when p^+ or r^+ = 0!!!!
-         if ( nsvhel.eq.rOne ) then
+c         if ( nsvhel.eq.rOne ) then
 c prprod = <rp> look ok
-            rpprod = (rtrans*pplus - rplus*ptrans)/prnorm
+c            rpprod = (rtrans*pplus - rplus*ptrans)/prnorm
 c vc(3,4) = |p]/<rp> looks good
-            vc(3) = ptransconj/(rpprod*pnorm)
-            vc(4) = -1*pplus/(rpprod*pnorm)
+c            vc(3) = ptransconj/(rpprod*pnorm)
+c            vc(4) = -1*pplus/(rpprod*pnorm)
 c vc(5,6) = <r| looks good
-            vc(5) = rtrans/(rnorm)
-            vc(6) = -1*rplus/(rnorm)
+c            vc(5) = rtrans/(rnorm)
+c            vc(6) = -1*rplus/(rnorm)
 
 c else nsvhel == -1 is right chiral         
 c |r]<p|/[pr]
-         else
+c         else
 c prprod = [pr] looks good
-            prprod = (pplus*rtransconj - ptransconj*rplus)/prnorm
+c            prprod = (pplus*rtransconj - ptransconj*rplus)/prnorm
 c vc(3,4) = |r]/[pr] looks good
-            vc(3) = rtransconj/(prprod*rnorm)
-            vc(4) = -1*rplus/(prprod*rnorm)
+c            vc(3) = rtransconj/(prprod*rnorm)
+c            vc(4) = -1*rplus/(prprod*rnorm)
 c vc(5,6) = <r| looks good
-            vc(5) = ptrans/(pnorm)
-            vc(6) = -1*pplus/(pnorm)
-         endif
+c            vc(5) = ptrans/(pnorm)
+c            vc(6) = -1*pplus/(pnorm)
+c         endif
 
          
 

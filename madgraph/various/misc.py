@@ -1511,7 +1511,6 @@ def sprint(*args, **opt):
 
 def get_symbols(words,symbols):
     """ ZW: Finds the positions where a substring appears in a string"""
-    start_pos = 0
     pos_list = []
     for i in range(len(words)):
         if words[i] == symbols:
