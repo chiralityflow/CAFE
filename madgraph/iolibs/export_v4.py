@@ -2955,6 +2955,89 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
 
 
     #===========================================================================
+    # helicity_lines_replacer_2
+    #===========================================================================
+    """ ZW: Function which takes as input the helicity_lines of a process
+            and removes any which are directly zero in the explicitly chiral case"""
+    def helicity_lines_replacer_2(self, helicity_lines, helas_calls, ncomb, nexternal):
+        # ZW: Find external particles in the process
+        plushel_list = []
+        minushel_list = []
+        # ZW: Based on naming convention of external particles in the UFO file,
+        # where the second to last character of the name is assumed to denote chirality,
+        # finds which helicities will contribute non-zero terms to the helicity sum
+        # I.e. for a final-state left-handed particle, only terms where the particle
+        # has helicity +1 will contribute
+        for k in range(nexternal):
+            if (helas_calls[k][5:11] == 'LXXXXX') or (helas_calls[k][5:11] == 'VLXXXX'):
+                icpos = helas_calls[k].find('*IC(')
+                state_status = helas_calls[k][icpos-2:icpos]
+                if (state_status == '+1'):
+                    plushel_list.append(k)
+                elif (state_status == '-1'):
+                    minushel_list.append(k)
+            elif (helas_calls[k][5:11] == 'RXXXXX') or (helas_calls[k][5:11] == 'VRXXXX'):
+                icpos = helas_calls[k].find('*IC(')
+                state_status = helas_calls[k][icpos-2:icpos]
+                if (state_status == '+1'):
+                    minushel_list.append(k)
+                elif (state_status == '-1'):
+                    plushel_list.append(k)
+        # ZW: If no chiral particles are found, returns the original helicity_lines
+        if (len(plushel_list) == 0) and (len(minushel_list) == 0):
+            return (helicity_lines, ncomb)
+        # ZW: Split the helicity_lines string into its rows
+        helicity_rows = [-1] + misc.get_symbols(helicity_lines,'\n')
+        helicity_rows.append(-1)
+        prop_helicity_lines = []
+        # ZW: Now check whether a term in the helicity sum will contribute or not
+        for n in range(len(helicity_rows) - 1):
+            # ZW: Treating only a single row in the helicity_lines string
+            curr_row = helicity_lines[helicity_rows[n]+1:helicity_rows[n+1]]
+            # ZW: The helicity-array is formated as eg / 1,-1,-1, 1/,
+            # so we search for the beginning of this array
+            slashes = misc.get_symbols(curr_row, '/')
+            curr_hel = curr_row[slashes[0]:]
+            # ZW: Helicities are written as either 1 or -1
+            ones = misc.get_symbols(curr_hel,'1')
+            left_cor = True
+            right_cor = True
+            for p in plushel_list:
+                if (curr_hel[ones[p]-1:ones[p]] != ' '):
+                    left_cor = False
+            for q in minushel_list:
+                if (curr_hel[ones[q]-1:ones[q]] != '-'):
+                    right_cor = False
+            if (left_cor) and (right_cor):
+                prop_helicity_lines.append(curr_row)
+        # ZW: Now make sure that we number the contributing helicity lines properly,
+        # i.e. we want to make sure that these lines correspond to the first lines
+        # of the helicity array in the matrix.f file
+        for r in range(len(prop_helicity_lines)):
+            curr_line = prop_helicity_lines[r]
+            arg_start = prop_helicity_lines[r].find('(I,')
+            arg_end = prop_helicity_lines[r].find('),I=')
+            curr_val = str(r+1)
+            while len(curr_val) < 4:
+                curr_val = ' ' + curr_val
+            curr_line = curr_line[:arg_start+3] + curr_val+ curr_line[arg_end:]
+            prop_helicity_lines[r] = curr_line
+        nu_helicity_lines = prop_helicity_lines[0] + '\n'
+        # ZW: NCOMB is the number of helicity configurations which contribute,
+        # ie the number of helicity configurations we sum over in the helicity sum
+        nucomb = len(prop_helicity_lines)
+        for k in range(1,nucomb):
+            nu_helicity_lines = nu_helicity_lines + prop_helicity_lines[k]
+            if (nu_helicity_lines[-1] != '/'):
+                nu_helicity_lines = nu_helicity_lines + '/'
+            nu_helicity_lines = nu_helicity_lines + '\n'
+        nu_helicity_lines = nu_helicity_lines[:-1]
+        if (nu_helicity_lines[-1] != '/'):
+            nu_helicity_lines = nu_helicity_lines + '/'
+        return (nu_helicity_lines, nucomb)
+
+
+    #===========================================================================
     # chirality_flow_charge_checker
     #===========================================================================
     def chirality_flow_charge_checker(self, helas_calls, matrix_element):
