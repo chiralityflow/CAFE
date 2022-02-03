@@ -39,9 +39,11 @@ while [ -s $cList ]; do
   # go into all SubProcess folders (P1_...). For each folder run the subprocess
   cd $co_dir/$dir
   for d in */ ; do
-    # tell user which process we are considering
     cd $co_dir/$dir/$d
-    printf "\nIn SubProcess $d\n"
+    
+    # tell user which process we are considering
+    export d
+    python $co_dir/write_proc_nicely.py
 
     # compile subprocess
     printf "\nTesting time to compile subprocess"
