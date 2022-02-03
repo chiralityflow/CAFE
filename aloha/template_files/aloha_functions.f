@@ -30,7 +30,7 @@ c
       implicit none
       double complex vcl(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj, pketsq(1:2), rbraan(1:2), pketan(1:2)
       double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,pnorm,rnorm,prnorm,rpprod,r(0:3),sqp0p3,sqr0r3
-      integer nhel,nsv,nsvahl,nsvhel
+      integer nhel,nsv,nsvahl,nsvhel, i
       double precision refmom(4)
 
       double precision rZero, rHalf, rOne, rTwo
@@ -125,6 +125,17 @@ c nsvhel = -1, i.e. right-chiral (outgoing - hel or incoming + hel)
 
 c endif for if massive or not
       endif
+
+      write(*,*) ' left vector wavefunction = '
+      do i=1,6
+        write(*,*) 'vcl(', I, ')= ', vcl(I)
+      enddo
+
+      write(*,*) ' left vector ref vec = '
+      do i=0,3
+        write(*,*) 'r(', I, ')= ', r(I)
+      enddo
+
 c
       return
       end
@@ -148,7 +159,7 @@ c
       implicit none
       double complex vcr(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj, rketsq(1:2), pbraan(1:2), pbrasq(1:2)
       double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,pnorm,rnorm,prnorm,prprod,r(0:3),sqp0p3,sqr0r3
-      integer nhel,nsv,nsvahl,nsvhel
+      integer nhel,nsv,nsvahl,nsvhel,i
       double precision refmom(4)
 
       double precision rZero, rHalf, rOne, rTwo
@@ -224,6 +235,16 @@ c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
             vcr(6) = dcmplx(rZero)
          endif
 
+      write(*,*) ' right vector wavefunction = '
+      do i=1,6
+        write(*,*) 'vcr(', I, ')= ', vcr(I)
+      enddo
+
+      write(*,*) ' right vector ref vec = '
+      do i=0,3
+        write(*,*) 'r(', I, ')= ', r(I)
+      enddo
+
 
 c endif for if massive or not
       endif
@@ -251,7 +272,7 @@ c
       double complex lf(6),chi(2)
       double precision p(0:3),sf(2),sfomeg(2),omega(2),fmass,
      &     pp,pp3,sqp0p3,sqm(0:1)
-      integer nhel,nsf,nh,ip,im
+      integer nhel,nsf,nh,ip,im, i
 
       double precision rZero, rHalf, rTwo
       parameter( rZero = 0.0d0, rHalf = 0.5d0, rTwo = 2.0d0 )
@@ -285,6 +306,12 @@ c
          lf(6) = dcmplx( rZero )
       endif
 
+      write(*,*) ' left fermion wavefunction = '
+      do i=1,6
+        write(*,*) 'lf(', I, ')= ', lf(I)
+      enddo
+
+
       return
       end
 c
@@ -312,7 +339,7 @@ c
       double complex rf(6),chi(2)
       double precision p(0:3),sf(2),sfomeg(2),omega(2),fmass,
      &     pp,pp3,sqp0p3,sqm(0:1)
-      integer nhel,nsf,nh,ip,im
+      integer nhel,nsf,nh,ip,im, i
 
       double precision rZero, rHalf, rTwo
       parameter( rZero = 0.0d0, rHalf = 0.5d0, rTwo = 2.0d0 )
@@ -346,6 +373,12 @@ c
          rf(5) = chi(1)
          rf(6) = chi(2)
       endif
+
+      write(*,*) 'right fermion wavefunction = '
+      do i=1,6
+        write(*,*) 'rf(', I, ')= ', rf(I)
+      enddo
+
 
       return
       end
