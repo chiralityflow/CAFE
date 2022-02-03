@@ -61,6 +61,9 @@ while [ -s $cList ]; do
 
   # remove process from list
   cd $co_dir
+  # To run on Mac
   ghead -n -1 $cList > temp
+  # To run on Linux
+  # head -n -1 $cList > temp
   mv temp $cList  
 done

@@ -16,9 +16,10 @@ proc = proc.replace('mulp','mul+ ')
 proc = proc.replace('murm','mur- ')
 proc = proc.replace('murp','mur+ ')
 # photons
+# choose whether using chiral photons or not (cannot be both)
+# proc = proc.replace('a','a ')
 proc = proc.replace('al','al ')
 proc = proc.replace('ar','ar ')
-proc = proc.replace('a','a ')
 
 # group same final-state particles for easier human reading
 final_state = proc.split('> ')[-1]

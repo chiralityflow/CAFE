@@ -8,8 +8,8 @@ def getCList():
 ########################
 
 ### Uncomment these for single lepton pair amps/MEs
-# procs=['2lQED']
-# cList='cardListee'
+procs=['2lQED']
+cList='cardListee'
 
 ### Uncomment these for two lepton pairs amps/MEs
 # procs=['4lDiffQED', '4lSameQED']
@@ -18,8 +18,8 @@ def getCList():
 ### Uncomment these for three lepton pairs amps/MEs
 # procs=['6lDiffQED', '6l4Same2DiffQED']
 # procs = ['eeto4muQED']
-procs =['6l4Same2DiffQED']
-cList='cardList6e'
+# procs =['6l4Same2DiffQED']
+# cList='cardList6e'
 
 
 
@@ -42,8 +42,8 @@ f.close()
 
 #####################
 
-naMin = 0
-naMax = 0
+naMin = 2
+naMax = 3
 
 for proc in procs:
   for na in range(naMin,naMax+1):
