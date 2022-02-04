@@ -1677,7 +1677,7 @@ def vertex_replacer(text, vertex):
     #     linebreaks = get_symbols(text_copy, '\n')
     #     text_copy = text_copy[:linebreaks[-18]+1] + FFV8_2_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'LLV1_1'): 
-        spinor = pbar_ket('V3','-1*P1')
+        spinor = pbar_ket('V3','(-1)*P1')
         LLV1_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
             + '      INPROD = {}\n'.format(left_prod('F2','V3'))\
             + '      F1(3) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
@@ -1699,7 +1699,7 @@ def vertex_replacer(text, vertex):
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[-19]+1] + LLV1_2_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'RRV1_1'):
-        spinor = pbar_bra('V3','-1*P1')
+        spinor = pbar_bra('V3','(-1)*P1')
         RRV1_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
             + '      INPROD = {}\n'.format(right_prod('V3','F2'))\
             + '      F1(3) = 0\n'\

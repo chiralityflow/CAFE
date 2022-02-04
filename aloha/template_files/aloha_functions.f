@@ -31,7 +31,6 @@ c
       double complex vcl(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj, pketsq(2), rbraan(2), pketan(2)
       double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,pnorm,rnorm,rpprod,r(0:3),sqp0p3,sqr0r3, svhel,sv
       integer nhel,nsv,nsvahl,nsvhel, i
-      double precision refmom(4)
 
       double precision rZero, rHalf, rOne, rTwo
       parameter( rZero = 0.0d0, rHalf = 0.5d0 )
@@ -39,12 +38,7 @@ c
 
       sqh = dsqrt(rHalf)
       hel = dble(nhel)
-      sv  = dble(nsv)
-      nsvahl = nsv*dabs(hel)
       nsvhel = nsv*nhel
-      pt2 = p(1)**2+p(2)**2
-      pp = min(p(0),dsqrt(pt2+p(3)**2))
-      pt = min(pp,dsqrt(pt2))
 
       vcl(1) = dcmplx(p(0),p(3))*nsv
       vcl(2) = dcmplx(p(1),p(2))*nsv
@@ -73,8 +67,8 @@ c pnorm = sqrt(|p^0 + p^3|) = sqrt(|p^+|)
          rnorm = sqrt(abs(rplus))
 
 c get spinors such that vector wavefunction is |p]<r|/<rp>
-c pketsq = |p]
-c rbraan = <r|
+c pketsq = |p] = (ptransconj/sqp0p3, -sqp0p3)
+c rbraan = <r| = (rtrans/sqr0r3, -sqr0r3)
 c rpprod = <rp>
 
          if(p(1).eq.0d0.and.p(2).eq.0d0.and.p(3).lt.0d0) then
@@ -98,7 +92,7 @@ c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
                pketsq(1) = ptransconj/sqp0p3
             endif
             if ( sqr0r3.eq.rZero ) then
-               rbraan(1) = dcmplx( dsqrt(rTwo*p(0)) )
+               rbraan(1) = dcmplx( dsqrt(rTwo*r(0)) )
             else
                rbraan(1) = rtrans/sqr0r3
             endif
@@ -106,8 +100,8 @@ c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
 c           rpprod = <rp> = rbraan*pketan
 c           pketan = |p> = (eps_{ab}|p]^b)^\dagger = (0 & -1)  (pketsq(1)^*) = (-pketsq(2)^*)
 c                                                    (1 &  0)  (pketsq(2)^*)   ( pketsq(1)^*)
-            pketan(1) = -conjg(pketsq(2))
-            pketan(2) =  conjg(pketsq(1))
+            pketan(1) = -dconjg(pketsq(2))
+            pketan(2) =  dconjg(pketsq(1))
             rpprod = rbraan(1)*pketan(1) + rbraan(2)*pketan(2)
             vcl(3) = pketsq(1)/rpprod
             vcl(4) = pketsq(2)/rpprod
@@ -169,7 +163,6 @@ c
 
       sqh = dsqrt(rHalf)
       hel = dble(nhel)
-      nsvahl = nsv*dabs(hel)
       nsvhel = nsv*hel
 
       vcr(1) = dcmplx(p(0),p(3))*nsv
@@ -199,8 +192,8 @@ c pnorm = sqrt(|p^0 + p^3|) = sqrt(|p^+|)
       else
 
 c get spinors such that vector wavefunction is |r]<p|/[pr]
-c rketsq = |r]
-c pbraan = <p|
+c rketsq = |r] = (rtransconj/sqr0r3, -sqr0r3)
+c pbraan = <p| = (ptrans/sqp0p3, -sqp0p3)
 c prprod = [pr]
 
          if(p(1).eq.0d0.and.p(2).eq.0d0.and.p(3).lt.0d0) then
@@ -224,7 +217,7 @@ c nsvhel = -1, i.e. right-chiral (outgoing - hel or incoming + hel)
                pbraan(1) = ptrans/sqp0p3
             endif
             if ( sqr0r3.eq.rZero ) then
-               rketsq(1) = dcmplx( dsqrt(rTwo*p(0)) )
+               rketsq(1) = dcmplx( dsqrt(rTwo*r(0)) )
             else
                rketsq(1) = rtransconj/sqr0r3
             endif
