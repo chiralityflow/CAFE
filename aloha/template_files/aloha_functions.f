@@ -28,8 +28,8 @@ c output:
 c       complex vcl(6)          : vector wavefunction    |p]<r|/<rp>
 c
       implicit none
-      double complex vcl(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj, pketsq(1:2), rbraan(1:2), pketan(1:2)
-      double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,pnorm,rnorm,prnorm,rpprod,r(0:3),sqp0p3,sqr0r3
+      double complex vcl(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj, pketsq(2), rbraan(2), pketan(2)
+      double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,pnorm,rnorm,rpprod,r(0:3),sqp0p3,sqr0r3, svhel,sv
       integer nhel,nsv,nsvahl,nsvhel, i
       double precision refmom(4)
 
@@ -39,8 +39,9 @@ c
 
       sqh = dsqrt(rHalf)
       hel = dble(nhel)
+      sv  = dble(nsv)
       nsvahl = nsv*dabs(hel)
-      nsvhel = nsv*hel
+      nsvhel = nsv*nhel
       pt2 = p(1)**2+p(2)**2
       pp = min(p(0),dsqrt(pt2+p(3)**2))
       pt = min(pp,dsqrt(pt2))
@@ -70,8 +71,6 @@ c rtransconj = r^1 -i*r^2
 c pnorm = sqrt(|p^0 + p^3|) = sqrt(|p^+|)
          pnorm = sqrt(abs(pplus))
          rnorm = sqrt(abs(rplus))
-c prnorm = sqrt(|p^+||r^+|)
-         prnorm = pnorm*rnorm
 
 c get spinors such that vector wavefunction is |p]<r|/<rp>
 c pketsq = |p]
@@ -92,7 +91,7 @@ c rpprod = <rp>
          rbraan(2) = dcmplx ( - sqr0r3 )
 
 c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
-         if ( nsvhel.eq.rOne ) then
+         if ( nsvhel.eq.1 ) then
             if ( sqp0p3.eq.rZero ) then
                pketsq(1) = dcmplx( dsqrt(rTwo*p(0)) )
             else
@@ -102,6 +101,7 @@ c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
                rbraan(1) = dcmplx( dsqrt(rTwo*p(0)) )
             else
                rbraan(1) = rtrans/sqr0r3
+            endif
             
 c           rpprod = <rp> = rbraan*pketan
 c           pketan = |p> = (eps_{ab}|p]^b)^\dagger = (0 & -1)  (pketsq(1)^*) = (-pketsq(2)^*)
@@ -109,7 +109,6 @@ c                                                    (1 &  0)  (pketsq(2)^*)   (
             pketan(1) = -conjg(pketsq(2))
             pketan(2) =  conjg(pketsq(1))
             rpprod = rbraan(1)*pketan(1) + rbraan(2)*pketan(2)
-            endif
             vcl(3) = pketsq(1)/rpprod
             vcl(4) = pketsq(2)/rpprod
             vcl(5) = rbraan(1)
@@ -130,6 +129,8 @@ c endif for if massive or not
       do i=1,6
         write(*,*) 'vcl(', I, ')= ', vcl(I)
       enddo
+      write(*,*) 'rpprod = ', rpprod
+      write(*,*) ' nsvhel for left vector = ', nsvhel
 
       write(*,*) ' left vector ref vec = '
       do i=0,3
@@ -157,8 +158,8 @@ c output:
 c       complex vcr(6)          : vector wavefunction       |r]<p|/[pr]
 c
       implicit none
-      double complex vcr(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj, rketsq(1:2), pbraan(1:2), pbrasq(1:2)
-      double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,pnorm,rnorm,prnorm,prprod,r(0:3),sqp0p3,sqr0r3
+      double complex vcr(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj, rketsq(2), pbraan(2), pbrasq(2)
+      double precision p(0:3),vmass,hel,hel0,pzpt,emp,sqh,pnorm,rnorm,prprod,r(0:3),sqp0p3,sqr0r3
       integer nhel,nsv,nsvahl,nsvhel,i
       double precision refmom(4)
 
@@ -170,12 +171,23 @@ c
       hel = dble(nhel)
       nsvahl = nsv*dabs(hel)
       nsvhel = nsv*hel
-      pt2 = p(1)**2+p(2)**2
-      pp = min(p(0),dsqrt(pt2+p(3)**2))
-      pt = min(pp,dsqrt(pt2))
 
       vcr(1) = dcmplx(p(0),p(3))*nsv
       vcr(2) = dcmplx(p(1),p(2))*nsv
+
+
+c rplus = r^0 + r^3
+      rplus = r(0) + r(3) 
+      pplus = p(0) + p(3)
+c rtrans = r^1 + i*r^2         
+      rtrans = dcmplx(r(1),r(2))
+      ptrans = dcmplx(p(1),p(2))
+c rtransconj = r^1 -i*r^2
+      rtransconj = dcmplx(r(1),-1*r(2))
+      ptransconj = dcmplx(p(1),-1*p(2))
+c pnorm = sqrt(|p^0 + p^3|) = sqrt(|p^+|)
+      pnorm = sqrt(abs(pplus))
+      rnorm = sqrt(abs(rplus))
 
       if ( vmass.ne.rZero ) then
 
@@ -185,6 +197,7 @@ c
          vcr(3:6) = dcmplx(rZero)
 
       else
+
 c get spinors such that vector wavefunction is |r]<p|/[pr]
 c rketsq = |r]
 c pbraan = <p|
@@ -204,7 +217,7 @@ c prprod = [pr]
          rketsq(2) = dcmplx ( - sqr0r3 )
 
 c nsvhel = -1, i.e. right-chiral (outgoing - hel or incoming + hel)
-         if ( nsvhel.eq.-1*rOne ) then
+         if ( nsvhel.eq.-1 ) then
             if ( sqp0p3.eq.rZero ) then
                pbraan(1) = dcmplx( dsqrt(rTwo*p(0)) )
             else
@@ -214,14 +227,16 @@ c nsvhel = -1, i.e. right-chiral (outgoing - hel or incoming + hel)
                rketsq(1) = dcmplx( dsqrt(rTwo*p(0)) )
             else
                rketsq(1) = rtransconj/sqr0r3
-            
+            endif
+            write(*,*) 'rketsq = ', rketsq(1), rketsq(2)
 c           prprod = [pr] = pbrasq*rketsq
 c           pbrasq = [p| = (-<p|^a*eps_{ab})^\dagger = -(pbraan(1)^*, pbraan(2)^*) (0 & -1)   = (-pbraan(2)^*, pbraan(1)^*)
 c                                                                                  (1 &  0)     
             pbrasq(1) = -conjg(pbraan(2))
             pbrasq(2) =  conjg(pbraan(1))
+            write(*,*) 'pbrasq = [p| = ', pbrasq(1), pbrasq(2)
+            write(*,*) 'pbraan = <p| = ', pbraan(1), pbraan(2)
             prprod = pbrasq(1)*rketsq(1) + pbrasq(2)*rketsq(2)
-            endif
             vcr(3) = rketsq(1)/prprod
             vcr(4) = rketsq(2)/prprod
             vcr(5) = pbraan(1)
@@ -239,6 +254,9 @@ c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
       do i=1,6
         write(*,*) 'vcr(', I, ')= ', vcr(I)
       enddo
+    
+      write(*,*) 'prprod = ', prprod
+      write(*,*) ' nsvhel for left vector = ', nsvhel
 
       write(*,*) ' right vector ref vec = '
       do i=0,3
@@ -266,10 +284,10 @@ c       integer nhel = -1 or 1 : helicity      of fermion
 c       integer nsf  = -1 or 1 : +1 for final state, -1 initial state
 c
 c output:
-c       complex lf(6)          : left-handed fermion wavefunction               [lf|
+c       complex lf(6)          : left-handed fermion wavefunction         [lf|
 c
       implicit none
-      double complex lf(6),chi(2)
+      double complex lf(6),pbrasq(2)
       double precision p(0:3),sf(2),sfomeg(2),omega(2),fmass,
      &     pp,pp3,sqp0p3,sqm(0:1)
       integer nhel,nsf,nh,ip,im, i
@@ -282,21 +300,25 @@ c
 
       nh = nhel*nsf
 
+c     pbrasq = [p| = (sqrt(p^0+p^3), (p^1-i*p^2)/sqrt(p^0+p^3))
+c                  = (0,sqrt(p^0-p^3)) if p^3=-p^0
+
+
       if(p(1).eq.0d0.and.p(2).eq.0d0.and.p(3).lt.0d0) then
          sqp0p3 = 0d0
       else
          sqp0p3 = dsqrt(max(p(0)+p(3),rZero))
       end if
-      chi(1) = dcmplx( sqp0p3 )
+      pbrasq(1) = dcmplx( sqp0p3 )
       if ( sqp0p3.eq.rZero ) then
-         chi(2) = dcmplx( dsqrt(rTwo*p(0)) )
+         pbrasq(2) = dcmplx( dsqrt(rTwo*p(0)) )
       else
-         chi(2) = dcmplx( p(1), -p(2) )/sqp0p3
+         pbrasq(2) = dcmplx( p(1), -p(2) )/sqp0p3
       endif
 
       if ( nh.eq.1 ) then
-         lf(3) = chi(1)
-         lf(4) = chi(2)
+         lf(3) = pbrasq(1)
+         lf(4) = pbrasq(2)
          lf(5) = dcmplx( rZero )
          lf(6) = dcmplx( rZero )
       else
@@ -336,7 +358,7 @@ c output:
 c       complex rf(6)          : fermion wavefunction               |rf>
 c
       implicit none
-      double complex rf(6),chi(2)
+      double complex rf(6),pketan(2)
       double precision p(0:3),sf(2),sfomeg(2),omega(2),fmass,
      &     pp,pp3,sqp0p3,sqm(0:1)
       integer nhel,nsf,nh,ip,im, i
@@ -354,11 +376,15 @@ c
       else
          sqp0p3 = dsqrt(max(p(0)+p(3),rZero))
       endif
-      chi(1) = dcmplx( sqp0p3 )
+
+c     pketan = |p> = (sqrt(p^0+p^3)            ) = (if p^0 = -p^3) (0            ) 
+c                    ((p^1+i*p^2)/sqrt(p^0+p^3))                   (sqrt(p^0-p^3)) 
+
+      pketan(1) = dcmplx( sqp0p3 )
       if ( sqp0p3.eq.rZero ) then
-         chi(2) = dcmplx( dsqrt(rTwo*p(0)) )
+         pketan(2) = dcmplx( dsqrt(rTwo*p(0)) )
       else
-         chi(2) = dcmplx( p(1), p(2) )/sqp0p3
+         pketan(2) = dcmplx( p(1), p(2) )/sqp0p3
       endif
 
 
@@ -370,8 +396,8 @@ c
       else
          rf(3) = dcmplx( rZero )
          rf(4) = dcmplx( rZero )
-         rf(5) = chi(1)
-         rf(6) = chi(2)
+         rf(5) = pketan(1)
+         rf(6) = pketan(2)
       endif
 
       write(*,*) 'right fermion wavefunction = '
@@ -1276,7 +1302,7 @@ c prnorm = sqrt(|p^+||r^+|)
          endif
          xi(2) = dcmplx ( - sqr0r3 )
 
-         if ( nsvhel.eq.rOne ) then
+         if ( nsvhel.eq.1 ) then
             rpprod = (rtrans*pplus - rplus*ptrans)/prnorm
             if ( sqp0p3.eq.rZero ) then
                chi(1) = dcmplx( dsqrt(rTwo*p(0)) )
