@@ -1112,6 +1112,7 @@ class Amplitude(base_objects.PhysicsObject):
 
             # AL: temporary switch to turn off removal of vanishing combinations
             remove_combs = True
+            # remove_combs = False
 
             # AL: remove combinations which vanish
             if remove_combs:

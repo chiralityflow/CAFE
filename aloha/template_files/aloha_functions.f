@@ -28,8 +28,8 @@ c output:
 c       complex vcl(6)          : vector wavefunction    |p]<r|/<rp>
 c
       implicit none
-      double complex vcl(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj, pketsq(2), rbraan(2), pketan(2)
-      double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,pnorm,rnorm,rpprod,r(0:3),sqp0p3,sqr0r3, svhel,sv
+      double complex vcl(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj, pketsq(2), rbraan(2), pketan(2), rpprod
+      double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,pnorm,rnorm,r(0:3),sqp0p3,sqr0r3, svhel,sv
       integer nhel,nsv,nsvahl,nsvhel, i
 
       double precision rZero, rHalf, rOne, rTwo
@@ -103,8 +103,8 @@ c                                                    (1 &  0)  (pketsq(2)^*)   (
             pketan(1) = -dconjg(pketsq(2))
             pketan(2) =  dconjg(pketsq(1))
             rpprod = rbraan(1)*pketan(1) + rbraan(2)*pketan(2)
-            vcl(3) = pketsq(1)/rpprod
-            vcl(4) = pketsq(2)/rpprod
+            vcl(3) = pketsq(1)*dsqrt(rTwo)/rpprod
+            vcl(4) = pketsq(2)*dsqrt(rTwo)/rpprod
             vcl(5) = rbraan(1)
             vcl(6) = rbraan(2)
          
@@ -124,6 +124,7 @@ c endif for if massive or not
         write(*,*) 'vcl(', I, ')= ', vcl(I)
       enddo
       write(*,*) 'rpprod = ', rpprod
+      write(*,*) ' |rpprod|^2 = ', rpprod*dconjg(rpprod), ' s_rp = ', 2*(r(0)*p(0) - r(1)*p(1)-r(2)*p(2)-r(3)*p(3))
       write(*,*) ' nsvhel for left vector = ', nsvhel
 
       write(*,*) ' left vector ref vec = '
@@ -152,8 +153,8 @@ c output:
 c       complex vcr(6)          : vector wavefunction       |r]<p|/[pr]
 c
       implicit none
-      double complex vcr(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj, rketsq(2), pbraan(2), pbrasq(2)
-      double precision p(0:3),vmass,hel,hel0,pzpt,emp,sqh,pnorm,rnorm,prprod,r(0:3),sqp0p3,sqr0r3
+      double complex vcr(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj, rketsq(2), pbraan(2), pbrasq(2), prprod
+      double precision p(0:3),vmass,hel,hel0,pzpt,emp,sqh,pnorm,rnorm,r(0:3),sqp0p3,sqr0r3
       integer nhel,nsv,nsvahl,nsvhel,i
       double precision refmom(4)
 
@@ -230,8 +231,8 @@ c                                                                               
             write(*,*) 'pbrasq = [p| = ', pbrasq(1), pbrasq(2)
             write(*,*) 'pbraan = <p| = ', pbraan(1), pbraan(2)
             prprod = pbrasq(1)*rketsq(1) + pbrasq(2)*rketsq(2)
-            vcr(3) = rketsq(1)/prprod
-            vcr(4) = rketsq(2)/prprod
+            vcr(3) = rketsq(1)*dsqrt(rTwo)/prprod
+            vcr(4) = rketsq(2)*dsqrt(rTwo)/prprod
             vcr(5) = pbraan(1)
             vcr(6) = pbraan(2)
          
@@ -249,6 +250,7 @@ c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
       enddo
     
       write(*,*) 'prprod = ', prprod
+      write(*,*) ' |prprod|^2 = ', prprod*dconjg(prprod), ' s_rp = ', 2*(r(0)*p(0) - r(1)*p(1)-r(2)*p(2)-r(3)*p(3))
       write(*,*) ' nsvhel for left vector = ', nsvhel
 
       write(*,*) ' right vector ref vec = '
