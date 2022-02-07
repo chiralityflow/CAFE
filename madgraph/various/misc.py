@@ -1586,29 +1586,6 @@ def vertex_replacer(text, vertex):
     "and outputs the corresponding chiral vertex Fortran file"
     text_copy = text
     linebreaks = get_symbols(text_copy, '\n')
-    # if (vertex == 'FFV7_0'):
-    #     equality = get_symbols(text_copy, '=')
-    #     p = text_copy[equality[-2]-2]
-    #     FFV7_0_replace = ' TMP{} = {}*{}\n'.format(p,left_prod('F1','V3'),right_prod('V3','F2'))
-    #     text_copy = text_copy[:equality[-2]-6] + FFV7_0_replace + text_copy[linebreaks[-5]+1:]
-    # if (vertex == 'FFV8_0'):
-    #     equality = get_symbols(text_copy, '=')
-    #     p = text_copy[equality[-2]-2]
-    #     FFV8_0_replace =  ' TMP{} = {}*{}\n'.format(p,left_prod('F1','V3'),right_prod('V3','F2'))
-    #     equality = get_symbols(text_copy, '=')
-    #     text_copy = text_copy[:equality[-2]-6] + FFV8_0_replace + text_copy[linebreaks[-5]+1:]
-    # if (vertex == 'FFV7P0_3'):
-    #     FFV7P0_3_replace = '      V3(3) = 2*DENOM*F1(4)\n'\
-    #         + '      V3(4) = -2*DENOM*F1(3)\n'\
-    #         + '      V3(5) = F2(6)\n'\
-    #         + '      V3(6) = -1*F2(5)\n'
-    #     text_copy = text_copy[:linebreaks[-8]+1] + FFV7P0_3_replace + text_copy[linebreaks[-4]+1:]
-    # if (vertex == 'FFV8P0_3'):
-    #     FFV8P0_3_replace = '      V3(3) = 2*DENOM*F1(4)\n'\
-    #         + '      V3(4) = -2*DENOM*F1(3)\n'\
-    #         + '      V3(5) = F2(6)\n'\
-    #         + '      V3(6) = -1*F2(5)\n'
-    #     text_copy = text_copy[:linebreaks[-8]+1] + FFV8P0_3_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'LRV1_0'):
         equality = get_symbols(text_copy, '=')
         p = text_copy[equality[-2]-2]
@@ -1632,50 +1609,6 @@ def vertex_replacer(text, vertex):
             + '      V3(5) = F1(6)\n'\
             + '      V3(6) = -1*F1(5)\n'
         text_copy = text_copy[:linebreaks[-8]+1] + RLV1P0_3_replace + text_copy[linebreaks[-4]+1:]
-    # if (vertex == 'FFV7_1'):
-    #     spinor = pbar_left('V3','P1')
-    #     FFV7_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
-    #         + '      INPROD = {}\n'.format(right_prod('V3','F2'))\
-    #         + '      F1(3) = 0\n'\
-    #         + '      F1(4) = 0\n'\
-    #         + '      F1(5) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
-    #         + '      F1(6) = DENOM*CI*INPROD*{}\n'.format(spinor[1])
-    #     text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
-    #     linebreaks = get_symbols(text_copy, '\n')
-    #     text_copy = text_copy[:linebreaks[-18]+1] + FFV7_1_replace + text_copy[linebreaks[-4]+1:]
-    # if (vertex == 'FFV7_2'):
-    #     spinor = pbar_right('V3','P2')
-    #     FFV7_2_replace = '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
-    #         + '      INPROD = {}\n'.format(left_prod('F1','V3'))\
-    #         + '      F2(3) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
-    #         + '      F2(4) = DENOM*CI*INPROD*{}\n'.format(spinor[1])\
-    #         + '      F2(5) = 0\n'\
-    #         + '      F2(6) = 0\n'
-    #     text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
-    #     linebreaks = get_symbols(text_copy, '\n')
-    #     text_copy = text_copy[:linebreaks[-19]+1] + FFV7_2_replace + text_copy[linebreaks[-4]+1:]
-    # if (vertex == 'FFV8_1'): 
-    #     spinor = pbar_right('V3','P1')
-    #     FFV8_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
-    #         + '      INPROD = {}\n'.format(left_prod('F2','V3'))\
-    #         + '      F1(3) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
-    #         + '      F1(4) = DENOM*CI*INPROD*{}\n'.format(spinor[1])\
-    #         + '      F1(5) = 0\n'\
-    #         + '      F1(6) = 0\n'
-    #     text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
-    #     linebreaks = get_symbols(text_copy, '\n')
-    #     text_copy = text_copy[:linebreaks[-18]+1] + FFV8_1_replace + text_copy[linebreaks[-4]+1:]
-    # if (vertex == 'FFV8_2'):
-    #     spinor = pbar_left('V3','P2')
-    #     FFV8_2_replace = '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
-    #         + '      INPROD = {}\n'.format(right_prod('V3','F1'))\
-    #         + '      F2(3) = 0\n'\
-    #         + '      F2(4) = 0\n'\
-    #         + '      F2(5) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
-    #         + '      F2(6) = DENOM*CI*INPROD*{}\n'.format(spinor[1])
-    #     text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
-    #     linebreaks = get_symbols(text_copy, '\n')
-    #     text_copy = text_copy[:linebreaks[-18]+1] + FFV8_2_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'LLV1_1'): 
         spinor = pbar_ket('V3','(-1)*P1')
         LLV1_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
