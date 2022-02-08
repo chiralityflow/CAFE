@@ -3606,8 +3606,7 @@ class Process(PhysicsObject):
 
         final_legs = [leg for leg in self.get_legs_with_decays() if leg.get('state') == True]
 
-        treat_photons = False
-        # treat_photons = True
+        treat_photons = True
 
         identical_indices = collections.defaultdict(int)
         for leg in final_legs:
@@ -3620,12 +3619,10 @@ class Process(PhysicsObject):
                 key = (90005,key[1])
             if (key[0] == -90007):
                 key = (-90005,key[1])
-            if treat_photons:
-                if (key[0] == 90024):
-                    key = (90023,key[1])
+            if (key[0] == 90024):
+                key = (90023,key[1])
             identical_indices[key] += 1
 
-        # misc.sprint(identical_indices)
         return reduce(lambda x, y: x * y, [ math.factorial(val) for val in \
                         identical_indices.values() ], 1)
 

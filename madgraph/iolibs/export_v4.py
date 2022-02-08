@@ -2716,7 +2716,6 @@ CF2PY CHARACTER*20, intent(out) :: PREFIX(%(nb_me)i)
         replace_dict['helicity_lines'] = helicity_lines
         # ZW: replaces helicity_lines and ncomb to remove sums
         # that are necessarily zero based on helicity configurations
-        # helicity_lines_2 = self.helicity_lines_replacer(helicity_lines, helas_calls, process_lines, ncomb)
         helicity_lines_2 = self.helicity_lines_replacer(helicity_lines, helas_calls, ncomb, nexternal)
         replace_dict['ncomb'] = helicity_lines_2[1]
         replace_dict['helicity_lines'] = helicity_lines_2[0]
