@@ -3625,7 +3625,7 @@ class Process(PhysicsObject):
                     key = (90023,key[1])
             identical_indices[key] += 1
 
-        misc.sprint(identical_indices)
+        # misc.sprint(identical_indices)
         return reduce(lambda x, y: x * y, [ math.factorial(val) for val in \
                         identical_indices.values() ], 1)
 

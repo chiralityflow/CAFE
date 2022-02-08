@@ -83,6 +83,7 @@ class IdentifyMETag(diagram_generation.DiagramTag):
         ninitial = process.get_ninitial()
         model = process.get('model')
         dc = 0
+
         if process.get('is_decay_chain'):
             dc = cls.dec_number
             cls.dec_number += 1
@@ -654,7 +655,6 @@ class HelasWavefunction(base_objects.PhysicsObject):
     def __init__(self, *arguments):
         """Allow generating a HelasWavefunction from a Leg
         """
-        # misc.sprint('In HelasWavefunction init')
 
         if len(arguments) > 2:
             if isinstance(arguments[0], base_objects.Leg) and \
@@ -5878,7 +5878,6 @@ class HelasMultiProcess(base_objects.PhysicsObject):
         HelasMatrixElements created. By default it is none, but when called from
         LoopHelasProcess, this options will contain 'optimized_output'."""
 
-
         if isinstance(argument, diagram_generation.AmplitudeList):
             super(HelasMultiProcess, self).__init__()
             self.set('matrix_elements', self.generate_matrix_elements(argument,
@@ -6024,6 +6023,10 @@ class HelasMultiProcess(base_objects.PhysicsObject):
                   "%s is not valid AmplitudeList" % type(amplitudes)
 
         combine = combine_matrix_elements
+
+        # AL: don't combine matrix elements if chiral
+        if amplitudes[0].get('process').get('model').get('name') == 'cf':
+            combine_matrix_elements = False
 
         if 'mode' in matrix_element_opts and matrix_element_opts['mode']=='MadSpin':
             combine = False

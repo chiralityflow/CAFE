@@ -671,11 +671,8 @@ class Amplitude(base_objects.PhysicsObject):
 
 
 
-        # AL: get reference momenta so we can remove diagrams which disappear after gauge choice
-        # misc.sprint(leglist)
-        # ref_momenta = self.get_ref_momenta(leglist)
-        # misc.sprint(ref_momenta)
-        # AL: new bool to say if first iteration of algorithm
+        # AL: new bool to say if first iteration of algorithm.
+        # Needed to get removal of diagrams due to reference momentum right
         is_first_it = True
 
 
@@ -1145,12 +1142,10 @@ class Amplitude(base_objects.PhysicsObject):
 
         # Create a list of leglists/vertices by merging combinations
         leg_vertex_list = self.merge_comb_legs(comb_lists, ref_dict_to1)
-        # misc.sprint(leg_vertex_list)
 
         res_length = len(res)
         # Consider all the pairs
         for leg_vertex_tuple in leg_vertex_list:
-            # misc.sprint(leg_vertex_tuple)
 
             # Remove forbidden particles
             if self.get('process').get('forbidden_particles') and \
@@ -1179,7 +1174,6 @@ class Amplitude(base_objects.PhysicsObject):
             
             # If there is a reduced diagram
             if reduced_diagram:
-                # misc.sprint(reduced_diagram)
                 vertex_list_list = [list(leg_vertex_tuple[1])]
                 vertex_list_list.append(reduced_diagram)
                 expanded_list = expand_list_list(vertex_list_list)
@@ -1272,7 +1266,6 @@ class Amplitude(base_objects.PhysicsObject):
 
                 # Check if the combination is valid
                 if base_objects.LegList(comb).can_combine_to_1(ref_dict_to1):
-                    # misc.sprint(comb)
 
                     # Identify the rest, create a list [comb,rest] and
                     # add it to res
@@ -1328,7 +1321,6 @@ class Amplitude(base_objects.PhysicsObject):
             for entry in comb_list:
                 # Act on all leg combinations
                 if isinstance(entry, tuple):
-                    # misc.sprint(entry)
 
                     # Build the leg object which will replace the combination:
                     # 1) leg ids is as given in the ref_dict
@@ -1349,11 +1341,12 @@ class Amplitude(base_objects.PhysicsObject):
                     # separate routine, to allow overloading by
                     # daughter classes
                     new_leg_vert_ids = []
-                    # misc.sprint(leg_vert_ids)
 
                     # AL: remove left and right photon propagators from combined legs
                     # This should only remove off-shell regular photons, so the on-shell (external)
                     # ones will be unchanged.
+                    # TODO: Rather do this by changing the propagating option of left/right photons in
+                    #  particles.py to propagating = false?
                     leg_ids = [leg[0] for leg in leg_vert_ids]
                     if leg_ids == [90022, 90023, 90024]:
                         leg_vert_ids = [leg_vert_ids[0]]
@@ -1879,6 +1872,11 @@ class MultiProcess(base_objects.PhysicsObject):
         # Store the diagram tags for processes, to allow for
         # identifying identical matrix elements already at this stage.
         model = process_definition['model']
+
+
+        # AL: check if chiral processes (we only have chiral particles in cf model.
+        # This can be updated if we add masses/have different needs for different particles)
+        is_chiral = model.get('name') == 'cf'
         
         islegs = [leg for leg in process_definition['legs'] \
                  if leg['state'] == False]
@@ -1891,6 +1889,7 @@ class MultiProcess(base_objects.PhysicsObject):
                  if leg['state'] == True]
         polids = [tuple(leg['polarization'])  for leg in process_definition['legs'] \
                  if leg['state'] == True]
+
         # Generate all combinations for the initial state
         for prod in itertools.product(*isids):
             islegs = [\
@@ -1905,7 +1904,13 @@ class MultiProcess(base_objects.PhysicsObject):
 
             for prod in itertools.product(*fsids):
                 tag = zip(prod, polids)
-                tag = sorted(tag)
+
+                # AL: if chiral, use tag = tuple(tag) rather than sorted(tag) so we consider all helicity combinations.
+                if is_chiral:
+                    tag = tuple(tag)
+                else: 
+                    tag = sorted(tag)
+
                 # Remove double counting between final states
                 if tuple(tag) in red_fsidlist:
                     continue

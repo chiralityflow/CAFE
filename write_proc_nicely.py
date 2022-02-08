@@ -27,17 +27,20 @@ initial_state = proc.split('> ')[0]
 particles = [word for word in final_state.split(' ') if word != '']
 
 # check for multiple instances of the same particle
+clean_up_name = False
 to_remove = []
-for ipart, part in enumerate(particles):
-    # if not already considered same particle before and there are multiple instances of this particle
-    if not part in to_remove and particles.count(part) > 1:
-        # we don't want to consider it again
-        to_remove.append(part)
-        # simplify output
-        particles[ipart] = str(particles.count(part)) + part
+if clean_up_name:
+    for ipart, part in enumerate(particles):
+        # if not already considered same particle before and there are multiple instances of this particle
+        if not part in to_remove and particles.count(part) > 1:
+            # we don't want to consider it again
+            to_remove.append(part)
+            # simplify output
+            particles[ipart] = str(particles.count(part)) + part
 
-# update particles in final state and re-join with initial state
-particles = [part for part in particles if part not in to_remove]
+    # update particles in final state and re-join with initial state
+    particles = [part for part in particles if part not in to_remove]
+    
 final_state = ' '.join(particles)        
 proc = initial_state + '> ' + final_state
 
