@@ -118,20 +118,6 @@ c nsvhel = -1, i.e. right-chiral (outgoing - hel or incoming + hel)
 
 c endif for if massive or not
       endif
-
-      write(*,*) ' left vector wavefunction = '
-      do i=1,6
-        write(*,*) 'vcl(', I, ')= ', vcl(I)
-      enddo
-      write(*,*) 'rpprod = ', rpprod
-      write(*,*) ' |rpprod|^2 = ', rpprod*dconjg(rpprod), ' s_rp = ', 2*(r(0)*p(0) - r(1)*p(1)-r(2)*p(2)-r(3)*p(3))
-      write(*,*) ' nsvhel for left vector = ', nsvhel
-
-      write(*,*) ' left vector ref vec = '
-      do i=0,3
-        write(*,*) 'r(', I, ')= ', r(I)
-      enddo
-
 c
       return
       end
@@ -222,14 +208,11 @@ c nsvhel = -1, i.e. right-chiral (outgoing - hel or incoming + hel)
             else
                rketsq(1) = rtransconj/sqr0r3
             endif
-            write(*,*) 'rketsq = ', rketsq(1), rketsq(2)
 c           prprod = [pr] = pbrasq*rketsq
 c           pbrasq = [p| = (-<p|^a*eps_{ab})^\dagger = -(pbraan(1)^*, pbraan(2)^*) (0 & -1)   = (-pbraan(2)^*, pbraan(1)^*)
 c                                                                                  (1 &  0)     
             pbrasq(1) = -conjg(pbraan(2))
             pbrasq(2) =  conjg(pbraan(1))
-            write(*,*) 'pbrasq = [p| = ', pbrasq(1), pbrasq(2)
-            write(*,*) 'pbraan = <p| = ', pbraan(1), pbraan(2)
             prprod = pbrasq(1)*rketsq(1) + pbrasq(2)*rketsq(2)
             vcr(3) = rketsq(1)*dsqrt(rTwo)/prprod
             vcr(4) = rketsq(2)*dsqrt(rTwo)/prprod
@@ -243,21 +226,6 @@ c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
             vcr(5) = dcmplx(rZero)
             vcr(6) = dcmplx(rZero)
          endif
-
-      write(*,*) ' right vector wavefunction = '
-      do i=1,6
-        write(*,*) 'vcr(', I, ')= ', vcr(I)
-      enddo
-    
-      write(*,*) 'prprod = ', prprod
-      write(*,*) ' |prprod|^2 = ', prprod*dconjg(prprod), ' s_rp = ', 2*(r(0)*p(0) - r(1)*p(1)-r(2)*p(2)-r(3)*p(3))
-      write(*,*) ' nsvhel for left vector = ', nsvhel
-
-      write(*,*) ' right vector ref vec = '
-      do i=0,3
-        write(*,*) 'r(', I, ')= ', r(I)
-      enddo
-
 
 c endif for if massive or not
       endif
@@ -322,11 +290,6 @@ c                  = (0,sqrt(p^0-p^3)) if p^3=-p^0
          lf(5) = dcmplx( rZero )
          lf(6) = dcmplx( rZero )
       endif
-
-      write(*,*) ' left fermion wavefunction = '
-      do i=1,6
-        write(*,*) 'lf(', I, ')= ', lf(I)
-      enddo
 
 
       return
@@ -394,12 +357,6 @@ c                    ((p^1+i*p^2)/sqrt(p^0+p^3))                   (sqrt(p^0-p^3
          rf(5) = pketan(1)
          rf(6) = pketan(2)
       endif
-
-      write(*,*) 'right fermion wavefunction = '
-      do i=1,6
-        write(*,*) 'rf(', I, ')= ', rf(I)
-      enddo
-
 
       return
       end
