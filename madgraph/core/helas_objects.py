@@ -668,9 +668,9 @@ class HelasWavefunction(base_objects.PhysicsObject):
                 if len(arguments) > 3:
                     ref_momenta = arguments[3]
                     # AL: if gauge boson, set reference momentum
+                    # AL: TODO: update when we update pid conventions
                     if leg.get('id') in [90023, 90024]:
                         self.set('ref_mom', ref_momenta[leg.get('number')-1])
-
                 
                 # decay_ids is the pdg codes for particles with decay
                 # chains defined
@@ -3793,8 +3793,14 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # Keep track of wavefunction number
         wf_number = 0
 
-        # AL: get list of wf numbers (better to give legs?) for ref momenta
-        ref_momenta = self.get_ref_momenta(process)
+        # AL: get list of wf numbers for ref momenta
+        # AL: was from function here, but now from the diagram generation process
+        # keep ability to pick our own ref momenta for now
+        man_ref_mom = False
+        if man_ref_mom:
+            ref_momenta = self.get_ref_momenta(process)
+        else:
+            ref_momenta = amplitude.get('ref_momenta')
 
         # Generate wavefunctions for the external particles
         external_wavefunctions = dict([(leg.get('number'),

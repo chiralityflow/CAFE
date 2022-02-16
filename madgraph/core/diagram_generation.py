@@ -449,6 +449,8 @@ class Amplitude(base_objects.PhysicsObject):
         # has_mirror_process is True if the same process but with the
         # two incoming particles interchanged has been generated
         self['has_mirror_process'] = False
+        # AL: added ref momenta
+        self['ref_momenta'] = []
 
     def __init__(self, argument=None):
         """Allow initialization with Process"""
@@ -476,6 +478,9 @@ class Amplitude(base_objects.PhysicsObject):
         if name == 'has_mirror_process':
             if not isinstance(value, bool):
                 raise self.PhysicsObjectError("%s is not a valid boolean" % str(value))
+        if name == 'ref_momenta':
+            if not isinstance(value,list):
+                raise self.PhysicsObjectError("%s is not a valid list of ref momenta" % str(value))
         return True
 
     def get(self, name):
@@ -493,7 +498,7 @@ class Amplitude(base_objects.PhysicsObject):
     def get_sorted_keys(self):
         """Return diagram property names as a nicely sorted list."""
 
-        return ['process', 'diagrams', 'has_mirror_process']
+        return ['process', 'diagrams', 'has_mirror_process', 'ref_momenta']
 
     def get_number_of_diagrams(self):
         """Returns number of diagrams for this amplitude"""
@@ -998,7 +1003,8 @@ class Amplitude(base_objects.PhysicsObject):
     # AL: new function to get combinations of particles which will vanish
     def get_vanishing_combs(self,ext_legs):
         """Function which gets combinations of chiral photons and chiral 
-        fermions which will vanish after our standardised choice of gauge reference momentum
+        fermions which will vanish after our standardised choice of gauge reference momentum,
+        It also sets the reference momenta for the rest of the process
         (standard choice is first appearing (anti)fermion of opposite chirality to the gauge boson)"""
 
         # return list of particle numbers (return -1 if not boson)
@@ -1029,6 +1035,8 @@ class Amplitude(base_objects.PhysicsObject):
                 break
         
         # find photons and update its reference momenta
+        # place ref momenta in array ref_mom and store as property of amplitude
+        ref_mom = []
         if found_left_ferm and found_right_ferm:
             for leg in ext_legs:
                 # if left photon, append right (anti)fermion
@@ -1038,12 +1046,22 @@ class Amplitude(base_objects.PhysicsObject):
                         vanishing_combs.append((leg, right_ferm))
                     else:
                         vanishing_combs.append((right_ferm, leg))
+                    # add ref momentum to list
+                    ref_mom.append(right_ferm.get('number'))
+
                 # if right photon, append left (anti)fermion
                 elif leg.get('id') == 90024:
                     if leg.get('number') < left_ferm.get('number'):
                         vanishing_combs.append((leg, left_ferm))
                     else:
                         vanishing_combs.append((left_ferm, leg))
+                    # add ref momentum to list
+                    ref_mom.append(left_ferm.get('number'))
+                
+                # if not chiral photon, ref momentum is -1
+                else: 
+                    ref_mom.append(-1)
+            self.set('ref_momenta', ref_mom)
 
         return vanishing_combs
 
@@ -1103,14 +1121,15 @@ class Amplitude(base_objects.PhysicsObject):
                                     max_multi_to1)
 
 
-        # AL: now remove from comb_lists those processes which vanish due to ref momentum
-        vanishing_combs = self.get_vanishing_combs(ext_legs)
         if (is_first_it): 
 
             # AL: temporary switch to turn off removal of vanishing combinations
             remove_combs = True
             # remove_combs = False
 
+            # AL: now remove from comb_lists those processes which vanish due to ref momentum
+            vanishing_combs = self.get_vanishing_combs(ext_legs)
+        
             # AL: remove combinations which vanish
             if remove_combs:
 
@@ -1981,9 +2000,15 @@ class MultiProcess(base_objects.PhysicsObject):
                         
                 # Check for successful crossings, unless we have specified
                 # properties that break crossing symmetry
+                
+                # AL: for now turn off crossing to get ref momenta correct 
+                # (done using if not process.get('model').get('name') == 'cf').
+                # TODO: For future would be good to make crossing work properly instead
+                
                 if not process.get('required_s_channels') and \
                    not process.get('forbidden_onsh_s_channels') and \
                    not process.get('forbidden_s_channels') and \
+                   not process.get('model').get('name') == 'cf' and \
                    not process.get('is_decay_chain') and not diagram_filter:
                     try:
                         crossed_index = success_procs.index(sorted_legs)
@@ -2259,6 +2284,11 @@ class MultiProcess(base_objects.PhysicsObject):
                                              d in new_amp.get('diagrams')])
         new_amp.set('diagrams', diagrams)
         new_amp.trim_diagrams()
+
+        # # AL: Recalculate the reference momenta
+        # misc.sprint(perm_map)
+        # new_amp.get_vanishing_combs(new_amp.get('process').get('legs'))
+        # misc.sprint(new_amp.get('ref_momenta'))
 
         # Make sure to reset mirror process
         new_amp.set('has_mirror_process', False)
