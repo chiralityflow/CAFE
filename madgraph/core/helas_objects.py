@@ -3750,9 +3750,11 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             # if left photon, append right (anti)fermion
             if leg.get('id') == 90023:
                 ref_moms.append(right_ferm.get('number'))
+                # ref_moms.append(left_ferm.get('number'))
             # if right photon, append left (anti)fermion
             elif leg.get('id') == 90024:
                 ref_moms.append(left_ferm.get('number'))
+                # ref_moms.append(right_ferm.get('number'))
             # else append -1
             else: ref_moms.append(-1)
             
