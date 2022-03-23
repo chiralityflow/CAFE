@@ -28,8 +28,8 @@ c output:
 c       complex vcl(6)          : vector wavefunction    |p]<r|/<rp>
 c
       implicit none
-      double complex vcl(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj, pketsq(2), rbraan(2), pketan(2), rpprod
-      double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,pnorm,rnorm,r(0:3),sqp0p3,sqr0r3, svhel,sv
+      double complex vcl(6), pketsq(2), rbraan(2), rpprod
+      double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,r(0:3),sqp0p3,sqr0r3, svhel,sv
       integer nhel,nsv,nsvahl,nsvhel, i
 
       double precision rZero, rHalf, rOne, rTwo
@@ -50,21 +50,6 @@ c
          vcl(3:6) = dcmplx(rZero)
 
       else
-
-
-c rplus = r^0 + r^3
-         rplus = r(0) + r(3) 
-         pplus = p(0) + p(3)
-c rtrans = r^1 + i*r^2         
-         rtrans = dcmplx(r(1),r(2))
-         ptrans = dcmplx(p(1),p(2))
-c rtransconj = r^1 -i*r^2
-         rtransconj = dcmplx(r(1),-1*r(2))
-         ptransconj = dcmplx(p(1),-1*p(2))
-
-c pnorm = sqrt(|p^0 + p^3|) = sqrt(|p^+|)
-         pnorm = sqrt(abs(pplus))
-         rnorm = sqrt(abs(rplus))
 
 c get spinors such that vector wavefunction is |p]<r|/<rp>
 c pketsq = |p] = (ptransconj/sqp0p3, -sqp0p3)
@@ -89,20 +74,18 @@ c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
             if ( sqp0p3.eq.rZero ) then
                pketsq(1) = dcmplx( dsqrt(rTwo*p(0)) )
             else
-               pketsq(1) = ptransconj/sqp0p3
+               pketsq(1) = dcmplx(p(1),-1*p(2))/sqp0p3
             endif
             if ( sqr0r3.eq.rZero ) then
                rbraan(1) = dcmplx( dsqrt(rTwo*r(0)) )
             else
-               rbraan(1) = rtrans/sqr0r3
+               rbraan(1) = dcmplx(r(1),r(2))/sqr0r3
             endif
             
 c           rpprod = <rp> = rbraan*pketan
 c           pketan = |p> = (eps_{ab}|p]^b)^\dagger = (0 & -1)  (pketsq(1)^*) = (-pketsq(2)^*)
 c                                                    (1 &  0)  (pketsq(2)^*)   ( pketsq(1)^*)
-            pketan(1) = -dconjg(pketsq(2))
-            pketan(2) =  dconjg(pketsq(1))
-            rpprod = rbraan(1)*pketan(1) + rbraan(2)*pketan(2)
+            rpprod = rbraan(2)*dconjg(pketsq(1)) - rbraan(1)*dconjg(pketsq(2))
             vcl(3) = pketsq(1)*dsqrt(rTwo)/rpprod
             vcl(4) = pketsq(2)*dsqrt(rTwo)/rpprod
             vcl(5) = rbraan(1)
@@ -139,8 +122,8 @@ c output:
 c       complex vcr(6)          : vector wavefunction       |r]<p|/[pr]
 c
       implicit none
-      double complex vcr(6),pplus,ptrans,ptransconj,rplus,rtrans,rtransconj, rketsq(2), pbraan(2), pbrasq(2), prprod
-      double precision p(0:3),vmass,hel,hel0,pzpt,emp,sqh,pnorm,rnorm,r(0:3),sqp0p3,sqr0r3
+      double complex vcr(6), rketsq(2), pbraan(2), prprod
+      double precision p(0:3),vmass,hel,hel0,pzpt,emp,sqh,r(0:3),sqp0p3,sqr0r3
       integer nhel,nsv,nsvahl,nsvhel,i
       double precision refmom(4)
 
@@ -155,19 +138,6 @@ c
       vcr(1) = dcmplx(p(0),p(3))*nsv
       vcr(2) = dcmplx(p(1),p(2))*nsv
 
-
-c rplus = r^0 + r^3
-      rplus = r(0) + r(3) 
-      pplus = p(0) + p(3)
-c rtrans = r^1 + i*r^2         
-      rtrans = dcmplx(r(1),r(2))
-      ptrans = dcmplx(p(1),p(2))
-c rtransconj = r^1 -i*r^2
-      rtransconj = dcmplx(r(1),-1*r(2))
-      ptransconj = dcmplx(p(1),-1*p(2))
-c pnorm = sqrt(|p^0 + p^3|) = sqrt(|p^+|)
-      pnorm = sqrt(abs(pplus))
-      rnorm = sqrt(abs(rplus))
 
       if ( vmass.ne.rZero ) then
 
@@ -201,19 +171,17 @@ c nsvhel = -1, i.e. right-chiral (outgoing - hel or incoming + hel)
             if ( sqp0p3.eq.rZero ) then
                pbraan(1) = dcmplx( dsqrt(rTwo*p(0)) )
             else
-               pbraan(1) = ptrans/sqp0p3
+               pbraan(1) = dcmplx(p(1),p(2))/sqp0p3
             endif
             if ( sqr0r3.eq.rZero ) then
                rketsq(1) = dcmplx( dsqrt(rTwo*r(0)) )
             else
-               rketsq(1) = rtransconj/sqr0r3
+               rketsq(1) = dcmplx(r(1),-1*r(2))/sqr0r3
             endif
 c           prprod = [pr] = pbrasq*rketsq
 c           pbrasq = [p| = (-<p|^a*eps_{ab})^\dagger = -(pbraan(1)^*, pbraan(2)^*) (0 & -1)   = (-pbraan(2)^*, pbraan(1)^*)
 c                                                                                  (1 &  0)     
-            pbrasq(1) = -conjg(pbraan(2))
-            pbrasq(2) =  conjg(pbraan(1))
-            prprod = pbrasq(1)*rketsq(1) + pbrasq(2)*rketsq(2)
+            prprod = -conjg(pbraan(2))*rketsq(1) + conjg(pbraan(1))*rketsq(2)
             vcr(3) = rketsq(1)*dsqrt(rTwo)/prprod
             vcr(4) = rketsq(2)*dsqrt(rTwo)/prprod
             vcr(5) = pbraan(1)

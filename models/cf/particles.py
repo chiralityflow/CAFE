@@ -134,3 +134,20 @@ muR__minus__ = Particle(pdg_code = 90007,
                        Y = 0)
 
 muR__plus__ = muR__minus__.anti()
+
+# W boson included since MadEvent relies on its mass to determine couplings
+
+W__plus__ = Particle(pdg_code = 24,
+                     name = 'W+',
+                     antiname = 'W-',
+                     spin = 3,
+                     color = 1,
+                     mass = Param.MW,
+                     width = Param.WW,
+                     texname = 'W+',
+                     antitexname = 'W-',
+                     charge = 1,
+                     GhostNumber = 0,
+                     LeptonNumber = 0,
+                     Y = 0)
+

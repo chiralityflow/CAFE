@@ -1588,15 +1588,14 @@ def vertex_replacer(text, vertex):
     linebreaks = get_symbols(text_copy, '\n')
     if (vertex == 'LRV1_0'):
         equality = get_symbols(text_copy, '=')
-        p = text_copy[equality[-2]-2]
-        LRV1_0_replace = ' TMP{} = -CI*{}*{}\n'.format(p,left_prod('F1','V3'),right_prod('V3','F2'))
-        text_copy = text_copy[:equality[-2]-6] + LRV1_0_replace + text_copy[linebreaks[-5]+1:]
+        LRV1_0_replace = '      VERTEX = -COUP*{}*{}\n'.format(left_prod('F1','V3'),right_prod('V3','F2'))
+        text_copy = text_copy[:linebreaks[-10]+1] + text_copy[linebreaks[-9]+1:linebreaks[-7]+1]\
+             + LRV1_0_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'RLV1_0'):
         equality = get_symbols(text_copy, '=')
-        p = text_copy[equality[-2]-2]
-        RLV1_0_replace =  ' TMP{} = -CI*{}*{}\n'.format(p,left_prod('F2','V3'),right_prod('V3','F1'))
-        equality = get_symbols(text_copy, '=')
-        text_copy = text_copy[:equality[-2]-6] + RLV1_0_replace + text_copy[linebreaks[-5]+1:]
+        RLV1_0_replace = '      VERTEX = -COUP*{}*{}\n'.format(left_prod('F2','V3'),right_prod('V3','F1'))
+        text_copy = text_copy[:linebreaks[-10]+1] + text_copy[linebreaks[-9]+1:linebreaks[-7]+1]\
+             + RLV1_0_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'LRV1P0_3'):
         LRV1P0_3_replace = '      V3(3) = 2*DENOM*F1(4)\n'\
             + '      V3(4) = -2*DENOM*F1(3)\n'\
@@ -1665,73 +1664,10 @@ def postex_vertex_replacer(working_dir):
     # ZW: include the names of the fortran-files corresponding to any
     # new vertices in vertex_list and this function will automatically
     # open and rewrite the file using vertex_replacer
-    vertex_list = [ 'LRV1_0.f', 'RLV1_0.f', 'LRV1P0_3.f', 'RLV1P0_3.f',\
+    vertex_list = [ 'LRV1_0.f', 'RLV1_0.f', 'LRV1_3.f', 'RLV1_3.f',\
         'LLV1_1.f', 'LLV1_2.f', 'RRV1_1.f', 'RRV1_2.f' ]
     onlyfiles = [f for f in os.listdir(write_dir) if os.path.isfile(os.path.join(write_dir, f))]
-    # if 'LRV1_0.f' in onlyfiles:
-    #     file = open(write_dir + '/LRV1_0.f', 'r')
-    #     LRV1_0_copy = file.read()
-    #     LRV1_0_copy = vertex_replacer(LRV1_0_copy, 'LRV1_0')
-    #     file.close()
-    #     file = open(write_dir + '/LRV1_0.f', 'w')
-    #     file.write(LRV1_0_copy)
-    #     file.close()
-    # if 'RLV1_0.f' in onlyfiles:
-    #     file = open(write_dir + '/RLV1_0.f', 'r')
-    #     RLV1_0_copy = file.read()
-    #     RLV1_0_copy = vertex_replacer(RLV1_0_copy, 'RLV1_0')
-    #     file.close()
-    #     file = open(write_dir + '/RLV1_0.f', 'w')
-    #     file.write(RLV1_0_copy)
-    #     file.close()
-    # if 'LRV1P0_3.f' in onlyfiles:
-    #     file = open(write_dir + '/LRV1P0_3.f', 'r')
-    #     LRV1P0_3_copy = file.read()
-    #     LRV1P0_3_copy = vertex_replacer(LRV1P0_3_copy, 'LRV1P0_3')
-    #     file.close()
-    #     file = open(write_dir + '/LRV1P0_3.f', 'w')
-    #     file.write(LRV1P0_3_copy)
-    #     file.close()
-    # if 'RLV1P0_3.f' in onlyfiles:
-    #     file = open(write_dir + '/RLV1P0_3.f', 'r')
-    #     RLV1P0_3_copy = file.read()
-    #     RLV1P0_3_copy = vertex_replacer(RLV1P0_3_copy, 'RLV1P0_3')
-    #     file.close()
-    #     file = open(write_dir + '/RLV1P0_3.f', 'w')
-    #     file.write(RLV1P0_3_copy)
-    #     file.close()
-    # if 'LLV1_1.f' in onlyfiles:
-    #     file = open(write_dir + '/LLV1_1.f', 'r')
-    #     LLV1_1_copy = file.read()
-    #     LLV1_1_copy = vertex_replacer(LLV1_1_copy, 'LLV1_1')
-    #     file.close()
-    #     file = open(write_dir + '/LLV1_1.f', 'w')
-    #     file.write(LLV1_1_copy)
-    #     file.close()
-    # if 'LLV1_2.f' in onlyfiles:
-    #     file = open(write_dir + '/LLV1_2.f', 'r')
-    #     LLV1_2_copy = file.read()
-    #     LLV1_2_copy = vertex_replacer(LLV1_2_copy, 'LLV1_2')
-    #     file.close()
-    #     file = open(write_dir + '/LLV1_2.f', 'w')
-    #     file.write(LLV1_2_copy)
-    #     file.close()
-    # if 'RRV1_1.f' in onlyfiles:
-    #     file = open(write_dir + '/RRV1_1.f', 'r')
-    #     RRV1_1_copy = file.read()
-    #     RRV1_1_copy = vertex_replacer(RRV1_1_copy, 'RRV1_1')
-    #     file.close()
-    #     file = open(write_dir + '/RRV1_1.f', 'w')
-    #     file.write(RRV1_1_copy)
-    #     file.close()
-    # if 'RRV1_2.f' in onlyfiles:
-    #     file = open(write_dir + '/RRV1_2.f', 'r')
-    #     RRV1_2_copy = file.read()
-    #     RRV1_2_copy = vertex_replacer(RRV1_2_copy, 'RRV1_2')
-    #     file.close()
-    #     file = open(write_dir + '/RRV1_2.f', 'w')
-    #     file.write(RRV1_2_copy)
-    #     file.close()ha
+    konlyfiles = [f[:4] + f[-4:] for f in onlyfiles]
     for vertex in vertex_list:
         if vertex in onlyfiles:
             file = open(write_dir + '/' + vertex, 'r')
