@@ -7,15 +7,16 @@ import particles as P
 import couplings as C
 import lorentz as L
 
-
-# AL: V1 to V4 used to create diagrams.
+# MS: If we add new particles, we must also add their vertices here
+# AL: V1 to V4 used to create diagrams, 
+# MS: ...s pecifically for internal photons
 # AL: Lorentz structure will be updated when constructing Helas (after constructing diagrams)
 # to one of either LRV, RLV, LLV, or RRV depending on process. L/R denote right/left fermions
 V_1 = Vertex(name = 'V_1',
               particles = [ P.eR__plus__, P.eL__minus__, P.a ],
-              color = [ '1' ],
-              lorentz = [ L.RLV1 ],
-              couplings = {(0,0):C.GC_3})
+              color = [ '1' ], # color singlet
+              lorentz = [ L.RLV1 ], # L for Lorentz, see lorentz.py in this folder
+              couplings = {(0,0):C.GC_3}) # QCD singlet, see couplings.py
 
 V_2 = Vertex(name = 'V_2',
               particles = [ P.eL__plus__, P.eR__minus__, P.a ],
@@ -39,6 +40,7 @@ V_4 = Vertex(name = 'V_4',
 
 ####################################################
 # AL: Same vertices as above but with chiral photons
+# MS: Use this for external photons
 ####################################################
 
 # TODO: Check if lorentz structure will need any updating (I don't think it will)

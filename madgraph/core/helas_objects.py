@@ -23,6 +23,12 @@ single and multiple processes; and HelasModel, which is the
 language-independent base class for the language-specific classes for
 writing Helas calls, found in the iolibs directory"""
 
+# MS: In this file, the dictionary, used by helas_call_writers.py is created. 
+# The madgraph level objects amplitudes, wavefunctions (for internal as well 
+# as exteral particles), diagrams etc are created (i.e. we handle the 
+# information which later on is used to write out the executed fortran files) 
+# here and need to be treated here.
+
 import array
 import copy
 import collections
@@ -616,6 +622,8 @@ class HelasWavefunction(base_objects.PhysicsObject):
         #           to an external structure.
         # AL: ref_mom = external particle used for reference momentum of gauge boson.
         #               If not gauge boson, ref_mom = -1, else = external particle number
+        # MS: Note that the 'mothers' member variable has to be set such
+        # that we can use the invariants for spinor inner products 
         self['state'] = 'initial'
         self['leg_state'] = True
         self['mothers'] = HelasWavefunctionList()

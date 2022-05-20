@@ -292,6 +292,9 @@ class HelasCallWriter(base_objects.PhysicsObject):
         return call
 
     # AL: Added a function to change the chiral external wavefunctions
+    # MS: we likely want to similary create a line for calling the
+    # vertex functions (LLV_1 (rather LLV1_1) etc), as we need more
+    # arguments mothers/momenta
     def get_chiral_wavefunction_call(self, wavefunction, call):
         """Return the wavefunction call for a chiral fermion as LXXXXX or RXXXXX
         instead of IXXXXX or OXXXXX, and a chiral boson as VLXXXX or VRXXXX instead
