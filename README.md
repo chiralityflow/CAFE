@@ -1,7 +1,7 @@
-# CAFE
-Developmental repo for the chiral automised flow extension (CAFE) for MadGraph5_aMC@NLO
+# MadCAFE
+Developmental repo for the chiral automised flow extension (MadCAFE) for MadGraph5_aMC@NLO
 
-CAFE is a tool based on the MG5aMC framework developed for scattering element 
+MadCAFE is a tool based on the MG5aMC framework developed for scattering element 
 evaluation using the chirality-flow formalism for the standard model of 
 particle physics.
 
