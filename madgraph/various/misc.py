@@ -1584,6 +1584,7 @@ def pbar_bra(ket,p):
 def vertex_replacer(text, vertex):
     "ZW: Function which takes the text of a Fortran vertex file as well as the vertex name as an input"
     "and outputs the corresponding chiral vertex Fortran file"
+    #sprint("Replaced some files")
     text_copy = text
     linebreaks = get_symbols(text_copy, '\n')
     if (vertex == 'LRV1_0'):
@@ -1665,7 +1666,7 @@ def postex_vertex_replacer(working_dir):
     # new vertices in vertex_list and this function will automatically
     # open and rewrite the file using vertex_replacer
     vertex_list = [ 'LRV1_0.f', 'RLV1_0.f', 'LRV1_3.f', 'RLV1_3.f',\
-        'LLV1_1.f', 'LLV1_2.f', 'RRV1_1.f', 'RRV1_2.f' ]
+        'LRV1P0_3.f', 'RLV1P0_3.f', 'LLV1_1.f', 'LLV1_2.f', 'RRV1_1.f', 'RRV1_2.f' ]
     onlyfiles = [f for f in os.listdir(write_dir) if os.path.isfile(os.path.join(write_dir, f))]
     konlyfiles = [f[:4] + f[-4:] for f in onlyfiles]
     for vertex in vertex_list:
