@@ -17,6 +17,7 @@ from __future__ import absolute_import
 
 
 import re
+import madgraph
 import madgraph.core.base_objects as base_objects
 import madgraph.core.helas_objects as helas_objects
 import madgraph.loop.loop_helas_objects as loop_helas_objects
@@ -26,6 +27,8 @@ import aloha
 from madgraph import MadGraph5Error
 import madgraph.various.misc as misc
 from six.moves import range
+if madgraph.ordering:
+    set	= misc.OrderedSet
 
 class HelasWriterError(Exception):
     """Class for the error of this module """
@@ -278,6 +281,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
         corresponding to the key"""
 
         try:
+            #misc.sprint(wavefunction['number_external'])
             call = self["wavefunctions"][wavefunction.get_call_key()](\
                                                                    wavefunction)
             if not wavefunction.get('mothers'):
@@ -1189,6 +1193,7 @@ class FortranUFOHelasCallWriter(UFOHelasCallWriter):
 
     def generate_external_wavefunction(self,argument):
         """ Generate an external wavefunction """
+        
         call="CALL "
         call_function = None
         if argument.get('is_loop'):

@@ -17,6 +17,7 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+import madgraph
 import madgraph.core.base_objects as MG
 import madgraph.core.helas_objects as helas_objects
 import madgraph.core.diagram_generation as diagram_generation
@@ -33,6 +34,8 @@ from six.moves import range
 
 logger = logging.getLogger('madgraph.fks_base')
 
+if madgraph.ordering:
+    set = misc.OrderedSet
 
 class NoBornException(Exception): pass
 
@@ -56,12 +59,15 @@ class FKSMultiProcess(diagram_generation.MultiProcess): #test written
         if not 'OLP' in list(self.keys()):
             self['OLP'] = 'MadLoop'
             self['ncores_for_proc_gen'] = 0
+
+        self['loop_filter'] = None
     
     def get_sorted_keys(self):
         """Return particle property names as a nicely sorted list."""
         keys = super(FKSMultiProcess, self).get_sorted_keys()
         keys += ['born_processes', 'real_amplitudes', 'real_pdgs', 'has_isr', 
-                 'has_fsr', 'spltting_types', 'OLP', 'ncores_for_proc_gen']
+                 'has_fsr', 'spltting_types', 'OLP', 'ncores_for_proc_gen', 
+                 'loop_filter']
         return keys
 
     def filter(self, name, value):
@@ -317,7 +323,7 @@ class FKSMultiProcess(diagram_generation.MultiProcess): #test written
     def generate_virtuals(self):
         """For each process among the born_processes, creates the corresponding
         virtual amplitude"""
-        
+
         # If not using MadLoop, then the LH order file generation and processing
         # will be entirely done during the output, so nothing must be done at
         # this stage yet.
@@ -358,7 +364,8 @@ class FKSMultiProcess(diagram_generation.MultiProcess): #test written
                                                              'Process', ''),
                         i + 1, len(self['born_processes'])))
             try:
-                myamp = loop_diagram_generation.LoopAmplitude(myproc)
+                myamp = loop_diagram_generation.LoopAmplitude(myproc,  
+                                                loop_filter=self['loop_filter'])
                 born.virt_amp = myamp
             except InvalidCmd:
                 logger.debug('invalid command for loop')
@@ -416,6 +423,7 @@ class FKSRealProcess(object):
         legs = [(leg.get('id'), leg) for leg in leglist]
         self.pdgs = array.array('i',[s[0] for s in legs])
         self.colors = [leg['color'] for leg in leglist]
+        self.particle_tags = [leg['is_tagged'] for leg in leglist]
         if not self.process['perturbation_couplings'] == ['QCD']:
             self.charges = [leg['charge'] for leg in leglist]
         else:
@@ -526,6 +534,13 @@ class FKSProcess(object):
         """return the list of the pdg codes
         of each leg in born_amp"""
         return [leg.get('id') for \
+                    leg in self.born_amp['process']['legs']]                    
+
+
+    def get_is_tagged(self):
+        """return the list of the 'is_tagged' keys
+        of each leg in born_amp"""
+        return [leg.get('is_tagged') for \
                     leg in self.born_amp['process']['legs']]                    
 
 

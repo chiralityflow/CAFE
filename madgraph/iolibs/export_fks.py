@@ -27,6 +27,7 @@ import string
 import copy
 import platform
 
+import madgraph
 import madgraph.core.color_algebra as color
 import madgraph.core.helas_objects as helas_objects
 import madgraph.core.base_objects as base_objects
@@ -58,6 +59,19 @@ pjoin = os.path.join
 
 _file_path = os.path.split(os.path.dirname(os.path.realpath(__file__)))[0] + '/'
 logger = logging.getLogger('madgraph.export_fks')
+if madgraph.ordering:
+    set	= misc.OrderedSet
+
+# the base to compute the orders_tag
+orderstag_base = 100
+
+def get_orderstag(ords):
+    step = 1
+    tag = 0
+    for o in ords:
+        tag += step*o
+        step *= orderstag_base
+    return tag
 
 
 def make_jpeg_async(args):
@@ -83,7 +97,7 @@ class ProcessExporterFortranFKS(loop_exporters.LoopProcessExporterFortranSA):
 #===============================================================================
 # copy the Template in a new directory.
 #===============================================================================
-    def copy_fkstemplate(self):
+    def copy_fkstemplate(self, model):
         """create the directory run_name as a copy of the MadEvent
         Template, and clean the directory
         For now it is just the same as copy_v4template, but it will be modified
@@ -225,6 +239,15 @@ class ProcessExporterFortranFKS(loop_exporters.LoopProcessExporterFortranSA):
         # We need to create the correct open_data for the pdf
         self.write_pdf_opendata()
         
+        if model["running_elements"]:
+            if not os.path.exists(pjoin(MG5DIR, 'Template',"Running")):
+                raise Exception("Library for the running have not been installed. To install them please run \"install RunningCoupling\"")
+                
+            misc.copytree(pjoin(MG5DIR, 'Template',"Running"), 
+                            pjoin(self.dir_path,'Source','RUNNING'))
+        
+        
+        
     # I put it here not in optimized one, because I want to use the same makefile_loop.inc
     # Also, we overload this function (i.e. it is already defined in 
     # LoopProcessExporterFortranSA) because the path of the template makefile
@@ -318,38 +341,6 @@ class ProcessExporterFortranFKS(loop_exporters.LoopProcessExporterFortranSA):
                 model.restrict_card.write(out_path)
             else:
                 files.cp(model.restrict_card, out_path)
-
-
-
-    #===========================================================================
-    # write_maxparticles_file
-    #===========================================================================
-    def write_maxparticles_file(self, writer, maxparticles):
-        """Write the maxparticles.inc file for MadEvent"""
-
-        lines = "integer max_particles, max_branch\n"
-        lines += "parameter (max_particles=%d) \n" % maxparticles
-        lines += "parameter (max_branch=max_particles-1)"
-
-        # Write the file
-        writer.writelines(lines)
-
-        return True
-
-
-    #===========================================================================
-    # write_maxconfigs_file
-    #===========================================================================
-    def write_maxconfigs_file(self, writer, maxconfigs):
-        """Write the maxconfigs.inc file for MadEvent"""
-
-        lines = "integer lmaxconfigs\n"
-        lines += "parameter (lmaxconfigs=%d)" % maxconfigs
-
-        # Write the file
-        writer.writelines(lines)
-
-        return True
 
 
     #===============================================================================
@@ -546,11 +537,14 @@ class ProcessExporterFortranFKS(loop_exporters.LoopProcessExporterFortranSA):
 
         filename = 'fks_info.inc'
         # write_fks_info_list returns a set of the splitting types
+        split_types = self.write_fks_info_file(writers.FortranWriter(filename), 
+                                 matrix_element, 
+                                 fortran_model)
+
+        # update the splitting types
         self.proc_characteristic['splitting_types'] = list(\
                 set(self.proc_characteristic['splitting_types']).union(\
-                    self.write_fks_info_file(writers.FortranWriter(filename), 
-                                 matrix_element, 
-                                 fortran_model)))
+                    split_types))
 
         filename = 'leshouche_info.dat'
         nfksconfs,maxproc,maxflow,nexternal=\
@@ -600,9 +594,9 @@ class ProcessExporterFortranFKS(loop_exporters.LoopProcessExporterFortranSA):
                               matrix_element,
                               fortran_model)
 
-        filename = 'ngraphs.inc'
-        self.write_ngraphs_file(writers.FortranWriter(filename),
-                            nconfigs)
+        filename = 'maxconfigs.inc'
+        self.write_maxconfigs_file(writers.FortranWriter(filename),
+                max(nconfigs,matrix_element.born_me.get_number_of_amplitudes()))
 
 #write the wrappers for real ME's
         filename_me = 'real_me_chooser.f'
@@ -627,6 +621,16 @@ class ProcessExporterFortranFKS(loop_exporters.LoopProcessExporterFortranSA):
                             writers.FortranWriter(filename),
                             matrix_element)
 
+        filename = 'a0Gmuconv.inc'
+        startfroma0 = self.write_a0gmuconv_file(
+                            writers.FortranWriter(filename),
+                            matrix_element)
+
+        filename = 'rescale_alpha_tagged.f'
+        self.write_rescale_a0gmu_file(
+                            writers.FortranWriter(filename),
+                            startfroma0, matrix_element, split_types)
+
         filename = 'orders.h'
         self.write_orders_c_header_file(
                             writers.CPPWriter(filename),
@@ -638,7 +642,11 @@ class ProcessExporterFortranFKS(loop_exporters.LoopProcessExporterFortranSA):
                             amp_split_orders)
         self.proc_characteristic['ninitial'] = ninitial
         self.proc_characteristic['nexternal'] = max(self.proc_characteristic['nexternal'], nexternal)
-    
+        
+        filename = 'maxparticles.inc'
+        self.write_maxparticles_file(writers.FortranWriter(filename),
+                                     nexternal)
+        
         filename = 'pmass.inc'
         try:
             self.write_pmass_file(writers.FortranWriter(filename),
@@ -720,18 +728,13 @@ class ProcessExporterFortranFKS(loop_exporters.LoopProcessExporterFortranSA):
                      'handling_lhe_events.f',
                      'write_event.f',
                      'fill_MC_mshell.f',
-                     'maxparticles.inc',
-                     'message.inc',
-                     'initcluster.f',
-                     'cluster.inc',
                      'cluster.f',
-                     'reweight.f',
                      'randinit',
-                     'sudakov.inc',
-                     'maxconfigs.inc',
                      'pineappl_maxproc.inc',
                      'pineappl_maxproc.h',
                      'timing_variables.inc',
+                     'orderstag_base.inc',
+                     'orderstags_glob.dat',
                      'polfit.f']
 
         for file in linkfiles:
@@ -760,7 +763,7 @@ class ProcessExporterFortranFKS(loop_exporters.LoopProcessExporterFortranSA):
         gen_infohtml.make_info_html_nlo(self.dir_path)
 
 
-        return calls
+        return calls, amp_split_orders
 
     #===========================================================================
     #  create the run_card 
@@ -834,6 +837,9 @@ class ProcessExporterFortranFKS(loop_exporters.LoopProcessExporterFortranSA):
         
         self.create_proc_charac()
 
+        filename = os.path.join(self.dir_path,'SubProcesses','orderstag_base.inc')
+        self.write_orderstag_base_file(writers.FortranWriter(filename))
+
         self.create_run_card(matrix_elements.get_processes(), history)
 #        modelname = self.model.get('name')
 #        if modelname == 'mssm' or modelname.startswith('mssm-'):
@@ -846,18 +852,7 @@ class ProcessExporterFortranFKS(loop_exporters.LoopProcessExporterFortranSA):
         filename = os.path.join(self.dir_path,'Source','MODEL','get_mass_width_fcts.f')
         makeinc = os.path.join(self.dir_path,'Source','MODEL','makeinc.inc')
         self.write_get_mass_width_file(writers.FortranWriter(filename), makeinc, self.model)
-
-#        # Write maxconfigs.inc based on max of ME's/subprocess groups
-
-        filename = os.path.join(self.dir_path,'Source','maxconfigs.inc')
-        self.write_maxconfigs_file(writers.FortranWriter(filename),
-                                   matrix_elements.get_max_configs())
         
-#        # Write maxparticles.inc based on max of ME's/subprocess groups
-        filename = os.path.join(self.dir_path,'Source','maxparticles.inc')
-        self.write_maxparticles_file(writers.FortranWriter(filename),
-                                     matrix_elements.get_max_particles())
-
         # Touch "done" file
         os.system('touch %s/done' % os.path.join(self.dir_path,'SubProcesses'))
         
@@ -1095,6 +1090,38 @@ This typically happens when using the 'low_mem_multicore_nlo_generation' NLO gen
 
         writer.writelines(text)
 
+    def write_orderstag_file(self, splitorders, outdir):
+        outfile = open(os.path.join(outdir, 'SubProcesses', 'orderstags_glob.dat'), 'w')
+        outfile.write('%d\n' % len(splitorders))
+        tags = ['%d' % get_orderstag(ords) for ords in splitorders]
+        outfile.write(' '.join(tags) + '\n')
+        outfile.close()
+
+    def write_orderstag_base_file(self, writer):
+        """write a small include file containing the 'base'
+        to compute the orders_tag"""
+
+        text = "integer orders_tag_base\n"
+        text+= "parameter (orders_tag_base=%d)\n" % orderstag_base
+        writer.writelines(text)
+
+
+    def write_a0gmuconv_file(self, writer, matrix_element):
+        """writes an include file with the informations about the 
+        alpha0 < > gmu conversion, to be used when the process has
+        tagged photons
+        """
+
+        bool_dict = {True: '.true.', False: '.false.'}
+        bornproc = matrix_element.born_me['processes'][0]
+        startfromalpha0 = False
+        if any([l['is_tagged'] and l['id'] == 22 for l in bornproc['legs']]):
+            if 'loop_qcd_qed_sm_a0' in bornproc['model'].get('modelpath'):
+                startfromalpha0 = True
+
+        text = 'logical  startfroma0\nparameter (startfroma0=%s)\n' % bool_dict[startfromalpha0]
+        writer.writelines(text)
+        return startfromalpha0
 
     def write_orders_c_header_file(self, writer, amp_split_size, amp_split_size_born):
         """writes the header file including the amp_split_size declaration for amcblast
@@ -1103,6 +1130,60 @@ This typically happens when using the 'low_mem_multicore_nlo_generation' NLO gen
         text+= "#define __amp_split_size_born %d" % amp_split_size_born
 
         writer.writelines(text)
+
+
+    def write_rescale_a0gmu_file(self, writer, startfroma0, matrix_element, split_types):
+        """writes the function that computes the rescaling factor needed in
+        the case of external photons.
+        If split types does not contain [QED] or if there are not tagged photons,
+        dummy informations are filled
+        """
+
+        # get the model parameters
+        params = sum([v for v in self.model.get('parameters').values()], [])
+        parnames = [p.name.lower() for p in params]
+
+        bornproc = matrix_element.born_me['processes'][0]
+        # this is to ensure compatibility with standard processes
+        if not any([l['is_tagged'] and l['id'] == 22 for l in bornproc['legs']])\
+                or 'QED' not in split_types:
+            to_check = []
+            expr = '1d0'
+            conv_pol = '0d0'
+            conv_fin = '0d0'
+        
+        elif startfroma0:
+            to_check = ['mdl_aewgmu', 'mdl_aew']
+            base = 'mdl_aewgmu/mdl_aew'
+            exp = 'qed_pow/2d0-ntag'
+            expr = '(%s)**(%s)' % (base, exp)
+            conv_fin = '(qed_pow - ntagph * 2d0) * MDL_ECOUP_DGMUA0_UV_EW_FIN_ * born_wgt'
+            conv_pol = '(qed_pow - ntagph * 2d0) * MDL_ECOUP_DGMUA0_UV_EW_1EPS_ * born_wgt'
+        else:
+            to_check = ['mdl_aew', 'mdl_aew0']
+            base = 'mdl_aew0/mdl_aew'
+            exp = 'ntag'
+            expr = '(%s)**(%s)' % (base, exp)
+            conv_fin = '- ntagph * 2d0 * MDL_ECOUP_DGMUA0_UV_EW_FIN_ * born_wgt'
+            conv_pol = '- ntagph * 2d0 * MDL_ECOUP_DGMUA0_UV_EW_1EPS_ * born_wgt'
+
+        replace_dict = {'rescale_fact': expr,
+                        'virtual_a0Gmu_conv_finite': conv_fin,
+                        'virtual_a0Gmu_conv_pole': conv_pol}
+
+        if not all(p in parnames for p in to_check):
+            raise fks_common.FKSProcessError(
+                    'Some parameters needed when there are tagged '+\
+                    'photons cannot be found in the model.\n' +\
+                    'Please load the correct model and restriction ' +\
+                    '(e.g loop_qcd_qed_sm_Gmu-a0 or loop_qcd_qed_sm_a0-Gmu)')
+
+        file = open(os.path.join(_file_path, \
+                          'iolibs/template_files/rescale_alpha_tagged.inc')).read()
+        file = file % replace_dict
+        
+        # Write the file
+        writer.writelines(file)
 
 
 
@@ -1210,12 +1291,25 @@ This typically happens when using the 'low_mem_multicore_nlo_generation' NLO gen
             pass
 
         amp_split_size=len(amp_split_orders)
-
         text = '! The orders to be integrated for the Born and at NLO\n'
         text += 'integer nsplitorders\n'
         text += 'parameter (nsplitorders=%d)\n' % len(split_orders)
-        text += 'character*3 ordernames(nsplitorders)\n'
-        text += 'data ordernames / %s /\n' % ', '.join(['"%3s"' % o for o in split_orders])
+        text += 'character*%d ordernames(nsplitorders)\n' % max([len(o) for o in split_orders])
+        step = 5
+        if len(split_orders) < step:
+            text += 'data ordernames / %s /\n' % ', '.join(['"%3s"' % o for o in split_orders])
+        else:
+            # this file is linked from f77 and f90 so need to be smart about line splitting
+            text += "INTEGER ORDERNAMEINDEX\n"
+            for i in range(1,len(split_orders),step):
+                start = i
+                stop = i+step -1
+                data = ', '.join(['"%3s"' % o for o in split_orders[start-1: stop]])
+                if stop > len(split_orders):
+                    stop = len(split_orders)
+                text += 'data (ordernames(ORDERNAMEINDEX), ORDERNAMEINDEX=%s,%s)  / %s /\n' % (start, stop, data)
+
+
         text += 'integer born_orders(nsplitorders), nlo_orders(nsplitorders)\n'
         text += '! the order of the coupling orders is %s\n' % ', '.join(split_orders)
         text += 'data born_orders / %s /\n' % ', '.join([str(max_born_orders[o]) for o in split_orders])
@@ -1234,7 +1328,7 @@ This typically happens when using the 'low_mem_multicore_nlo_generation' NLO gen
         text += 'double precision amp_split(amp_split_size)\n'
         text += 'double complex amp_split_cnt(amp_split_size,2,nsplitorders)\n'
         text += 'common /to_amp_split/amp_split, amp_split_cnt\n'
-
+        writer.line_length=132
         writer.writelines(text)
 
         return amp_split_orders, amp_split_size, amp_split_size_born
@@ -1583,6 +1677,21 @@ This typically happens when using the 'low_mem_multicore_nlo_generation' NLO gen
         writer.writelines(lines)
 
 
+    def write_maxparticles_file(self, writer, maxparticles):
+        """Write the maxparticles.inc file for MadEvent"""
+        lines = "integer max_particles, max_branch\n"
+        lines += "parameter (max_particles=%d) \n" % maxparticles
+        lines += "parameter (max_branch=max_particles-1)"
+        writer.writelines(lines)
+
+
+    def write_maxconfigs_file(self, writer, maxconfigs):
+        """Write the maxconfigs.inc file for MadEvent"""
+        lines = "integer lmaxconfigs\n"
+        lines += "parameter (lmaxconfigs=%d)" % maxconfigs
+        writer.writelines(lines)
+
+
     def write_genps(self, writer, maxproc,ngraphs,ncolor,maxflow, fortran_model):
         """writes the genps.inc file
         """
@@ -1808,6 +1917,23 @@ This typically happens when using the 'low_mem_multicore_nlo_generation' NLO gen
         if 'sa_symmetry 'not  in self.opt:
             self.opt['sa_symmetry']=False
 
+
+        # Add information relevant for FxFx matching:
+        # Maximum QCD power in all the contributions
+        max_qcd_order = 0
+        for diag in matrix_element.get('diagrams'):
+            orders = diag.calculate_orders()
+            if 'QCD' in orders:
+                max_qcd_order = max(max_qcd_order,orders['QCD'])  
+        max_n_light_final_partons = max(len([1 for id in proc.get_final_ids() 
+        if proc.get('model').get_particle(id).get('mass')=='ZERO' and
+               proc.get('model').get_particle(id).get('color')>1])
+                                    for proc in matrix_element.get('processes'))
+        # Maximum number of final state light jets to be matched
+        self.proc_characteristic['max_n_matched_jets'] = max(
+                               self.proc_characteristic['max_n_matched_jets'],
+                                   min(max_qcd_order,max_n_light_final_partons))   
+
         # Set lowercase/uppercase Fortran code
         writers.FortranWriter.downcase = False
 
@@ -1970,13 +2096,6 @@ This typically happens when using the 'low_mem_multicore_nlo_generation' NLO gen
         filename = 'born_nhel.inc'
         self.write_born_nhel_file(writers.FortranWriter(filename),
                            born_me, nflows, fortran_model)
-
-        filename = 'born_ngraphs.inc'
-        self.write_ngraphs_file(writers.FortranWriter(filename), nconfigs)
-
-        filename = 'ncombs.inc'
-        self.write_ncombs_file(writers.FortranWriter(filename),
-                               born_me, fortran_model)
 
         filename = 'born_coloramps.inc'
         self.write_coloramps_file(writers.FortranWriter(filename),
@@ -2408,6 +2527,7 @@ Parameters              %(params)s\n\
                proc.get('model').get_particle(id).get('color')>1])
                                     for proc in matrix_element.get('processes'))
         # Maximum number of final state light jets to be matched
+        misc.sprint(self.proc_characteristic['max_n_matched_jets'], max_qcd_order,max_n_light_final_partons)
         self.proc_characteristic['max_n_matched_jets'] = max(
                                self.proc_characteristic['max_n_matched_jets'],
                                    min(max_qcd_order,max_n_light_final_partons))    
@@ -2857,6 +2977,7 @@ Parameters              %(params)s\n\
             col_lines = []
             pdg_lines = []
             charge_lines = []
+            tag_lines = []
             fks_j_from_i_lines = []
             split_type_lines = []
             for i, info in enumerate(fks_info_list):
@@ -2870,6 +2991,9 @@ Parameters              %(params)s\n\
                     'DATA (PARTICLE_CHARGE_D(%d, IPOS), IPOS=1, NEXTERNAL) / %s /'\
                     % (i + 1, ', '.join('%19.15fd0' % charg\
                                         for charg in fksborn.real_processes[info['n_me']-1].charges) ))
+                tag_lines.append( \
+                    'DATA (PARTICLE_TAG_D(%d, IPOS), IPOS=1, NEXTERNAL) / %s /' \
+                    % (i + 1, ', '.join(bool_dict[tag] for tag in fksborn.real_processes[info['n_me']-1].particle_tags) ))
                 fks_j_from_i_lines.extend(self.get_fks_j_from_i_lines(fksborn.real_processes[info['n_me']-1],\
                                                 i + 1))
                 split_type_lines.append( \
@@ -2884,6 +3008,7 @@ Parameters              %(params)s\n\
             pdgs = [l.get('id') for l in bornproc.get('legs')] + [-21]
             colors = [l.get('color') for l in bornproc.get('legs')] + [8]
             charges = [l.get('charge') for l in bornproc.get('legs')] + [0.]
+            tags = [l.get('is_tagged') for l in bornproc.get('legs')] + [False]
 
             fks_i = len(colors)
             # fist look for a colored legs (set j to 1 otherwise)
@@ -2919,6 +3044,8 @@ Parameters              %(params)s\n\
                             % ', '.join([str(pdg) for pdg in pdgs])]
             charge_lines = ['DATA (PARTICLE_CHARGE_D(1, IPOS), IPOS=1, NEXTERNAL) / %s /' \
                             % ', '.join('%19.15fd0' % charg for charg in charges)]
+            tag_lines = ['DATA (PARTICLE_TAG_D(1, IPOS), IPOS=1, NEXTERNAL) / %s /' \
+                            %  ', '.join(bool_dict[tag] for tag in tags)]
             fks_j_from_i_lines = ['DATA (FKS_J_FROM_I_D(1, %d, JPOS), JPOS = 0, 1)  / 1, %d /' \
                             % (fks_i, fks_j)]
             split_type_lines = [ \
@@ -2930,6 +3057,7 @@ Parameters              %(params)s\n\
         replace_dict['col_lines'] = '\n'.join(col_lines)
         replace_dict['pdg_lines'] = '\n'.join(pdg_lines)
         replace_dict['charge_lines'] = '\n'.join(charge_lines)
+        replace_dict['tag_lines'] = '\n'.join(tag_lines)
         replace_dict['fks_j_from_i_lines'] = '\n'.join(fks_j_from_i_lines)
         replace_dict['split_type_lines'] = '\n'.join(split_type_lines)
 
@@ -3226,7 +3354,6 @@ Parameters              %(params)s\n\
         writer.writelines(lines_P)
 
     
-
     
     #===============================================================================
     # write_dname_file
@@ -3692,42 +3819,6 @@ Parameters              %(params)s\n\
         writer.writelines(file)
 
         return True
-
-    #===============================================================================
-    # write_ncombs_file
-    #===============================================================================
-    def write_ncombs_file(self, writer, matrix_element, fortran_model):
-#        #test written
-        """Write the ncombs.inc file for MadEvent."""
-    
-        # Extract number of external particles
-        (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
-    
-        # ncomb (used for clustering) is 2^(nexternal)
-        file = "       integer    n_max_cl\n"
-        file = file + "parameter (n_max_cl=%d)" % (2 ** (nexternal+1))
-    
-        # Write the file
-        writer.writelines(file)
-   
-        return True
-    
-    #===========================================================================
-    # write_config_subproc_map_file
-    #===========================================================================
-    def write_config_subproc_map_file(self, writer, s_and_t_channels):
-        """Write a dummy config_subproc.inc file for MadEvent"""
-
-        lines = []
-
-        for iconfig in range(len(s_and_t_channels)):
-            lines.append("DATA CONFSUB(1,%d)/1/" % \
-                         (iconfig + 1))
-
-        # Write the file
-        writer.writelines(lines)
-
-        return True
     
     #===========================================================================
     # write_colors_file
@@ -3794,7 +3885,37 @@ c           This is dummy particle used in multiparticle vertices
             """ % model.get_first_non_pdg()
         lines += """else
         write(*,*)'Error: No color given for pdg ',ipdg
-        get_color=0        
+        stop 1
+        return
+        endif
+        end
+        """
+        
+        lines+= """
+        function get_spin(ipdg)
+        implicit none
+        integer get_spin, ipdg
+
+        if(ipdg.eq.%d)then
+        get_spin=%d
+        return
+        """ % (particle_ids[0], model.get_particle(particle_ids[0]).get('spin'))
+
+        for part_id in particle_ids[1:]:
+            lines += """else if(ipdg.eq.%d)then
+            get_spin=%d
+            return
+            """ % (part_id, model.get_particle(part_id).get('spin'))
+        # Dummy particle for multiparticle vertices with pdg given by
+        # first code not in the model
+        lines += """else if(ipdg.eq.%d)then
+c           This is dummy particle used in multiparticle vertices
+            get_spin=-2
+            return
+            """ % model.get_first_non_pdg()
+        lines += """else
+        write(*,*)'Error: No spin given for pdg ',ipdg
+        stop 1
         return
         endif
         end
@@ -3886,7 +4007,7 @@ class ProcessOptimizedExporterFortranFKS(loop_exporters.LoopProcessOptimizedExpo
 #===============================================================================
 # copy the Template in a new directory.
 #===============================================================================
-    def copy_fkstemplate(self):
+    def copy_fkstemplate(self, model):
         """create the directory run_name as a copy of the MadEvent
         Template, and clean the directory
         For now it is just the same as copy_v4template, but it will be modified
@@ -4073,6 +4194,10 @@ class ProcessOptimizedExporterFortranFKS(loop_exporters.LoopProcessOptimizedExpo
         self.write_pdf_opendata()
 
 
+        if model["running_elements"]:
+            shutil.copytree(pjoin(MG5DIR, 'Template',"Running"), 
+                            pjoin(self.dir_path,'Source','RUNNING'))
+        
         # Return to original PWD
         os.chdir(cwd)
         

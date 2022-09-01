@@ -29,8 +29,10 @@ import copy
 import itertools
 import logging
 
+import madgraph
 import madgraph.core.base_objects as base_objects
 import madgraph.various.misc as misc
+import madgraph.fks.fks_tag as fks_tag
 from madgraph import InvalidCmd, MadGraph5Error
 from six.moves import range
 from six.moves import zip
@@ -38,6 +40,8 @@ from six.moves import filter
 
 logger = logging.getLogger('madgraph.diagram_generation')
 
+if madgraph.ordering:
+    set = misc.OrderedSet
 
 class NoDiagramException(InvalidCmd): pass
 
@@ -132,7 +136,6 @@ class DiagramTag(object):
 
     def get_external_numbers(self):
         """Get the order of external particles in this tag"""
-
         return self.tag.get_external_numbers()
 
     def diagram_from_tag(self, model):
@@ -359,6 +362,7 @@ class DiagramTagChainLink(object):
         second entry in the end link tuples)"""
 
         if self.end_link:
+            #misc.sprint(self.links[0][1])
             return [self.links[0][1]]
 
         return sum([l.get_external_numbers() for l in self.links], [])
@@ -654,6 +658,7 @@ class Amplitude(base_objects.PhysicsObject):
             if leg.get('number') == 0:
                 leg.set('number', i + 1)
 
+            
         # Copy leglist from process, so we can flip leg identities
         # without affecting the original process
         leglist = self.copy_leglist(process.get('legs'))
@@ -738,6 +743,7 @@ class Amplitude(base_objects.PhysicsObject):
                                                 #   ref_momenta,
                                                   is_decay_proc,
                                                   process.get('orders'))
+        
         #In LoopAmplitude the function below is overloaded such that it
         #converts back all DGLoopLegs to Legs. In the default tree-level
         #diagram generation, this does nothing.
@@ -1099,7 +1105,7 @@ class Amplitude(base_objects.PhysicsObject):
             vertex_ids = self.get_combined_vertices(curr_leglist,
                        copy.copy(ref_dict_to0[tuple(sorted([leg.get('id') for \
                                                        leg in curr_leglist]))]))
-                                                    
+
             final_vertices = [base_objects.Vertex({'legs':curr_leglist,
                                                    'id':vertex_id}) for \
                               vertex_id in vertex_ids]
@@ -1190,7 +1196,6 @@ class Amplitude(base_objects.PhysicsObject):
                                                   is_first_it,
                                                   is_decay_proc,
                                                   new_coupling_orders)
-            
             # If there is a reduced diagram
             if reduced_diagram:
                 vertex_list_list = [list(leg_vertex_tuple[1])]
@@ -1242,8 +1247,6 @@ class Amplitude(base_objects.PhysicsObject):
                 
         return present_couplings
 
-
-    
     def combine_legs(self, list_legs, ref_dict_to1, max_multi_to1):
         """Recursive function. Take a list of legs as an input, with
         the reference dictionary n-1->1, and output a list of list of
@@ -1289,7 +1292,6 @@ class Amplitude(base_objects.PhysicsObject):
                     # Identify the rest, create a list [comb,rest] and
                     # add it to res
                     res_list = copy.copy(list_legs)
-                    
                     for leg in comb:
                         res_list.remove(leg)
                     res_list.insert(list_legs.index(comb[0]), comb)
@@ -1338,6 +1340,7 @@ class Amplitude(base_objects.PhysicsObject):
             vertex_list = []
 
             for entry in comb_list:
+
                 # Act on all leg combinations
                 if isinstance(entry, tuple):
 
@@ -1380,6 +1383,7 @@ class Amplitude(base_objects.PhysicsObject):
                                                                   leg_vert_ids,
                                                                   number,
                                                                   state)
+                    
                     reduced_list.append([l[0] for l in new_leg_vert_ids])
      
                     # AL: change left <-> right for chiral particles
@@ -1399,6 +1403,7 @@ class Amplitude(base_objects.PhysicsObject):
                         new_leg_vert_ids[0][0]['id'] = 90007
                     elif new_leg_vert_ids[0][0]['id'] == 90007: 
                         new_leg_vert_ids[0][0]['id'] = 90005
+
                     
                     # Create and add the corresponding vertex
                     # Extract vertex ids corresponding to the various legs
@@ -1707,7 +1712,7 @@ class DecayChainAmplitude(Amplitude):
             decay_ids.append(amp.get('process').get_initial_ids()[0])
             
         # Return a list with unique ids
-        return list(set(decay_ids))
+        return misc.make_unique(decay_ids)
     
     def has_loop_process(self):
         """ Returns wether this amplitude has a loop process."""
@@ -1863,6 +1868,7 @@ class MultiProcess(base_objects.PhysicsObject):
         generation.  Doing so will risk making it impossible to
         identify processes with identical amplitudes.
         """
+
         assert isinstance(process_definition, base_objects.ProcessDefinition), \
                                     "%s not valid ProcessDefinition object" % \
                                     repr(process_definition)
@@ -1897,7 +1903,7 @@ class MultiProcess(base_objects.PhysicsObject):
         # This can be updated if we add masses/have different needs for different particles)
         is_chiral = model.get('name') == 'cf'
         
-        islegs = [leg for leg in process_definition['legs'] \
+        islegs_orig = [leg for leg in process_definition['legs'] \
                  if leg['state'] == False]
         fslegs = [leg for leg in process_definition['legs'] \
                  if leg['state'] == True]        
@@ -1909,12 +1915,33 @@ class MultiProcess(base_objects.PhysicsObject):
         polids = [tuple(leg['polarization'])  for leg in process_definition['legs'] \
                  if leg['state'] == True]
 
+        masses = {id: model.get_particle(id).get('mass')  for leg in process_definition['legs'] for id in leg['ids']} 
+
+        # keep track of the 'is_tagged' property of the legs if needed
+        try:
+            fstags = [leg['is_tagged'] for leg in process_definition['legs'] \
+                 if 'is_tagged' in leg.keys() and leg['state'] == True]
+
+        except KeyError:
+            fstags = []
+
         # Generate all combinations for the initial state
         for prod in itertools.product(*isids):
             islegs = [\
                     base_objects.Leg({'id':id, 'state': False, 
-                                      'polarization': islegs[i]['polarization']})
+                                      'polarization': islegs_orig[i]['polarization']})
                     for i,id in enumerate(prod)]
+
+            # check for longitudinal photon
+            invalid = False
+            for i, l in enumerate(islegs):
+                if 0 in l['polarization'] and  masses[l['id']] == "ZERO":
+                    l['polarization'] = [l for l in l['polarization'] if l != 0]
+                    if len(l['polarization']) == 0:
+                        invalid = True
+                        break
+            if invalid:
+                continue
 
             # Generate all combinations for the final state, and make
             # sure to remove double counting
@@ -1923,13 +1950,7 @@ class MultiProcess(base_objects.PhysicsObject):
 
             for prod in itertools.product(*fsids):
                 tag = zip(prod, polids)
-
-                # AL: if chiral, use tag = tuple(tag) rather than sorted(tag) so we consider all helicity combinations.
-                if is_chiral:
-                    tag = tuple(tag)
-                else: 
-                    tag = sorted(tag)
-
+                tag = sorted(tag)
                 # Remove double counting between final states
                 if tuple(tag) in red_fsidlist:
                     continue
@@ -1937,11 +1958,31 @@ class MultiProcess(base_objects.PhysicsObject):
                 red_fsidlist.add(tuple(tag))
                 # Generate leg list for process
                 leg_list = [copy.copy(leg) for leg in islegs]
-                leg_list.extend([\
-                        base_objects.Leg({'id':id, 'state': True, 'polarization': fslegs[i]['polarization']}) \
-                        for i,id  in enumerate(prod)])
                 
+                if not fstags:   
+                    leg_list.extend([\
+                            base_objects.Leg({'id':id, 'state': True, 'polarization': fsleg['polarization']}) \
+                            for id, fsleg in zip(prod, fslegs)])
+                else:
+                    leg_list.extend([\
+                            fks_tag.TagLeg({'id':id, 'state': True, 'polarization': fsleg['polarization'], 'is_tagged': tag}) \
+                            for id, fsleg, tag in zip(prod, fslegs, fstags)])
+
+
                 legs = base_objects.LegList(leg_list)
+
+
+                # check for longitudinal photon
+                invalid = False
+                for l in legs[len(islegs):]:
+                    if 0 in l['polarization'] and  masses[l['id']] == "ZERO":
+                        l['polarization'] =list(l['polarization'])
+                        l['polarization'].remove(0)
+                        if len(l['polarization']) == 0:
+                            invalid = True
+                            break
+                if invalid:
+                    continue
 
                 # Check for crossed processes
                 sorted_legs = sorted([(l,i+1) for (i,l) in \

@@ -166,14 +166,16 @@ C     ----------
      $     .LE.MAXTRIES.OR.(ISUM_HEL.NE.0).OR.THIS_NTRY(IMIRROR).LE.10)
      $      THEN
             T=MATRIX1(P ,NHEL(1,I),JC(1),I)
+
             DO JJ=1,NINCOMING
               IF(POL(JJ).NE.1D0.AND.NHEL(JJ,I).EQ.INT(SIGN(1D0,POL(JJ))
      $         )) THEN
-                T=T*ABS(POL(JJ))*NB_SPIN_STATE_IN(JJ)/2D0  ! NB_SPIN_STATE(JJ)/2d0 is added for polarised beam
+                T=T*ABS(POL(JJ))
               ELSE IF(POL(JJ).NE.1D0)THEN
-                T=T*(2D0-ABS(POL(JJ)))*NB_SPIN_STATE_IN(JJ)/2D0
+                T=T*(2D0-ABS(POL(JJ)))
               ENDIF
             ENDDO
+
             IF (ISUM_HEL.NE.0.AND.DS_GET_DIM_STATUS('Helicity')
      $       .EQ.0.AND.ALLOW_HELICITY_GRID_ENTRIES) THEN
               CALL DS_ADD_ENTRY('Helicity',I,T)
@@ -229,6 +231,7 @@ C        in a common block defined in genps.inc.
 
         T=MATRIX1(P ,NHEL(1,I),JC(1),I)
 
+
         DO JJ=1,NINCOMING
           IF(POL(JJ).NE.1D0.AND.NHEL(JJ,I).EQ.INT(SIGN(1D0,POL(JJ))))
      $      THEN
@@ -237,6 +240,7 @@ C        in a common block defined in genps.inc.
             T=T*(2D0-ABS(POL(JJ)))
           ENDIF
         ENDDO
+
 C       Always one helicity at a time
         ANS = T
 C       Include the Jacobian from helicity sampling
@@ -343,10 +347,10 @@ C     Needed for v4 models
       COMPLEX*16 DUM0,DUM1
       DATA DUM0, DUM1/(0D0, 0D0), (1D0, 0D0)/
 
-      DOUBLE PRECISION FK_ZERO
       DOUBLE PRECISION FK_WZ
-      SAVE FK_ZERO
+      DOUBLE PRECISION FK_ZERO
       SAVE FK_WZ
+      SAVE FK_ZERO
 
       LOGICAL FIRST
       DATA FIRST /.TRUE./
@@ -422,6 +426,8 @@ C     Amplitude(s) for diagram number 5
       CALL FFV1_2_3(W(1,1),W(1,3),GUZ1,GUZ2,MZ, ZERO,W(1,5))
 C     Amplitude(s) for diagram number 6
       CALL FFV1_2_0(W(1,4),W(1,2),W(1,5),GUZ1,GUZ2,AMP(6))
+
+      JAMP(:,:) = (0D0,0D0)
 C     JAMPs contributing to orders ALL_ORDERS=1
       JAMP(1,1) = (1.666666666666667D-01)*AMP(1)+(-1.000000000000000D
      $ +00)*AMP(2)+(-1.000000000000000D+00)*AMP(3)+(5.000000000000000D

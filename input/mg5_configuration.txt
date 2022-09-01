@@ -36,7 +36,6 @@
 #! If None: try to find g77 or gfortran on the system
 #!
 # fortran_compiler = None
-# f2py_compiler_py2 = None
 # f2py_compiler_py3 = None 
 
 

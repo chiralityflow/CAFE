@@ -25,6 +25,8 @@ import os
 import re
 import six
 StringIO = six
+
+import madgraph
 import madgraph.core.color_algebra as color
 import collections
 from madgraph import MadGraph5Error, MG5DIR, InvalidCmd
@@ -36,6 +38,9 @@ from functools import reduce
 
 logger = logging.getLogger('madgraph.base_objects')
 pjoin = os.path.join
+if madgraph.ordering:
+    set = misc.OrderedSet
+
 
 #===============================================================================
 # PhysicsObject
@@ -1041,8 +1046,10 @@ class Model(PhysicsObject):
         self['version_tag'] = None # position of the directory (for security)
         self['gauge'] = [0, 1]
         self['case_sensitive'] = True
+        self['running_elements'] = []
         self['allow_pickle'] = True
         self['limitations'] = [] # MLM means that the model can sometimes have issue with MLM/default scale. 
+                                 # fix_scale means that the model should use fix_scale computation.
         # attribute which might be define if needed
         #self['name2pdg'] = {'name': pdg}
         
@@ -1315,7 +1322,7 @@ class Model(PhysicsObject):
         # Set coupling hierachy
         hierarchy = dict([(order, 1) for order in self.get('coupling_orders')])
         # Special case for only QCD and QED couplings, unless already set
-        if self.get('coupling_orders') == set(['QCD', 'QED']):
+        if set(self.get('coupling_orders')) == set(['QCD', 'QED']):
             hierarchy['QED'] = 2
         return hierarchy
 
@@ -1405,7 +1412,7 @@ class Model(PhysicsObject):
                                           i.get('orders').keys()])])
             # Append the corresponding particles, excluding the
             # particles that have already been added
-            particles.append(set(sum([[p.get_pdg_code() for p in \
+            particles.append(misc.make_unique(sum([[p.get_pdg_code() for p in \
                                       inter.get('particles') if \
                                        p.get_pdg_code() not in sum_particles] \
                                       for inter in interactions[-1]], [])))
@@ -1419,6 +1426,38 @@ class Model(PhysicsObject):
         return max([inter.get_WEIGHTED_order(self) for inter in \
                         self.get('interactions')])
             
+    def get_running(self, used_parameters=None):
+        """return a list of parameter which needs to be run together.
+           check also that at least one requested coupling is dependent of 
+           such running 
+        """
+        
+        correlated = []
+        
+        for key in self["running_elements"]:
+            for param_list in key.run_objects:
+                names = [k.name for k in param_list]
+                try:
+                    names.remove('aS')
+                except Exception:
+                    pass
+                # find all set of parameter where at least one paremeter are present
+                this_ones = set(names)
+                for subset in list(correlated):
+                    if any(n in subset for n in names):
+                        this_ones.update(subset)
+                        correlated.remove(subset)
+                correlated.append(this_ones)
+        
+        #filtering
+        if used_parameters:
+            for subset in list(correlated): 
+                if not any(n in subset for n in used_parameters):
+                    correlated.remove(subset)
+        
+        return correlated   
+
+        
 
     def check_majoranas(self):
         """Return True if there is fermion flow violation, False otherwise"""
@@ -1804,7 +1843,7 @@ class Model(PhysicsObject):
 
                 # Add A new parameter CMASS
                 #first compute the dependencies (as,...)
-                depend = list(set(mass.depend + width.depend))
+                depend = misc.make_unique(mass.depend + width.depend)
                 if len(depend)>1 and 'external' in depend:
                     depend.remove('external')
                 depend = tuple(depend)
@@ -1893,6 +1932,9 @@ class Model(PhysicsObject):
             for coup in list_coup:                
                 coup.expr = pat.sub(replace, coup.expr)
                 
+    def get_all_spin(self):
+        return {p.get('spin') for p in self['particles']}
+
     def add_param(self, new_param, depend_param):
         """add the parameter in the list of parameter in a correct position"""
             
@@ -1939,7 +1981,7 @@ class ParamCardVariable(ModelVariable):
     depend = ('external',)
     type = 'real'
     
-    def __init__(self, name, value, lhablock, lhacode):
+    def __init__(self, name, value, lhablock, lhacode, scale=None):
         """Initialize a new ParamCardVariable
         name: name of the variable
         value: default numerical value
@@ -1950,6 +1992,7 @@ class ParamCardVariable(ModelVariable):
         self.value = value 
         self.lhablock = lhablock
         self.lhacode = lhacode
+        self.scale = scale
 
 
 #===============================================================================
@@ -2079,6 +2122,7 @@ class Leg(PhysicsObject):
 
         else :
             return False
+
 
     # Make sure sort() sorts lists of legs according to 'number'
     def __lt__(self, other):
@@ -3452,11 +3496,16 @@ class Process(PhysicsObject):
 
         return len([leg for leg in self.get('legs') if leg.get('state') == False])
 
-    def get_initial_ids(self):
+    def get_initial_ids(self, beamid=0):
         """Gives the pdg codes for initial state particles"""
 
-        return [leg.get('id') for leg in \
+        if beamid == 0:
+            return [leg.get('id') for leg in \
                 [leg for leg in self.get('legs') if leg.get('state') == False]]
+        else:
+            return [leg.get('id') for leg in \
+                [leg for leg in self.get('legs') if leg.get('state') == False and
+                leg.get('number') == beamid]]
 
     def get_initial_pdg(self, number):
         """Return the pdg codes for initial state particles for beam number"""
@@ -3622,6 +3671,7 @@ class Process(PhysicsObject):
             if (key[0] == 90024):
                 key = (90023,key[1])
             identical_indices[key] += 1
+
 
         return reduce(lambda x, y: x * y, [ math.factorial(val) for val in \
                         identical_indices.values() ], 1)
