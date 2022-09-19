@@ -3670,6 +3670,18 @@ class Process(PhysicsObject):
                 key = (-90005,key[1])
             if (key[0] == 90024):
                 key = (90023,key[1])
+            # AW: Added quarks and gluons
+            if (key[0] == 80021):
+                key = (70021,key[1])
+            if (key[0] == 80001):
+                key = (70001,key[1])
+            if (key[0] == -80001):
+                key = (-70001,key[1])  
+            if (key[0] == 80002):
+                key = (70002,key[1])
+            if (key[0] == -80002):
+                key = (-70002,key[1])           
+
             identical_indices[key] += 1
 
 

@@ -311,7 +311,8 @@ class HelasCallWriter(base_objects.PhysicsObject):
         ref_mom = wavefunction.get('ref_mom')
         
         # AL: update LH spinor wavefunction
-        if pdg_code in [90001, 90005]:
+        # AW: adding paricle codes for quarks and gluons
+        if pdg_code in [90001, 90005, 70001, 70002]:
             # Change in/out label to left label
             call = call[:5] + 'L' + call[6:]
             
@@ -325,7 +326,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
                 call = call.replace(io_old, io_new)
         
         # AL: update RH spinor wavefunction
-        elif pdg_code in [90003, 90007]:
+        elif pdg_code in [90003, 90007, 80001, 80002]:
             # Change in/out label to right label            
             call = call[:5] + 'R' + call[6:]
         
@@ -339,7 +340,8 @@ class HelasCallWriter(base_objects.PhysicsObject):
                 call = call.replace(io_old, io_new)
         
         # AL: update LH vector wavefunction
-        elif pdg_code == 90023:
+        # AW: hope this works
+        elif pdg_code == 90023 or pdg_code == 70021:
             # update name
             call = call[:6] + 'L' + call[7:]
 
@@ -349,7 +351,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
 
         # AL: update RH vector wavefunction
-        elif pdg_code == 90024:
+        elif pdg_code == 90024 or pdg_code == 80021:
             # update name
             call = call[:6] + 'R' + call[7:]
 

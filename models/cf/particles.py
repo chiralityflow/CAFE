@@ -135,6 +135,116 @@ muR__minus__ = Particle(pdg_code = 90007,
 
 muR__plus__ = muR__minus__.anti()
 
+# AW: chiral gluons and quarks. Naming convention: Left handed particles: 70000 + PDG#, right handed particles: 80000 + PDG#
+
+g = Particle(pdg_code = 21,
+             name = 'g',
+             antiname = 'g',
+             spin = 3,
+             color = 8,
+             mass = Param.ZERO,
+             width = Param.ZERO,
+             texname = 'g',
+             antitexname = 'g',
+             charge = 0,
+             GhostNumber = 0,
+             LeptonNumber = 0,
+             Y = 0)
+
+gL = Particle(pdg_code = 70021,
+             name = 'gL',
+             antiname = 'gL',
+             spin = 3,
+             color = 8,
+             mass = Param.ZERO,
+             width = Param.ZERO,
+             texname = 'gL',
+             antitexname = 'gL',
+             charge = 0,
+             GhostNumber = 0,
+             LeptonNumber = 0,
+             Y = 0)
+
+
+gR = Particle(pdg_code = 80021,
+             name = 'gR',
+             antiname = 'gR',
+             spin = 3,
+             color = 8,
+             mass = Param.ZERO,
+             width = Param.ZERO,
+             texname = 'gR',
+             antitexname = 'gR',
+             charge = 0,
+             GhostNumber = 0,
+             LeptonNumber = 0,
+             Y = 0)
+
+uL = Particle(pdg_code = 70002,
+             name = 'uL',
+             antiname = 'uL~',
+             spin = 2,
+             color = 3,
+             mass = Param.ZERO,
+             width = Param.ZERO,
+             texname = 'uL',
+             antitexname = 'uL~',
+             charge = 2/3,
+             GhostNumber = 0,
+             LeptonNumber = 0,
+             Y = 0)
+
+uL__tilde__ = uL.anti()
+
+uR = Particle(pdg_code = 80002,
+             name = 'uR',
+             antiname = 'uR~',
+             spin = 2,
+             color = 3,
+             mass = Param.ZERO,
+             width = Param.ZERO,
+             texname = 'uR',
+             antitexname = 'uR~',
+             charge = 2/3,
+             GhostNumber = 0,
+             LeptonNumber = 0,
+             Y = 0)
+
+uR__tilde__ = uR.anti()
+
+dL = Particle(pdg_code = 70001,
+             name = 'dL',
+             antiname = 'dL~',
+             spin = 2,
+             color = 3,
+             mass = Param.ZERO,
+             width = Param.ZERO,
+             texname = 'dL',
+             antitexname = 'dL~',
+             charge = -1/3,
+             GhostNumber = 0,
+             LeptonNumber = 0,
+             Y = 0)
+
+dL__tilde__ = dL.anti()
+
+dR = Particle(pdg_code = 80001,
+             name = 'dR',
+             antiname = 'dR~',
+             spin = 2,
+             color = 3,
+             mass = Param.ZERO,
+             width = Param.ZERO,
+             texname = 'dR',
+             antitexname = 'dR~',
+             charge = -1/3,
+             GhostNumber = 0,
+             LeptonNumber = 0,
+             Y = 0)
+
+dR__tilde__ = dR.anti()
+
+
 # W boson included since MadEvent relies on its mass to determine couplings
 
 W__plus__ = Particle(pdg_code = 24,

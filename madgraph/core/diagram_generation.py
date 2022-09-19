@@ -735,6 +735,26 @@ class Amplitude(base_objects.PhysicsObject):
             ref_dict_to0.pop((-90007,90007),None)
             ref_dict_to0[(-90007,90005)] = [0]
 
+            # AW: Same as AL does but for quarks
+            ref_dict_to0.pop((70001,-70001),None)
+            ref_dict_to0[(70001,-80001)] = [0]
+            ref_dict_to0.pop((-70001,70001),None)
+            ref_dict_to0[(-70001,80001)] = [0]
+            ref_dict_to0.pop((80001,-80001),None)
+            ref_dict_to0[(80001,-70001)] = [0]
+            ref_dict_to0.pop((-80001,80001),None)
+            ref_dict_to0[(-80001,70001)] = [0]
+            ref_dict_to0.pop((70002,-70002),None)
+            ref_dict_to0[(70002,-80002)] = [0]
+            ref_dict_to0.pop((-70002,70002),None)
+            ref_dict_to0[(-70002,80002)] = [0]
+            ref_dict_to0.pop((80002,-80002),None)
+            ref_dict_to0[(80002,-70002)] = [0]
+            ref_dict_to0.pop((-80002,80002),None)
+            ref_dict_to0[(-80002,70002)] = [0]
+
+
+
             reduced_leglist = self.reduce_leglist(leglist,
                                                   max_multi_to1,
                                                 #   model.get('ref_dict_to0'),
@@ -1372,6 +1392,9 @@ class Amplitude(base_objects.PhysicsObject):
                     leg_ids = [leg[0] for leg in leg_vert_ids]
                     if leg_ids == [90022, 90023, 90024]:
                         leg_vert_ids = [leg_vert_ids[0]]
+                    if leg_ids == [21, 70021, 80021]:
+                        leg_vert_ids = [leg_vert_ids[0]]   
+                    
 
                     # # AL: alternative option, keep say right photon in propagator
                     # if leg_ids == [90022, 90023, 90024] or leg_ids == [90023, 90024]:

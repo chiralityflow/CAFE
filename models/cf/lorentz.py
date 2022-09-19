@@ -35,7 +35,6 @@ RRV1 = Lorentz(name = 'RRV1',
 
 
 
-
 # AL: I have commented out all other lorentz structures that we don't yet use in building
 # chirality-flow diagrams
 

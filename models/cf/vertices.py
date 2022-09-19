@@ -95,3 +95,83 @@ V_12 = Vertex(name = 'V_12',
               color = [ '1' ],
               lorentz = [ L.LRV1 ],
               couplings = {(0,0):C.GC_3})
+
+
+# AW: Quark-antiquark-gluon vertices
+# V_13-V_16 with non chiral gluons
+
+V_13 = Vertex(name = 'V_13',
+               particles = [ P.uL__tilde__, P.uR, P.g ],
+               color = [ 'T(3,2,1)' ],
+               lorentz = [ L.LRV1 ],
+               couplings = {(0,0):C.GC_11})
+
+V_14 = Vertex(name = 'V_14',
+               particles = [ P.uR__tilde__, P.uL, P.g ],
+               color = [ 'T(3,2,1)' ],
+               lorentz = [ L.RLV1 ],
+               couplings = {(0,0):C.GC_11})
+
+V_15 = Vertex(name = 'V_15',
+               particles = [ P.dL__tilde__, P.dR, P.g ],
+               color = [ 'T(3,2,1)' ],
+               lorentz = [ L.LRV1 ],
+               couplings = {(0,0):C.GC_11})
+
+V_16 = Vertex(name = 'V_16',
+               particles = [ P.dR__tilde__, P.dL, P.g ],
+               color = [ 'T(3,2,1)' ],
+               lorentz = [ L.RLV1 ],
+               couplings = {(0,0):C.GC_11})
+
+# Chiral gluons from here
+
+V_17 = Vertex(name = 'V_17',
+               particles = [ P.uL__tilde__, P.uR, P.gL ],
+               color = [ 'T(3,2,1)' ],
+               lorentz = [ L.LRV1 ],
+               couplings = {(0,0):C.GC_11})
+
+V_18 = Vertex(name = 'V_18',
+               particles = [ P.uL__tilde__, P.uR, P.gR ],
+               color = [ 'T(3,2,1)' ],
+               lorentz = [ L.LRV1 ],
+               couplings = {(0,0):C.GC_11})               
+
+V_19 = Vertex(name = 'V_19',
+               particles = [ P.uR__tilde__, P.uL, P.gL ],
+               color = [ 'T(3,2,1)' ],
+               lorentz = [ L.RLV1 ],
+               couplings = {(0,0):C.GC_11})
+
+V_20 = Vertex(name = 'V_20',
+               particles = [ P.uR__tilde__, P.uL, P.gR ],
+               color = [ 'T(3,2,1)' ],
+               lorentz = [ L.RLV1 ],
+               couplings = {(0,0):C.GC_11})
+
+V_21 = Vertex(name = 'V_21',
+               particles = [ P.dL__tilde__, P.dR, P.gL ],
+               color = [ 'T(3,2,1)' ],
+               lorentz = [ L.LRV1 ],
+               couplings = {(0,0):C.GC_11})
+
+V_22 = Vertex(name = 'V_22',
+               particles = [ P.dL__tilde__, P.dR, P.gR ],
+               color = [ 'T(3,2,1)' ],
+               lorentz = [ L.LRV1 ],
+               couplings = {(0,0):C.GC_11})
+
+V_23 = Vertex(name = 'V_23',
+               particles = [ P.dR__tilde__, P.dL, P.gL ],
+               color = [ 'T(3,2,1)' ],
+               lorentz = [ L.RLV1 ],
+               couplings = {(0,0):C.GC_11})
+
+
+V_24 = Vertex(name = 'V_24',
+               particles = [ P.dR__tilde__, P.dL, P.gR ],
+               color = [ 'T(3,2,1)' ],
+               lorentz = [ L.RLV1 ],
+               couplings = {(0,0):C.GC_11})
+
