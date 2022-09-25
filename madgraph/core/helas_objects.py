@@ -680,7 +680,8 @@ class HelasWavefunction(base_objects.PhysicsObject):
                     ref_momenta = arguments[3]
                     # AL: if gauge boson, set reference momentum
                     # AL: TODO: update when we update pid conventions
-                    if leg.get('id') in [90023, 90024]:
+                    # AW: added gluons
+                    if leg.get('id') in [90023, 90024, 70021, 80021]:
                         self.set('ref_mom', ref_momenta[leg.get('number')-1])
                 
                 # decay_ids is the pdg codes for particles with decay
@@ -975,12 +976,14 @@ class HelasWavefunction(base_objects.PhysicsObject):
 
     # AL: new function to check if particle is a chiral fermion
     # AL TODO: update how this is done after changing pdg_ids
+    # AW: Seems unused
     def is_chiral(self):
         return abs(self.get('pdg_code')) < 90010 and \
              abs(self.get('pdg_code')) > 90000
 
     # AL: new function to check if particle is a chiral fermion
     # AL TODO: update how this is done after changing pdg_ids
+    # AW: Seems like an other unused copy
     def is_chiral(self):
         return abs(self.get('pdg_code')) < 90010 and \
              abs(self.get('pdg_code')) > 90000
@@ -3546,7 +3549,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             pdg_code = ext_wfs[key]['particle']['pdg_code']
             # All chiral particle numbers between 90000 and 90024
             # TODO: Update this after choosing a consistent set of conventions!!
-            if pdg_code > 90000 and pdg_code < 90025:
+            # AW: Changed pdg_code from 90000 to 70000
+            if pdg_code > 70000 and pdg_code < 90025:
                 return True
         
         # Haven't found a chiral particle, return false
@@ -3563,7 +3567,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             pdg_code = ext_wfs[key]['particle']['pdg_code']
             # All chiral fermion numbers between 90000 and 90021
             # TODO: Update this after choosing a consistent set of conventions!!
-            if pdg_code > 90000 and pdg_code < 90022:
+            # AW: Updated for QCD
+            if pdg_code > 70000 and pdg_code < 90022 and pdg_code != 70021 and pdg_code != 80021:
                 pdg_code = ext_wfs[key]['particle']['pdg_code']
                 if pdg_code not in pdg_codes:
                     pdg_codes.append(pdg_code)
@@ -3598,13 +3603,28 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         """A function to update the vertex id if chiral LL or RR vertex"""
         # First sort the ids (fermions before boson in QED)
         # TODO: Update this when we have new pdg_codes convention with e.g. left < right
-        pdg_codes.sort()
-        
+        # AW: VIKTIGT ATT ÄNDRA HÄR EFTERSOM 21, 70021 OCH 80021 ÄR BOSONER I QCD
+        # AW: Changed sorting algorithm to seperate bosons and fermions and sort them seperately 
+        boson_ids = [21, 70021, 80021, 90022, 90023, 90024]
+        bosons = []
+        fermions = []
+        for codes in pdg_codes:
+            if codes in boson_ids:
+                bosons.append(codes)
+            else:
+                fermions.append(codes)
+
+        bosons.sort()
+        fermions.sort()
+        pdg_codes = fermions + bosons
+
+        # pdg_codes.sort()
+        #print(pdg_codes, 'sorted')
         # If not all-outgoing, then we have an LL or RR vertex
         if not pdg_codes[0]*pdg_codes[1] < 0:
             # change to all outgoing particles
             pdg_codes[0] = -pdg_codes[0]
-
+            #print('shuffled', pdg_codes)
             # Get new vertex id
             vertex.set('id', list(vert_id_to_pdgs_dict.keys())\
                 [list(vert_id_to_pdgs_dict.values()).index(pdg_codes)])
@@ -3649,14 +3669,26 @@ class HelasMatrixElement(base_objects.PhysicsObject):
 
             # get fermion name and chirality
             part_name = ext_wfs[ext_nums[ipart]].get('name')
-            chirality = part_name[-2]
+            # AW: quarks have their chirality at last letter
+            if len(part_name) == 2:
+                chirality = part_name[-1]
+            else:
+                chirality = part_name[-2]
             if chirality != 'l' and chirality != 'r':
                 raise self.PhysicsObjectError("%s is not a valid chirality" % str(chirality))
 
             # loop over bosons which could be in the vertex
-            bosons = ['a','al','ar']
-            boson_ids = [90022, 90023, 90024]
+            # AW: Update so bosons are gluons and photons if quark but only photons if color == 1
+            if ext_wfs[ext_nums[ipart]].get('color') == 1:
+                bosons = ['a','al','ar']
+                boson_ids = [90022, 90023, 90024]
+            else:
+                bosons = ['a','al','ar', 'g', 'gl', 'gr']
+                boson_ids = [90022, 90023, 90024, 21, 70021, 80021]
             for iboson, boson in enumerate(bosons):
+                # AW: quark: 2 characters, antiquark: 3 characters. As quark but ends with ~
+                # leptons: 3 characters +/- particle/antiparticle
+                # We add the antiparticle with opposite chirality, so ul -> ur~, dl~ -> dr etc.
                 if part_name[-1] == '+':
                     orig_vtx = part_name + part_name[:-2]
                     if chirality == 'l': 
@@ -3675,6 +3707,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     part_name_p = part_name[:-1] + '+'
                     part_name_m = part_name
 
+                print(orig_vtx, part_name_p, part_name_m)
                 # Use below names to increase and output new vert_to_id_dict
                 new_vtx_mp = part_name_m + part_name_p + boson
                 new_vtx_pm = part_name_p + part_name_m + boson
@@ -3748,27 +3781,29 @@ class HelasMatrixElement(base_objects.PhysicsObject):
 
         # find first left (anti)fermion and first right (anti)fermion
         # TODO: update this when updating pdg conventions!
+        # AW: Added quarks
         found_left_ferm = False
         found_right_ferm = False
         for leg in legs:
-            if abs(leg.get('id')) in [90001, 90005] and not found_left_ferm:
+            if abs(leg.get('id')) in [90001, 90005, 70001, 70002] and not found_left_ferm:
                 left_ferm = leg
                 found_left_ferm = True
         
-            elif abs(leg.get('id')) in [90003, 90007] and not found_right_ferm:
+            elif abs(leg.get('id')) in [90003, 90007, 80001, 80002] and not found_right_ferm:
                 right_ferm = leg
                 found_right_ferm = True
             elif found_right_ferm and found_left_ferm:
                 break
         
         # find photons and update its reference momenta
+        # AW: same but for gluons
         for leg in legs:
             # if left photon, append right (anti)fermion
-            if leg.get('id') == 90023:
+            if leg.get('id') == 90023 or leg.get('id') == 70021:
                 ref_moms.append(right_ferm.get('number'))
                 # ref_moms.append(left_ferm.get('number'))
             # if right photon, append left (anti)fermion
-            elif leg.get('id') == 90024:
+            elif leg.get('id') == 90024 or leg.get('id') == 80021:
                 ref_moms.append(left_ferm.get('number'))
                 # ref_moms.append(right_ferm.get('number'))
             # else append -1

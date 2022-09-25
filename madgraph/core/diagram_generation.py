@@ -1041,17 +1041,18 @@ class Amplitude(base_objects.PhysicsObject):
 
         # find first left (anti)fermion and first right (anti)fermion
         # TODO: update this when updating pdg conventions!
+        # AW: Added quarks
         found_left_ferm = False
         found_right_ferm = False
         for leg in ext_legs:
-            if abs(leg.get('id')) in [90001, 90005] and not found_left_ferm:
+            if abs(leg.get('id')) in [90001, 90005, 70001, 70002] and not found_left_ferm:
                 left_ferm = copy.copy(leg)
                 # if incoming particle, flip to outgoing id
                 if left_ferm.get('state') == False:
                     left_ferm['id'] = -left_ferm['id']
                 found_left_ferm = True
         
-            elif abs(leg.get('id')) in [90003, 90007] and not found_right_ferm:
+            elif abs(leg.get('id')) in [90003, 90007, 80001, 80002] and not found_right_ferm:
                 right_ferm = copy.copy(leg)
                 # if incoming particle, flip to outgoing id
                 if right_ferm.get('state') == False:
@@ -1066,6 +1067,7 @@ class Amplitude(base_objects.PhysicsObject):
         if found_left_ferm and found_right_ferm:
             for leg in ext_legs:
                 # if left photon, append right (anti)fermion
+                # AW: Look more here
                 if leg.get('id') == 90023:
                     # ensure order is order of particle number
                     if leg.get('number') < right_ferm.get('number'):
@@ -1150,6 +1152,7 @@ class Amplitude(base_objects.PhysicsObject):
         if (is_first_it): 
 
             # AL: temporary switch to turn off removal of vanishing combinations
+            # AW: Look here later
             remove_combs = True
             # remove_combs = False
 
@@ -1392,6 +1395,7 @@ class Amplitude(base_objects.PhysicsObject):
                     leg_ids = [leg[0] for leg in leg_vert_ids]
                     if leg_ids == [90022, 90023, 90024]:
                         leg_vert_ids = [leg_vert_ids[0]]
+                    # AW: Added gluonns
                     if leg_ids == [21, 70021, 80021]:
                         leg_vert_ids = [leg_vert_ids[0]]   
                     
@@ -1426,6 +1430,22 @@ class Amplitude(base_objects.PhysicsObject):
                         new_leg_vert_ids[0][0]['id'] = 90007
                     elif new_leg_vert_ids[0][0]['id'] == 90007: 
                         new_leg_vert_ids[0][0]['id'] = 90005
+                    elif new_leg_vert_ids[0][0]['id'] == -80001: 
+                        new_leg_vert_ids[0][0]['id'] = -70001
+                    elif new_leg_vert_ids[0][0]['id'] == -70001: 
+                        new_leg_vert_ids[0][0]['id'] = -80001
+                    elif new_leg_vert_ids[0][0]['id'] == 80001: 
+                        new_leg_vert_ids[0][0]['id'] = 70001
+                    elif new_leg_vert_ids[0][0]['id'] == 70001: 
+                        new_leg_vert_ids[0][0]['id'] = 80001
+                    elif new_leg_vert_ids[0][0]['id'] == -80002: 
+                        new_leg_vert_ids[0][0]['id'] = -70002
+                    elif new_leg_vert_ids[0][0]['id'] == -70002: 
+                        new_leg_vert_ids[0][0]['id'] = -80002
+                    elif new_leg_vert_ids[0][0]['id'] == 80002: 
+                        new_leg_vert_ids[0][0]['id'] = 70002
+                    elif new_leg_vert_ids[0][0]['id'] == 70002: 
+                        new_leg_vert_ids[0][0]['id'] = 80002
 
                     
                     # Create and add the corresponding vertex

@@ -175,3 +175,77 @@ V_24 = Vertex(name = 'V_24',
                lorentz = [ L.RLV1 ],
                couplings = {(0,0):C.GC_11})
 
+
+# AW: ADD Q Q PHOTON VERTEX
+
+V_25 = Vertex(name = 'V_25',
+               particles = [ P.uL__tilde__, P.uR, P.a ],
+               color = [ 'Identity(1,2)' ],
+               lorentz = [ L.LRV1 ],
+               couplings = {(0,0):C.GC_2})
+
+V_26 = Vertex(name = 'V_26',
+               particles = [ P.uR__tilde__, P.uL, P.a ],
+               color = [ 'Identity(1,2)' ],
+               lorentz = [ L.RLV1 ],
+               couplings = {(0,0):C.GC_2})
+
+V_27 = Vertex(name = 'V_27',
+              particles = [ P.dL__tilde__, P.dR, P.a ],
+              color = [ 'Identity(1,2)' ],
+              lorentz = [ L.LRV1 ],
+              couplings = {(0,0):C.GC_1})
+
+V_28 = Vertex(name = 'V_28',
+              particles = [ P.dR__tilde__, P.dL, P.a ],
+              color = [ 'Identity(1,2)' ],
+              lorentz = [ L.RLV1 ],
+              couplings = {(0,0):C.GC_1})
+
+V_29 = Vertex(name = 'V_29',
+               particles = [ P.uL__tilde__, P.uR, P.aL ],
+               color = [ 'Identity(1,2)' ],
+               lorentz = [ L.LRV1 ],
+               couplings = {(0,0):C.GC_2})
+
+V_30 = Vertex(name = 'V_30',
+               particles = [ P.uL__tilde__, P.uR, P.aR ],
+               color = [ 'Identity(1,2)' ],
+               lorentz = [ L.LRV1 ],
+               couplings = {(0,0):C.GC_2})
+
+V_31 = Vertex(name = 'V_31',
+               particles = [ P.uR__tilde__, P.uL, P.aL ],
+               color = [ 'Identity(1,2)' ],
+               lorentz = [ L.RLV1 ],
+               couplings = {(0,0):C.GC_2})
+
+V_32 = Vertex(name = 'V_32',
+               particles = [ P.uR__tilde__, P.uL, P.aR ],
+               color = [ 'Identity(1,2)' ],
+               lorentz = [ L.RLV1 ],
+               couplings = {(0,0):C.GC_2})
+
+V_33 = Vertex(name = 'V_33',
+              particles = [ P.dL__tilde__, P.dR, P.aL ],
+              color = [ 'Identity(1,2)' ],
+              lorentz = [ L.LRV1 ],
+              couplings = {(0,0):C.GC_1})
+
+V_34 = Vertex(name = 'V_34',
+              particles = [ P.dL__tilde__, P.dR, P.aR ],
+              color = [ 'Identity(1,2)' ],
+              lorentz = [ L.LRV1 ],
+              couplings = {(0,0):C.GC_1})
+
+V_35 = Vertex(name = 'V_35',
+              particles = [ P.dR__tilde__, P.dL, P.aL ],
+              color = [ 'Identity(1,2)' ],
+              lorentz = [ L.RLV1 ],
+              couplings = {(0,0):C.GC_1})
+
+V_36 = Vertex(name = 'V_36',
+              particles = [ P.dR__tilde__, P.dL, P.aR ],
+              color = [ 'Identity(1,2)' ],
+              lorentz = [ L.RLV1 ],
+              couplings = {(0,0):C.GC_1})
