@@ -1392,13 +1392,15 @@ class Amplitude(base_objects.PhysicsObject):
                     # ones will be unchanged.
                     # TODO: Rather do this by changing the propagating option of left/right photons in
                     #  particles.py to propagating = false?
+                    #misc.sprint(leg_vert_ids)
                     leg_ids = [leg[0] for leg in leg_vert_ids]
+                    #misc.sprint(leg_ids)
                     if leg_ids == [90022, 90023, 90024]:
                         leg_vert_ids = [leg_vert_ids[0]]
-                    # AW: Added gluonns
-                    if leg_ids == [21, 70021, 80021]:
-                        leg_vert_ids = [leg_vert_ids[0]]   
-                    
+                    # AW: Keep only non chiral gluon and photon propagator. Had some problems here check if nessesary
+                    if leg_ids == [21, 70021, 80021, 90022, 90023, 90024]:
+                        leg_vert_ids = [leg_vert_ids[0], leg_vert_ids[3]]   
+                    #misc.sprint(leg_vert_ids)
 
                     # # AL: alternative option, keep say right photon in propagator
                     # if leg_ids == [90022, 90023, 90024] or leg_ids == [90023, 90024]:

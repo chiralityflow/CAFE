@@ -833,6 +833,8 @@ class ColorString(list):
         copy.deepcopy"""
         res = ColorString()
         for col_obj in self:
+            misc.sprint(col_obj, len(col_obj), col_obj[0:len(col_obj)]) 
+
             assert type(col_obj) != array.array
             res.append(col_obj.create_copy())
         res.coeff = self.coeff

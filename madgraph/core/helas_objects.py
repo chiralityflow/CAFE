@@ -3693,6 +3693,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     orig_vtx = part_name + part_name[:-2]
                     if chirality == 'l': 
                         orig_vtx += 'r-' + boson
+                        # if el+ add el+ + er- + boson
                     else: 
                         orig_vtx += 'l-' + boson
                     part_name_p = part_name
@@ -3702,12 +3703,36 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     orig_vtx = part_name[:-2] 
                     if chirality == 'l': 
                         orig_vtx += 'r+' + part_name + boson
+                        # if el- add er+ + el- + boson 
                     else: 
                         orig_vtx += 'l+' + part_name + boson
                     part_name_p = part_name[:-1] + '+'
                     part_name_m = part_name
+                # AW: same as for leptons with quarks. Check for eventual mess ups here
+                elif part_name[-1] == '~':
+                    orig_vtx = part_name + part_name[:-2]
+                    # if ul~ add ul~ + ur + boson
+                    # part_name_p = ul~, part_name_m = ul
+                    if chirality == 'l':
+                        orig_vtx += 'r' + boson
+                    else:
+                        orig_vtx += 'l' + boson
+                    part_name_p = part_name
+                    part_name_m = part_name[:-1] 
+                
+                elif len(part_name) == 2:
+                    orig_vtx = part_name[:-1]
+                    # if ul add ur~ + ul + boson
+                    if chirality == 'l':
+                        orig_vtx += 'r~' + part_name + boson 
+                    else:
+                        orig_vtx += 'l~' + part_name + boson
+                    part_name_p = part_name[:-1] + '~'
+                    part_name_m = part_name
 
-                print(orig_vtx, part_name_p, part_name_m)
+
+
+                #misc.sprint(orig_vtx, chirality, part_name, part_name_p, part_name_m)
                 # Use below names to increase and output new vert_to_id_dict
                 new_vtx_mp = part_name_m + part_name_p + boson
                 new_vtx_pm = part_name_p + part_name_m + boson
@@ -3763,6 +3788,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 model.get('interactions').append(new_int_mp)
                 model.get('interaction_dict')[n_ints_in_model + 2] = new_int_pm
                 model.get('interactions').append(new_int_pm)
+
+                #misc.sprint(vert_ids_to_pdg)
        
 
         return model, vert_ids_to_pdg
