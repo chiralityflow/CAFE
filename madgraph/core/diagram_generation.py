@@ -1950,7 +1950,11 @@ class MultiProcess(base_objects.PhysicsObject):
 
             for prod in itertools.product(*fsids):
                 tag = zip(prod, polids)
-                tag = sorted(tag)
+                # AL: this is required to get right chiral photons before left ones
+                if is_chiral: 
+                    tag = tuple(tag)
+                else:
+                    tag = sorted(tag)
                 # Remove double counting between final states
                 if tuple(tag) in red_fsidlist:
                     continue
