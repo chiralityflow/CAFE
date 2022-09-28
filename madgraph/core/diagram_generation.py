@@ -1995,7 +1995,12 @@ class MultiProcess(base_objects.PhysicsObject):
 
             for prod in itertools.product(*fsids):
                 tag = zip(prod, polids)
-                tag = sorted(tag)
+                # AL: this is required to get right chiral photons before left ones
+                if is_chiral: 
+                    tag = tuple(tag)
+                else:
+                    tag = sorted(tag)
+
                 # Remove double counting between final states
                 if tuple(tag) in red_fsidlist:
                     continue
@@ -2090,7 +2095,7 @@ class MultiProcess(base_objects.PhysicsObject):
                 # AL: for now turn off crossing to get ref momenta correct 
                 # (done using if not process.get('model').get('name') == 'cf').
                 # TODO: For future would be good to make crossing work properly instead
-                
+
                 if not process.get('required_s_channels') and \
                    not process.get('forbidden_onsh_s_channels') and \
                    not process.get('forbidden_s_channels') and \
