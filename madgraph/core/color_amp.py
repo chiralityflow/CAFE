@@ -62,6 +62,7 @@ class ColorBasis(dict):
         pass
 
     def colorize(self, diagram, model):
+        # AW: comment for debug
         """Takes a diagram and a model and outputs a dictionary with keys being
         color coefficient index tuples and values a color string (before 
         simplification)."""
@@ -76,14 +77,15 @@ class ColorBasis(dict):
         for i, vertex in enumerate(diagram.get('vertices')):
             min_index, res_dict = self.add_vertex(vertex, diagram, model,
                             repl_dict, res_dict, min_index)
-
+        
         # if the process has no QCD particles
         # Return a list filled with ColorOne if all entries are empty ColorString()
         empty_colorstring = color_algebra.ColorString()
         if all(cs == empty_colorstring for cs in res_dict.values()):
             res_dict = dict((key, color_algebra.ColorString(
                                [color_algebra.ColorOne()])) for key in res_dict)
-                    
+
+        misc.sprint(res_dict) 
         return res_dict
 
     
@@ -139,7 +141,7 @@ class ColorBasis(dict):
 
             color_num_pairs.append((curr_color, curr_num))
             pdg_codes.append(curr_pdg)
-
+        
         if vertex != diagram.get('vertices')[-1]:
             # Put the resulting wavefunction first, to make
             # wavefunction call more natural
@@ -147,18 +149,27 @@ class ColorBasis(dict):
             color_num_pairs.insert(0, last_color_num)
             last_pdg = pdg_codes.pop(-1)
             pdg_codes.insert(0, last_pdg)
-
+        # AW: debug    
+        misc.sprint(color_num_pairs, pdg_codes)
         # Order the legs according to the interaction particles
+        # AW: SOMETHING GOES WRONG HERE, interaction_pdgs are in wrong order
         if vertex.get('id')!=-1:
             interaction_pdgs = [p.get_pdg_code() for p in \
                                 model.get_interaction(vertex.get('id')).\
                                 get('particles')]
         else:
             interaction_pdgs = [l.get('id') for l in vertex.get('legs')]
+        # AW: I think antiparticle should come before particle in interaction_pdgs. Ask MS, AL or ZW
+        if interaction_pdgs[0] > 0 and interaction_pdgs[1] < 0:
+            first_pdg = interaction_pdgs[1]
+            interaction_pdgs[1] = interaction_pdgs[0]
+            interaction_pdgs[0] = first_pdg
 
+        #misc.sprint(interaction_pdgs)
         sorted_color_num_pairs = []
         #print "interactions_pdg=",interaction_pdgs
-        #print "pdg_codes=",pdg_codes        
+        #print "pdg_codes=",pdg_codes 
+               
         for i, pdg in enumerate(interaction_pdgs):
             index = pdg_codes.index(pdg)
             pdg_codes.pop(index)
@@ -168,11 +179,13 @@ class ColorBasis(dict):
             raise base_objects.PhysicsObject.PhysicsObjectError
 
         color_num_pairs = sorted_color_num_pairs
-
         # Create a list of associated leg number following the same order
         list_numbers = [p[1] for p in color_num_pairs]
 
         # ... and the associated dictionary for replacement
+        # AW: list numbers get wrong order for some reason
+        
+        misc.sprint(list_numbers)
         match_dict = dict(enumerate(list_numbers))
 
         if vertex['id'] == -1:
@@ -184,6 +197,8 @@ class ColorBasis(dict):
         inter_indices = [i for (i,j) in \
                         model.get_interaction(vertex['id'])['couplings'].keys()]
         
+        # AW: get_interaction(vertex['id'])['color'] has wrong type (array instead of T(2,1,0))
+        #misc.sprint(inter_color,inter_indices))
         # For colorless vertices, return a copy of res_dict
         # Where one 0 has been added to each color index chain key
         if not inter_color:
@@ -199,7 +214,8 @@ class ColorBasis(dict):
         new_res_dict = {}
         for i, col_str in \
                 enumerate(inter_color):
-            
+            # AW: debug print
+            #misc.sprint(i, col_str)
             # Ignore color string if it doesn't correspond to any coupling
             if i not in inter_indices:
                 continue
@@ -207,7 +223,7 @@ class ColorBasis(dict):
             # Build the new element
             assert type(col_str) == color_algebra.ColorString 
             mod_col_str = col_str.create_copy()
-
+            #misc.sprint(mod_col_str)
             # Replace summed (negative) internal indices
             list_neg = []
             for col_obj in mod_col_str:
@@ -218,10 +234,11 @@ class ColorBasis(dict):
                 internal_indices_dict[index] = min_index
                 min_index = min_index - 1
             mod_col_str.replace_indices(internal_indices_dict)
-
+            #misc.sprint(mod_col_str)
             # Replace other (positive) indices using the match_dic
             mod_col_str.replace_indices(match_dict)
-
+            #misc.sprint(mod_col_str)
+            #misc.sprint(match_dict)
             # If we are considering the first vertex, simply create
             # new entries
 
@@ -235,7 +252,7 @@ class ColorBasis(dict):
                     new_col_str_chain.product(mod_col_str)
                     new_res_dict[tuple(list(ind_chain) + [i])] = \
                         new_col_str_chain
-
+        misc.sprint(new_res_dict)
         return (min_index, new_res_dict)
 
 

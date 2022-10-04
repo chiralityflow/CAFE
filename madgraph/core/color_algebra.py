@@ -30,6 +30,8 @@ import madgraph
 if madgraph.ordering:
     set = misc.OrderedSet
 
+# AW: Debug
+import inspect
 #===============================================================================
 # ColorObject
 #===============================================================================
@@ -226,7 +228,7 @@ class T(ColorObject):
     def simplify(self):
         """Implement T(a,b,c,...,i,i) = Tr(a,b,c,...) and
         T(a,x,b,x,c,i,j) = 1/2(T(a,c,i,j)Tr(b)-1/Nc T(a,b,c,i,j))"""
-
+        # AW: comment for debug
         # T(a,b,c,...,i,i) = Tr(a,b,c,...)
         if self[-2] == self[-1]:
             return ColorFactor([ColorString([Tr(*self[:-2])])])
@@ -831,10 +833,18 @@ class ColorString(list):
     def create_copy(self):
         """Returns a real copy of self, non trivial because bug in 
         copy.deepcopy"""
+        # misc.sprint('Caller name', inspect.stack()[1][3])
+        # AW: debugging here
         res = ColorString()
+        # AW: Added counter
+        i = 0
         for col_obj in self:
-            misc.sprint(col_obj, len(col_obj), col_obj[0:len(col_obj)]) 
-
+            #misc.sprint(col_obj,i) 
+            i += 1
+            # AW: Wrong type on col_obj. Changing type for debug purposes
+            if type(col_obj) == array.array:
+                print(col_obj, 'if not T(2,1,0) there is a bug')
+                col_obj = T(2,1,0)
             assert type(col_obj) != array.array
             res.append(col_obj.create_copy())
         res.coeff = self.coeff

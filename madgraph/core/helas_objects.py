@@ -3740,7 +3740,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 # Get new interaction that we'll add to dictionary
                 new_int_mp = copy.deepcopy(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]])
                 new_int_pm = copy.deepcopy(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]])
-
+               
                 # AL: Give interaction an unused id
                 n_ints_in_model = len(model.get('interaction_dict'))
                 new_int_mp['id'] = n_ints_in_model + 1
@@ -3767,6 +3767,9 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     new_int_mp['lorentz'] = ['LLV1']
                     new_int_pm['lorentz'] = ['LLV1']
             
+                """ misc.sprint(new_int_mp['particles'][0].get_color(),new_int_mp['particles'][1].get_color())
+                misc.sprint(new_int_pm['particles'][0].get_color(),new_int_pm['particles'][1].get_color()) """
+                
                 # AL: update particles in interaction
                 if new_int_mp['particles'][0]['pdg_code'] == part:
                     new_int_mp['particles'][1] = copy.copy(new_int_mp['particles'][0])
@@ -3777,19 +3780,33 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 elif new_int_pm['particles'][1]['pdg_code'] == part:
                     new_int_pm['particles'][0] = copy.copy(new_int_pm['particles'][1])
 
+                """ misc.sprint(new_int_mp['particles'][0].get_color(),new_int_mp['particles'][1].get_color())
+                misc.sprint(new_int_pm['particles'][0].get_color(),new_int_pm['particles'][1].get_color()) """
                 # AL: update which is particle, antiparticle
                 new_int_mp['particles'][0]['is_part'] = True
                 new_int_mp['particles'][1]['is_part'] = False
                 new_int_pm['particles'][0]['is_part'] = False
                 new_int_pm['particles'][1]['is_part'] = True
-            
+
+                
+
+                """ if new_int_mp['particles'][0]['color'] == 3:
+                    new_int_mp['particles'][0]['chiral_color'] = -3
+                    new_int_mp['particles'][1]['chiral_color'] = 3
+                    new_int_pm['particles'][0]['chiral_color'] = -3
+                    new_int_pm['particles'][1]['chiral_color'] = 3 """
+
+                #misc.sprint(new_int_mp['particles'][0]['chiral_color'],new_int_mp['particles'][1]['chiral_color'])
+
+                """ misc.sprint(new_int_mp['particles'][0].get_color(),new_int_mp['particles'][1].get_color())
+                misc.sprint(new_int_pm['particles'][0].get_color(),new_int_pm['particles'][1].get_color()) """
+
                 # AL: add new interaction to the interaction_dict and interactions
                 model.get('interaction_dict')[n_ints_in_model + 1] = new_int_mp
                 model.get('interactions').append(new_int_mp)
                 model.get('interaction_dict')[n_ints_in_model + 2] = new_int_pm
                 model.get('interactions').append(new_int_pm)
 
-                #misc.sprint(vert_ids_to_pdg)
        
 
         return model, vert_ids_to_pdg
@@ -3879,7 +3896,6 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             ref_momenta = self.get_ref_momenta(process)
         else:
             ref_momenta = amplitude.get('ref_momenta')
-
         # Generate wavefunctions for the external particles
         external_wavefunctions = dict([(leg.get('number'),
                                         HelasWavefunction(leg, 0, model,
@@ -3965,7 +3981,6 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                         vids.append(part['id'])
                     
                     updated_vertex = self.set_new_vertex_id(vertex, vids, vert_id_to_pdgs_dict)
-
                     vertex.set('id', updated_vertex.get('id'))
 
 
@@ -4045,7 +4060,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
 
                 number_to_wavefunctions = new_number_to_wavefunctions
                 color_lists = new_color_lists
-
+                
             # Generate all amplitudes corresponding to the different
             # copies of this diagram
             helas_diagram = HelasDiagram()
@@ -4120,7 +4135,6 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     new_color_list = copy.copy(color_list)
                     if inter:
                         new_color_list.append(color)
-                        
                     amp.set('color_indices', new_color_list)
 
                     # Add amplitude to amplitdes in helas_diagram
@@ -5256,7 +5270,6 @@ class HelasMatrixElement(base_objects.PhysicsObject):
 
         # There is a color basis - create a list of coefficients and
         # amplitude numbers
-
         col_amp_list = []
         for i, col_basis_elem in \
                 enumerate(sorted(color_basis.keys())):

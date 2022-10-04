@@ -91,7 +91,8 @@ class PhysicsObject(dict):
         assert isinstance(name, str), \
                                  "Property name %s is not a string" % repr(name)
 
-        if name not in list(self.keys()):
+        # AW: exclude chiral color from check
+        if name not in list(self.keys()) and name != 'chiral_color':
             raise self.PhysicsObjectError("""%s is not a valid property for this object: %s\n
     Valid property are %s""" % (name,self.__class__.__name__, list(self.keys())))
         return True
@@ -209,11 +210,11 @@ class Particle(PhysicsObject):
     color, mass, width, charge,... The is_part flag tells if the considered
     particle object is a particle or an antiparticle. The self_antipart flag
     tells if the particle is its own antiparticle."""
-
+    # AW: added new property 'chiral_color' for when particles and antiparticles are interchanged in add_LL_RR_vertices
     sorted_keys = ['name', 'antiname', 'spin', 'color',
                    'charge', 'mass', 'width', 'pdg_code',
                   'line', 'propagator',
-                   'is_part', 'self_antipart', 'type', 'counterterm']
+                   'is_part', 'self_antipart', 'type', 'counterterm', 'chiral_color']
 
     def default_setup(self):
         """Default values for all properties"""
@@ -239,6 +240,8 @@ class Particle(PhysicsObject):
         # Counterterm defined as a dictionary with format:
         # ('ORDER_OF_COUNTERTERM',((Particle_list_PDG))):{laurent_order:CTCouplingName}
         self['counterterm'] = {}
+        # AW: added new property 'chiral_color' for when particles and antiparticles are interchanged in add_LL_RR_vertices
+        self['chiral_color'] = 1
 
     def get(self, name):
         
@@ -324,6 +327,13 @@ class Particle(PhysicsObject):
                 raise self.PhysicsObjectError("Color %s is not an integer" % repr(value))
             if value not in [1, 3, 6, 8]:
                 raise self.PhysicsObjectError("Color %i is not valid" % value)
+        
+        # AW: check for chiral color
+        """ if name == 'chiral_color':
+            if not isinstance(value, int):
+                raise self.PhysicsObjectError("Chiral color %s is not an integer" % repr(value))
+            if value not in [1, 3, -3, 6, 8]:
+                raise self.PhysicsObjectError("Chiral color %i is not valid" % value) """
 
         if name in ['mass', 'width']:
             # Must start with a letter, followed by letters, digits or _
@@ -404,6 +414,10 @@ class Particle(PhysicsObject):
 
     def get_color(self):
         """Return the color code with a correct minus sign"""
+        # AW: gives chiral color if it has been changed from the default value
+        if self['chiral_color'] != 1 and self['chiral_color'] != None:
+            misc.sprint('test', self['chiral_color'])
+            return self['chiral_color']
 
         if not self['is_part'] and abs(self['color']) in [3, 6]:
             return - self['color']
@@ -413,6 +427,10 @@ class Particle(PhysicsObject):
     def get_anti_color(self):
         """Return the color code of the antiparticle with a correct minus sign
         """
+        # AW: gives chiral color if it has been changed from the default value
+        if self['chiral_color'] != 1 and self['chiral_color'] != None:
+            misc.sprint('test', self['chiral_color'])
+            return - self['chiral_color']
 
         if self['is_part'] and self['color'] not in [1, 8]:
             return - self['color']
