@@ -193,6 +193,7 @@ uL = Particle(pdg_code = 70002,
              GhostNumber = 0,
              LeptonNumber = 0,
              Y = 0)
+             
 
 uL__tilde__ = uL.anti()
 
