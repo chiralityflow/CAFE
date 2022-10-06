@@ -56,6 +56,8 @@ from functools import reduce
 if madgraph.ordering:
     set = misc.OrderedSet
 
+# AW: Inspect for debug
+import inspect
 #===============================================================================
 # 
 #===============================================================================
@@ -3537,6 +3539,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         (without optimization then). This is called from the initialization
         and pulled out here in order to have the correct treatment in daughter
         classes."""
+        misc.sprint('Caller name', inspect.stack()[1][3])
         logger.debug('Computing the color basis')
         self.get('color_basis').build(self.get('base_amplitude'))
         self.set('color_matrix',
@@ -3737,10 +3740,20 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 new_vtx_mp = part_name_m + part_name_p + boson
                 new_vtx_pm = part_name_p + part_name_m + boson
             
+                misc.sprint(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]])
+                misc.sprint(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]]['color'])
+                
                 # Get new interaction that we'll add to dictionary
                 new_int_mp = copy.deepcopy(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]])
                 new_int_pm = copy.deepcopy(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]])
-               
+                
+                # AW: deepcopy copies the color wrong, probably because it tries to copy the class T instead of the specific object
+                # AW: hence we change the color back to the uncopied version
+                new_int_mp['color'] = model.get('interaction_dict')[vert_to_id_dict[orig_vtx]]['color']
+                new_int_pm['color'] = model.get('interaction_dict')[vert_to_id_dict[orig_vtx]]['color']
+
+                misc.sprint(new_int_mp)
+                misc.sprint(new_int_pm)
                 # AL: Give interaction an unused id
                 n_ints_in_model = len(model.get('interaction_dict'))
                 new_int_mp['id'] = n_ints_in_model + 1
@@ -6062,7 +6075,7 @@ class HelasMultiProcess(base_objects.PhysicsObject):
         """ Process the color information for a given matrix
         element made of a tree diagram. compute_loop_nc is dummy here for the
         tree-level Nc and present for structural reasons only."""
-        
+        misc.sprint('Caller name', inspect.stack()[1][3])
         if compute_loop_nc:
             raise MadGraph5Error("The tree-level function 'process_color' "+\
              " of class HelasMultiProcess cannot be called with a value for compute_loop_nc")
