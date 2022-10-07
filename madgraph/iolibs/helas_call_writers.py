@@ -323,6 +323,16 @@ class HelasCallWriter(base_objects.PhysicsObject):
             else: 
                 io_new = '+' + io_old[1:]
                 call = call.replace(io_old, io_new)
+            # EB: update to match lxxxxx in aloha_functions_chiral.py
+            # Added: Inner product vector, V, 
+            #        lenght of V, LEV,
+            #        the momentum vector, PV
+            #        MOL is the external mother.
+            call_lhs = ','.join(call.split(',')[:-2])
+            call_rhs = ','.join(call.split(',')[-2:])
+            call = call_lhs + ',' + 'LEV(' + str(wavefunction.get('number')) + '),PV(1,' \
+                 + str(wavefunction.get('number'))+ '),V(1,' + str(wavefunction.get('number')) + '))\n' \
+                 + 'MOL(' + str(wavefunction.get('number')) + ',:) = ' + str(wavefunction.get('external_mothersL'))
         
         # AL: update RH spinor wavefunction
         elif pdg_code in [90003, 90007]:
@@ -337,26 +347,55 @@ class HelasCallWriter(base_objects.PhysicsObject):
             else: 
                 io_new = '+' + io_old[1:]
                 call = call.replace(io_old, io_new)
+            # EB: update to match rxxxxx in aloha_functions_chiral.py
+            # Added: Inner product vector, V, 
+            #        lenght of V, LEV,
+            #        the momentum vector, PV,
+            #        MOR is the external mother.
+            call_lhs = ','.join(call.split(',')[:-2])
+            call_rhs = ','.join(call.split(',')[-2:])
+            call = call_lhs + ',LEV(' + str(wavefunction.get('number')) + '),PV(1,' \
+                 + str(wavefunction.get('number'))+ '),V(1,' + str(wavefunction.get('number')) + '))\n' \
+                 + 'MOR(' + str(wavefunction.get('number')) + ',:) = ' + str(wavefunction.get('external_mothersR')) 
         
         # AL: update LH vector wavefunction
+        # EB: calls updated to add:
+            # inner product needed for polarization factor, MANG or MSQR
+            # inner product vector, V
+            # length of inner product vector, LEV
+            # the momentum vector PV
+            # W is no longer used - therefor no +call_rhs
+            # MOL and MOR are the external mothers
         elif pdg_code == 90023:
             # update name
             call = call[:6] + 'L' + call[7:]
 
             # insert reference momentum as argument
+            # EB: insert all new arguments
+            wavefunction.get('external_mothersR')[0] = ref_mom
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
-
+            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + 'MANG(' + str(ref_mom) + ',' + str(wavefunction.get('number')) + '),LEV(' \
+                + str(wavefunction.get('number')) + '),PV(1,' + str(wavefunction.get('number')) + '),V(1,' \
+                +  str(wavefunction.get('number')) + '))\n' \
+                + 'MOL(' + str(wavefunction.get('number')) + ',:) = ' + str(wavefunction.get('external_mothersL')) + '\n' \
+                + 'MOR(' + str(wavefunction.get('number')) + ',:) = ' + str(wavefunction.get('external_mothersR'))
+            
         # AL: update RH vector wavefunction
         elif pdg_code == 90024:
             # update name
             call = call[:6] + 'R' + call[7:]
 
             # insert reference momentum as argument
+            # EB: insert all new arguments
+            wavefunction.get('external_mothersL')[0] = ref_mom
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
+            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + 'MSQR(' + str(wavefunction.get('number')) + ',' + str(ref_mom) + '),LEV(' \
+                + str(wavefunction.get('number')) + '),PV(1,' + str(wavefunction.get('number')) + '),V(1,' \
+                +  str(wavefunction.get('number')) + '))\n' \
+                + 'MOL(' + str(wavefunction.get('number')) + ',:) = ' + str(wavefunction.get('external_mothersL')) + '\n' \
+                + 'MOR(' + str(wavefunction.get('number')) + ',:) = ' + str(wavefunction.get('external_mothersR'))
 
         return call
 
