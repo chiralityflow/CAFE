@@ -407,7 +407,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
 
         return call
     
-    # EB: Add a function to change the chiral internal wavefunctions.
+    # EB: Added a function to change the chiral internal wavefunctions.
     def get_internal_chiral_wavefunction_call(self, wavefunction, call):
         """Return the call for internal chiral wavefunction"""
 
@@ -416,26 +416,36 @@ class HelasCallWriter(base_objects.PhysicsObject):
 
         # EB: Update the call for LLV1_2
         if call[5:11] == 'LLV1_2':
+
+            # EB: The part of the call that is kept the same.
             call_keep = ','.join(call.split(',')[-5:-2])
+
+            call_1 = 'MOL(' + str(wavefunction.get('number')) + ',:) = ' \
+                + str(wavefunction.get('external_mothersL')) + '\n'
+
             for mother in wavefunction.get('mothers'):
                 number = mother.get('number')
                 pdg_code = mother.get('pdg_code')
 
+                # EB: Is this check needed or are the
+                #       mothers always sorted correctly?
+                #     To do: check this. (sorting mothers in helas_objects)
+
                 # EB: if chiral fermion
                 if abs(pdg_code) < 90010 and abs(pdg_code) > 90000:
-                    call_1 = 'CALL LLV1_2(V(1,' + str(number) + '),LEV(' + str(number) \
+                    call_2 = 'CALL LLV1_2(V(1,' + str(number) + '),LEV(' + str(number) \
                         + '),PV(1,' + str(number) + '),MOL(' + str(number) + ',:),'
         
                 # EB: else is boson
                 else:
-                    call_2 = 'V(1,' + str(number) + '),PV(1,' + str(number) + '),MOL(' \
+                    call_3 = 'V(1,' + str(number) + '),PV(1,' + str(number) + '),MOL(' \
                         + str(number) + ',:),MOR(' + str(number) + ',:),NEXTERNAL,MSQR,MANG,'
                     
-            call_3 = ',MOL(' + str(wavefunction.get('number')) + ',:),V(1,' \
+            call_4 = ',MOL(' + str(wavefunction.get('number')) + ',:),V(1,' \
                 + str(wavefunction.get('number')) + '),PV(1,' + str(wavefunction.get('number')) \
                 + '),LEV(' + str(wavefunction.get('number')) + '))'
 
-            call = call_1 + call_2 + call_keep + call_3
+            call = call_1 + call_2 + call_3 + call_keep + call_4
         
         # EB: else: print the vertex name.
         # TO DO: update to proper error print.
@@ -448,13 +458,71 @@ class HelasCallWriter(base_objects.PhysicsObject):
     def get_amplitude_call(self, amplitude):
         """Return the function for writing the amplitude
         corresponding to the key"""
-
+    
+        # EB: Moved (amplitude) from return to first line of try
+        #       for syntax to follow convention used for 
+        #       wavefunctions.
         try:
-            call = self["amplitudes"][amplitude.get_call_key()]
+            call = self["amplitudes"][amplitude.get_call_key()](amplitude)
+            #EB: Update call if chiral
+            for mother in amplitude.get('mothers'):
+                if mother.is_chiral():
+                    call = self.get_chiral_amplitude_call(amplitude, call)
+                    break
         except KeyError as error:
             return ""
         else:
-            return call(amplitude)
+            return call
+    
+
+    # EB: Added function to change the chiral amplitudes.
+    def get_chiral_amplitude_call(self, amplitude, call):
+        """Return the call for chiral amplitude."""
+
+        # EB: check to see if vertex has been implemented.
+        # If so, update the call.
+
+        # EB: Update the call for LRV1_0
+        if call[5:11] == 'LRV1_0': 
+            
+            # EB: The part of the call that is kept the same.
+            call_keep = ','.join(call.split(',')[-2:])
+
+            for mother in amplitude.get('mothers'):
+                number = mother.get('number')
+                pdg_code = mother.get('pdg_code')
+            
+                # EB: Is this check needed or are the
+                #       mothers always sorted correctly?
+                #     To do: check this. (sorting mothers in helas_objects)
+
+                # EB: If left-handed fermion.
+                if pdg_code in (90001, -90001, 90005, -90005):
+                    call_1 = 'CALL LRV1_0(V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' \
+                        + str(number) + '),MOL(' + str(number) + ',:),'
+                
+                # EB: If right-handed fermion.
+                if pdg_code in (90003, -90003, 90007, -90007):
+                    call_2 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' \
+                        + str(number) + '),MOR(' + str(number) + ',:),'
+
+                # EB: else is boson.
+                else:
+                    call_3 = 'V(1,' + str(number) + '),PV(1,' + str(number) + '),MOL(' + str(number) \
+                       + ',:),MOR('  + str(number) + ',:),NEXTERNAL,MSQR,MANG,'
+
+            
+            call = call_1 + call_2 + call_3 + call_keep        
+        
+        # EB: else: print the vertex name.
+        # TO DO: update to proper error print.
+        else:
+            misc.sprint('Vertex')
+            misc.sprint(call[5:11])
+            misc.sprint('not implemented yet')
+
+        return call
+
 
     def add_wavefunction(self, key, function):
         """Set the function for writing the wavefunction
