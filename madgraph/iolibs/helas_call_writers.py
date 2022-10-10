@@ -284,8 +284,14 @@ class HelasCallWriter(base_objects.PhysicsObject):
             #misc.sprint(wavefunction['number_external'])
             call = self["wavefunctions"][wavefunction.get_call_key()](\
                                                                    wavefunction)
-            if not wavefunction.get('mothers'):
-                call = self.get_chiral_wavefunction_call(wavefunction, call)
+            #EB: Test to see if chiral
+            if wavefunction.is_chiral():
+                if not wavefunction.get('mothers'):
+                    call = self.get_external_chiral_wavefunction_call(wavefunction, call)
+                #else it is internal
+                else:
+                    call = self.get_internal_chiral_wavefunction_call(wavefunction, call)
+
         except KeyError as error:
             return ""
         
@@ -299,17 +305,21 @@ class HelasCallWriter(base_objects.PhysicsObject):
     # MS: we likely want to similary create a line for calling the
     # vertex functions (LLV_1 (rather LLV1_1) etc), as we need more
     # arguments mothers/momenta
-    def get_chiral_wavefunction_call(self, wavefunction, call):
+    def get_external_chiral_wavefunction_call(self, wavefunction, call):
         """Return the wavefunction call for a chiral fermion as LXXXXX or RXXXXX
         instead of IXXXXX or OXXXXX, and a chiral boson as VLXXXX or VRXXXX instead
         of VXXXXX"""    
         
         # AL: first get pdg_code. If left- or right-particle, 
-        # ref momentum for gauge boson, then update call 
+        # ref momentum for gauge boson, then update call
+        # EB: Also get number, external_mothersL, and external_mothersR
         pdg_code = wavefunction.get('particle').get('pdg_code')
         nsv_new = wavefunction.get('leg_state')
         ref_mom = wavefunction.get('ref_mom')
-        
+        number = wavefunction.get('number')
+        external_mothersL = wavefunction.get('external_mothersL')
+        external_mothersR = wavefunction.get('external_mothersR')
+
         # AL: update LH spinor wavefunction
         if pdg_code in [90001, 90005]:
             # Change in/out label to left label
@@ -330,9 +340,9 @@ class HelasCallWriter(base_objects.PhysicsObject):
             #        MOL is the external mother.
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',' + 'LEV(' + str(wavefunction.get('number')) + '),PV(1,' \
-                 + str(wavefunction.get('number'))+ '),V(1,' + str(wavefunction.get('number')) + '))\n' \
-                 + 'MOL(' + str(wavefunction.get('number')) + ',:) = ' + str(wavefunction.get('external_mothersL'))
+            call = call_lhs + ',' + 'LEV(' + str(number) + '),PV(1,' \
+                 + str(number)+ '),V(1,' + str(number) + '))\n' \
+                 + 'MOL(' + str(number) + ',:) = ' + str(external_mothersL)
         
         # AL: update RH spinor wavefunction
         elif pdg_code in [90003, 90007]:
@@ -354,9 +364,9 @@ class HelasCallWriter(base_objects.PhysicsObject):
             #        MOR is the external mother.
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',LEV(' + str(wavefunction.get('number')) + '),PV(1,' \
-                 + str(wavefunction.get('number'))+ '),V(1,' + str(wavefunction.get('number')) + '))\n' \
-                 + 'MOR(' + str(wavefunction.get('number')) + ',:) = ' + str(wavefunction.get('external_mothersR')) 
+            call = call_lhs + ',LEV(' + str(number) + '),PV(1,' \
+                 + str(number)+ '),V(1,' + str(number) + '))\n' \
+                 + 'MOR(' + str(number) + ',:) = ' + str(external_mothersR) 
         
         # AL: update LH vector wavefunction
         # EB: calls updated to add:
@@ -375,11 +385,10 @@ class HelasCallWriter(base_objects.PhysicsObject):
             wavefunction.get('external_mothersR')[0] = ref_mom
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + 'MANG(' + str(ref_mom) + ',' + str(wavefunction.get('number')) + '),LEV(' \
-                + str(wavefunction.get('number')) + '),PV(1,' + str(wavefunction.get('number')) + '),V(1,' \
-                +  str(wavefunction.get('number')) + '))\n' \
-                + 'MOL(' + str(wavefunction.get('number')) + ',:) = ' + str(wavefunction.get('external_mothersL')) + '\n' \
-                + 'MOR(' + str(wavefunction.get('number')) + ',:) = ' + str(wavefunction.get('external_mothersR'))
+            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + 'MANG(' + str(ref_mom) + ',' + str(number) + '),LEV(' \
+                + str(number) + '),PV(1,' + str(number) + '),V(1,' +  str(number) + '))\n' \
+                + 'MOL(' + str(number) + ',:) = ' + str(external_mothersL) + '\n' \
+                + 'MOR(' + str(number) + ',:) = ' + str(external_mothersR)
             
         # AL: update RH vector wavefunction
         elif pdg_code == 90024:
@@ -388,15 +397,52 @@ class HelasCallWriter(base_objects.PhysicsObject):
 
             # insert reference momentum as argument
             # EB: insert all new arguments
-            wavefunction.get('external_mothersL')[0] = ref_mom
+            external_mothersL[0] = ref_mom
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + 'MSQR(' + str(wavefunction.get('number')) + ',' + str(ref_mom) + '),LEV(' \
-                + str(wavefunction.get('number')) + '),PV(1,' + str(wavefunction.get('number')) + '),V(1,' \
-                +  str(wavefunction.get('number')) + '))\n' \
-                + 'MOL(' + str(wavefunction.get('number')) + ',:) = ' + str(wavefunction.get('external_mothersL')) + '\n' \
-                + 'MOR(' + str(wavefunction.get('number')) + ',:) = ' + str(wavefunction.get('external_mothersR'))
+            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + 'MSQR(' + str(number) + ',' + str(ref_mom) + '),LEV(' \
+                + str(number) + '),PV(1,' + str(number) + '),V(1,' +  str(number) + '))\n' \
+                + 'MOL(' + str(number) + ',:) = ' + str(external_mothersL) + '\n' \
+                + 'MOR(' + str(number) + ',:) = ' + str(external_mothersR)
 
+        return call
+    
+    # EB: Add a function to change the chiral internal wavefunctions.
+    def get_internal_chiral_wavefunction_call(self, wavefunction, call):
+        """Return the call for internal chiral wavefunction"""
+
+        # EB: check to see if vertex has been implemented.
+        # If so, update the call.
+
+        # EB: Update the call for LLV1_2
+        if call[5:11] == 'LLV1_2':
+            call_keep = ','.join(call.split(',')[-5:-2])
+            for mother in wavefunction.get('mothers'):
+                number = mother.get('number')
+                pdg_code = mother.get('pdg_code')
+
+                # EB: if chiral fermion
+                if abs(pdg_code) < 90010 and abs(pdg_code) > 90000:
+                    call_1 = 'CALL LLV1_2(V(1,' + str(number) + '),LEV(' + str(number) \
+                        + '),PV(1,' + str(number) + '),MOL(' + str(number) + ',:),'
+        
+                # EB: else is boson
+                else:
+                    call_2 = 'V(1,' + str(number) + '),PV(1,' + str(number) + '),MOL(' \
+                        + str(number) + ',:),MOR(' + str(number) + ',:),NEXTERNAL,MSQR,MANG,'
+                    
+            call_3 = ',MOL(' + str(wavefunction.get('number')) + ',:),V(1,' \
+                + str(wavefunction.get('number')) + '),PV(1,' + str(wavefunction.get('number')) \
+                + '),LEV(' + str(wavefunction.get('number')) + '))'
+
+            call = call_1 + call_2 + call_keep + call_3
+        
+        # EB: else: print the vertex name.
+        # TO DO: update to proper error print.
+        else:
+            misc.sprint('Vertex')
+            misc.sprint(call[5:11])
+            misc.sprint('not implemented yet')
         return call
 
     def get_amplitude_call(self, amplitude):
