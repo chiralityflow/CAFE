@@ -626,10 +626,16 @@ class HelasWavefunction(base_objects.PhysicsObject):
         # AL: ref_mom = external particle used for reference momentum of gauge boson.
         #               If not gauge boson, ref_mom = -1, else = external particle number
         # MS: Note that the 'mothers' member variable has to be set such
-        # that we can use the invariants for spinor inner products 
+        # that we can use the invariants for spinor inner products.
+        # EB: external_mothersL = external mothers for the left-handed
+        #           part of a wavefunction.
+        #     external_mothersR = external mothers for the right-handed
+        #           part of a wavefunction.
         self['state'] = 'initial'
         self['leg_state'] = True
         self['mothers'] = HelasWavefunctionList()
+        self['external_mothersL'] = []
+        self['external_mothersR'] = []
         self['number_external'] = 0
         self['number'] = 0
         self['me_id'] = 0
@@ -975,14 +981,16 @@ class HelasWavefunction(base_objects.PhysicsObject):
 
     # AL: new function to check if particle is a chiral fermion
     # AL TODO: update how this is done after changing pdg_ids
+    # EB: change to also inclued chiral bosons
     def is_chiral(self):
-        return abs(self.get('pdg_code')) < 90010 and \
+        return abs(self.get('pdg_code')) < 90025 and \
              abs(self.get('pdg_code')) > 90000
 
     # AL: new function to check if particle is a chiral fermion
     # AL TODO: update how this is done after changing pdg_ids
+    # EB: change to also inclued chiral bosons
     def is_chiral(self):
-        return abs(self.get('pdg_code')) < 90010 and \
+        return abs(self.get('pdg_code')) < 90025 and \
              abs(self.get('pdg_code')) > 90000
 
     def is_majorana(self):
@@ -2588,6 +2596,10 @@ class HelasAmplitude(base_objects.PhysicsObject):
         # conjugate_indices is a list [1,2,...] with fermion lines
         # that need conjugates. Default is "None"
         self['conjugate_indices'] = None
+        # EB: Test to see if it will run with this addition.
+        #     To do: Look at why this needs to be set for the code not to crash.
+        self['external_mothersL'] = []
+        self['external_mothersR'] = []
 
     # Customized constructor
     def __init__(self, *arguments):
@@ -3426,6 +3438,10 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # has_mirror_process is True if the same process but with the
         # two incoming particles interchanged has been generated
         self['has_mirror_process'] = False
+        # EB: Test to see if it will run with this addition
+        #     To do: Look at why this needs to be set for the code not to crash.
+        self['external_mothersL'] = []
+        self['external_mothersR'] = []
 
     def filter(self, name, value):
         """Filter for valid diagram property values."""
@@ -3734,11 +3750,14 @@ class HelasMatrixElement(base_objects.PhysicsObject):
 
         return model, vert_ids_to_pdg
 
-    # AL: New function to get reference momenta for each gauge boson
-    def get_ref_momenta(self, process):
+    # AL: New function to get reference momenta for each gauge boson.
+    # EB: Added flag for if the reference momenta should be the momenta
+    #     of the first fermion with same of opposite chirality.
+    def get_ref_momenta(self, process, opposite_ref):
         """Get a list of reference momenta for each particle. 
-        For photons, the reference momenta is equal to the momenta of the first
-        fermion of opposite chirality"""
+        For photons, the reference momenta is equal to the momenta of the
+         first fermion of same or opposite chirality, depending on 
+         opposite_ref being false or true"""
 
         # return list of particle numbers (return -1 if not boson)
         ref_moms = []
@@ -3763,16 +3782,26 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         
         # find photons and update its reference momenta
         for leg in legs:
-            # if left photon, append right (anti)fermion
-            if leg.get('id') == 90023:
-                ref_moms.append(right_ferm.get('number'))
-                # ref_moms.append(left_ferm.get('number'))
-            # if right photon, append left (anti)fermion
-            elif leg.get('id') == 90024:
-                ref_moms.append(left_ferm.get('number'))
-                # ref_moms.append(right_ferm.get('number'))
-            # else append -1
-            else: ref_moms.append(-1)
+            # EB: if opposite chirality is selected.
+            if opposite_ref:
+                # if left photon, append right (anti)fermion
+                if leg.get('id') == 90023:
+                    ref_moms.append(right_ferm.get('number'))
+                # if right photon, append left (anti)fermion
+                elif leg.get('id') == 90024:
+                    ref_moms.append(left_ferm.get('number'))
+                # else append -1
+                else: ref_moms.append(-1)
+            # EB: if same chirality selected. 
+            else:
+                # if left photon, append left (anti)fermion
+                if leg.get('id') == 90023:
+                     ref_moms.append(left_ferm.get('number'))
+                # if right photon, append right (anti)fermion
+                elif leg.get('id') == 90024:
+                     ref_moms.append(right_ferm.get('number'))
+                # else append -1
+                else: ref_moms.append(-1)
             
         return ref_moms
         
@@ -3812,9 +3841,12 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # AL: get list of wf numbers for ref momenta
         # AL: was from function here, but now from the diagram generation process
         # keep ability to pick our own ref momenta for now
-        man_ref_mom = False
+        # EB: Added flag for if we want the ref momentum to be the momentum of the 
+        #     first fermion with same or opposite chirality.
+        man_ref_mom = True
+        opposite_ref = False
         if man_ref_mom:
-            ref_momenta = self.get_ref_momenta(process)
+            ref_momenta = self.get_ref_momenta(process,opposite_ref)
         else:
             ref_momenta = amplitude.get('ref_momenta')
 
@@ -3823,7 +3855,23 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                                         HelasWavefunction(leg, 0, model,
                                                           ref_momenta, decay_ids)) \
                                        for leg in process.get('legs')])
-
+                        
+        # EB: Set the external mothers for the external particles
+        for leg in process.get('legs'):
+            # EB: if left-handed external particle
+            if external_wavefunctions[leg.get('number')].get('particle').get('pdg_code') in (90001, -90001, 90005, -90005, 90023):
+                external_wavefunctions[leg.get('number')].set('external_mothersL', [leg.get('number')])
+            # EB: if right-handed external particle
+            if external_wavefunctions[leg.get('number')].get('particle').get('pdg_code') in (90003, -90003, 90007, -90007, 90024):
+                external_wavefunctions[leg.get('number')].set('external_mothersR', [leg.get('number')])
+            # EB: for external bosons set the ref_mom in the other external_mothers
+            if external_wavefunctions[leg.get('number')].get('particle').get('pdg_code') == 90023:
+                external_wavefunctions[leg.get('number')].set('external_mothersR', [external_wavefunctions[leg.get('number')].get('ref_mom')])
+            if external_wavefunctions[leg.get('number')].get('particle').get('pdg_code') == 90024:
+                external_wavefunctions[leg.get('number')].set('external_mothersL', [external_wavefunctions[leg.get('number')].get('ref_mom')])
+            #misc.sprint(external_wavefunctions[leg.get('number')].get('particle').get('name'))
+            #misc.sprint(external_wavefunctions[leg.get('number')].get('external_mothersL'))
+            #misc.sprint(external_wavefunctions[leg.get('number')].get('external_mothersR'))
         # Initially, have one wavefunction for each external leg.
         wf_number = len(process.get('legs'))
 
@@ -3855,7 +3903,9 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # and get dictionary of vertex names to vertex ids
         model, vert_id_to_pdgs_dict = self.add_LL_RR_vertices(\
                                  amplitude, external_wavefunctions)
-
+        
+        # EB: I doesn't make it out of this loop before crashing
+        #     in the case where we don't remove diagrams.
         for diagram in diagram_list:
 
             # List of dictionaries from leg number to wave function,
@@ -3894,7 +3944,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 
                 # Check if the process involves chiral fermions
                 is_chiral = self.is_chiral_particles(external_wavefunctions)
-
+                
                 # if chiral and LL or RR, get the new vertex id
                 if is_chiral:
                     # First get ids in vertex.
@@ -3905,7 +3955,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     updated_vertex = self.set_new_vertex_id(vertex, vids, vert_id_to_pdgs_dict)
 
                     vertex.set('id', updated_vertex.get('id'))
-
+               
 
                 for number_wf_dict, color_list in zip(number_to_wavefunctions,
                                                      color_lists):
@@ -3937,6 +3987,32 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                         wf.set('lorentz', [inter.get('lorentz')[coupl_key[1]]])
                         wf.set('color_key', color)
                         wf.set('mothers', mothers)
+
+                        # EB: set the external_mothers for the new wavefunction
+                        # EB: check to see which getexternal_mothers to use based on
+                        #     the particle of the new wavefunction.
+                        if wf.get('particle').get('pdg_code') in (90001, -90001, 90005, -90005):
+                            for mother in mothers:
+                                # EB: Only want to pass the physical momentum forward to fermions 
+                                if mother.get('particle').get('pdg_code') == 90024:
+                                    wf.get('external_mothersL').extend(mother.get('external_mothersR'))
+                                else:
+                                    wf.get('external_mothersL').extend(mother.get('external_mothersL'))
+                        elif wf.get('particle').get('pdg_code') in (90003, -90003, -90007, 90007):
+                            for mother in mothers:
+                                # EB: Only want to pass the physical momentum forward to fermions 
+                                if mother.get('particle').get('pdg_code') == 90023:
+                                    wf.get('external_mothersL').extend(mother.get('external_mothersL'))
+                                else:
+                                    wf.get('external_mothersL').extend(mother.get('external_mothersR'))
+                        elif wf.get('particle').get('pdg_code') == 90022:
+                            for mother in mothers:
+                                wf.get('external_mothersL').extend(mother.get('external_mothersL'))
+                                wf.get('external_mothersR').extend(mother.get('external_mothersR'))
+                        #misc.sprint(wf.get('particle').get('name'))
+                        #misc.sprint(wf.get('external_mothersL'))
+                        #misc.sprint(wf.get('external_mothersR'))
+                       
                         # Need to set incoming/outgoing and
                         # particle/antiparticle according to the fermion flow
                         # of mothers
@@ -3980,10 +4056,10 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                         new_color_list = copy.copy(color_list)
                         new_color_list.append(coupl_key[0])
                         new_color_lists.append(new_color_list)
-
+                
                 number_to_wavefunctions = new_number_to_wavefunctions
                 color_lists = new_color_lists
-
+            
             # Generate all amplitudes corresponding to the different
             # copies of this diagram
             helas_diagram = HelasDiagram()
@@ -4083,21 +4159,35 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                         moved = True
                         break
                 if not moved: iwf -= 1
-
+            
             # Finally, add wavefunctions to diagram
             helas_diagram.set('wavefunctions', diagram_wavefunctions)
-
+            
             if optimization:
                 wavefunctions.extend(diagram_wavefunctions)
                 wf_mother_arrays.extend([wf.to_array() for wf \
                                          in diagram_wavefunctions])
             else:
                 wf_number = len(process.get('legs'))
-
+            
             # Append this diagram in the diagram list
             helas_diagrams.append(helas_diagram)
         
-
+         
+        # EB: Fill up the array to the dimension needed for the current version
+        #     of the vertex fortran subroutines.
+        for diagram in helas_diagrams:
+            for wf in diagram.get('wavefunctions'):   
+                for i in range(len(wf.get('external_mothersL'))+1,len(process.get('legs'))+1):
+                    wf.get('external_mothersL').append(0)
+                for i in range(len(wf.get('external_mothersR'))+1,len(process.get('legs'))+1):
+                    wf.get('external_mothersR').append(0)
+        for leg in process.get('legs'):
+            for i in range(len(external_wavefunctions[leg.get('number')].get('external_mothersL'))+1,len(process.get('legs'))+1):
+                external_wavefunctions[leg.get('number')].get('external_mothersL').append(0)
+            for i in range(len(external_wavefunctions[leg.get('number')].get('external_mothersR'))+1,len(process.get('legs'))+1):
+                external_wavefunctions[leg.get('number')].get('external_mothersR').append(0)
+       
         self.set('diagrams', helas_diagrams)
 
         # Sort all mothers according to the order wanted in Helas calls
@@ -4968,9 +5058,35 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             mothers.append(wf)
 
         return mothers
+
+    # EB: Legacy methods that generates external_mothers from mothers.
+    #     To do: remove these?
+    def getexternal_mothersL(self, mothers):
+        external_mothersL = []
+
+        for mother in mothers:
+            # if mother is left lepton or left external photon.
+            if mother.get('particle').get('pdg_code') in (90001, -90001, 90005, -90005, 90023):
+                external_mothersL.extend(mother.get('external_mothersL'))
+            # if mother is right external photon.
+            if mother.get('particle').get('pdg_code') == 90024:
+                external_mothersL.extend(mother.get('ref_mom'))
+        
+        return external_mothersL
+
+    def getexternal_mothersR(self, mothers):
+        external_mothersR = []
+
+        for mother in mothers:
+            # if mother is right lepton or right external photon.
+            if mother.get('particle').get('pdg_code') in (90003, -90003, 90007, -90007, 90024):
+                external_mothersR.extend(mother.get('external_mothersR'))
+            # if mother is left external photon.
+            if mother.get('particle').get('pdg_code') == 90024:
+                external_mothersR.extend(mother.get('ref_mom'))
+        
+        return external_mothersR
     
-
-
     def get_num_configs(self):
         """Get number of diagrams, which is always more than number of
         configs"""
