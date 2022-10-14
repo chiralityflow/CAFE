@@ -30,7 +30,7 @@ import madgraph
 if madgraph.ordering:
     set = misc.OrderedSet
 
-# AW: Debug
+# AW: Inspect can find how functions call eachother
 import inspect
 #===============================================================================
 # ColorObject
@@ -41,9 +41,14 @@ class ColorObject(array.array):
 
     def __new__(cls, *args):
         """Create a new ColorObject, assuming an integer array"""
+        #misc.sprint(cls, args)
+        #misc.sprint('Caller name', inspect.stack()[1][3])
         try:
+            # AW: debug
+            #misc.sprint('NEW COLOR OBJECT: ',super(ColorObject, cls).__new__(cls, 'i', args))
             return super(ColorObject, cls).__new__(cls, 'i', args)
         except TypeError:
+            #misc.sprint(super(ColorObject, cls).__new__(cls, 'i', args[1]))
             assert args[0] == 'i' #happens when unpacking pickle with py3
             return super(ColorObject, cls).__new__(cls, 'i', args[1])
     def __reduce__(self):
@@ -51,8 +56,9 @@ class ColorObject(array.array):
         return (self.__class__, tuple([i for i in self]))
 
     def __str__(self):
+        #misc.sprint('Caller name', inspect.stack()[1][3])
         """Returns a standard string representation."""
-
+        #misc.sprint(self.__class__.__name__,','.join([str(i) for i in self]))
         return '%s(%s)' % (self.__class__.__name__,
                            ','.join([str(i) for i in self]))
 
@@ -833,18 +839,10 @@ class ColorString(list):
     def create_copy(self):
         """Returns a real copy of self, non trivial because bug in 
         copy.deepcopy"""
-        # misc.sprint('Caller name', inspect.stack()[1][3])
-        # AW: debugging here
+        
         res = ColorString()
-        # AW: Added counter
-        i = 0
+        
         for col_obj in self:
-            #misc.sprint(col_obj,i) 
-            i += 1
-            # AW: Wrong type on col_obj. Changing type for debug purposes
-            if type(col_obj) == array.array:
-                print(col_obj, 'if not T(2,1,0) there is a bug')
-                col_obj = T(2,1,0)
             assert type(col_obj) != array.array
             res.append(col_obj.create_copy())
         res.coeff = self.coeff

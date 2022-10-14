@@ -416,7 +416,7 @@ class Particle(PhysicsObject):
         """Return the color code with a correct minus sign"""
         # AW: gives chiral color if it has been changed from the default value
         if self['chiral_color'] != 1 and self['chiral_color'] != None:
-            misc.sprint('test', self['chiral_color'])
+            #misc.sprint('test', self['chiral_color'])
             return self['chiral_color']
 
         if not self['is_part'] and abs(self['color']) in [3, 6]:
@@ -429,7 +429,7 @@ class Particle(PhysicsObject):
         """
         # AW: gives chiral color if it has been changed from the default value
         if self['chiral_color'] != 1 and self['chiral_color'] != None:
-            misc.sprint('test', self['chiral_color'])
+            #misc.sprint('test', self['chiral_color'])
             return - self['chiral_color']
 
         if self['is_part'] and self['color'] not in [1, 8]:
@@ -974,8 +974,9 @@ class InteractionList(PhysicsObjectList):
         interaction_dict = {}
 
         for inter in self:
+            #misc.sprint(inter)
             interaction_dict[inter.get('id')] = inter
-
+        
         return interaction_dict
 
     def synchronize_interactions_with_particles(self, particle_dict):
@@ -1306,8 +1307,8 @@ class Model(PhysicsObject):
 
     def get_interaction(self, id):
         """Return the interaction corresponding to the id"""
-
         try:
+            #misc.sprint(self.get("interaction_dict")[id])
             return self.get("interaction_dict")[id]
         except Exception:
             return None

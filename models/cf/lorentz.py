@@ -38,6 +38,12 @@ RRV1 = Lorentz(name = 'RRV1',
 # AL: I have commented out all other lorentz structures that we don't yet use in building
 # chirality-flow diagrams
 
+# AW: I uncommented the structures needed for QCD
+
+VVV1 = Lorentz(name = 'VVV1',
+                spins = [ 3, 3, 3 ],
+                structure = 'P(3,1)*Metric(1,2) - P(3,2)*Metric(1,2) - P(2,1)*Metric(1,3) + P(2,3)*Metric(1,3) + P(1,2)*Metric(2,3) - P(1,3)*Metric(2,3)')
+
 # UUS1 = Lorentz(name = 'UUS1',
 #                spins = [ -1, -1, 1 ],
 #                structure = '1')
@@ -110,10 +116,6 @@ RRV1 = Lorentz(name = 'RRV1',
 # VVS1 = Lorentz(name = 'VVS1',
 #                spins = [ 3, 3, 1 ],
 #                structure = 'Metric(1,2)')
-
-# VVV1 = Lorentz(name = 'VVV1',
-#                spins = [ 3, 3, 3 ],
-#                structure = 'P(3,1)*Metric(1,2) - P(3,2)*Metric(1,2) - P(2,1)*Metric(1,3) + P(2,3)*Metric(1,3) + P(1,2)*Metric(2,3) - P(1,3)*Metric(2,3)')
 
 # SSSS1 = Lorentz(name = 'SSSS1',
 #                 spins = [ 1, 1, 1, 1 ],

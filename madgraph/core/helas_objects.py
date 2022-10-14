@@ -3606,7 +3606,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         """A function to update the vertex id if chiral LL or RR vertex"""
         # First sort the ids (fermions before boson in QED)
         # TODO: Update this when we have new pdg_codes convention with e.g. left < right
-        # AW: VIKTIGT ATT ÄNDRA HÄR EFTERSOM 21, 70021 OCH 80021 ÄR BOSONER I QCD
+        # AW: 21, 70021 and 80021 are also bosons in QCD
         # AW: Changed sorting algorithm to seperate bosons and fermions and sort them seperately 
         boson_ids = [21, 70021, 80021, 90022, 90023, 90024]
         bosons = []
@@ -3617,21 +3617,28 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             else:
                 fermions.append(codes)
 
+        # AW: To think about: do we want to sort bosons in a ggg vertex?
         bosons.sort()
         fermions.sort()
         pdg_codes = fermions + bosons
 
+        misc.sprint(pdg_codes)
         # pdg_codes.sort()
         #print(pdg_codes, 'sorted')
         # If not all-outgoing, then we have an LL or RR vertex
-        if not pdg_codes[0]*pdg_codes[1] < 0:
+        # AW: we must check for tripple gluon vertex 
+        # AW: for [-f, -f, V] we get [f, -f, V] while madgraph prefers [-f, f, V]
+        if not pdg_codes[0]*pdg_codes[1] < 0 and pdg_codes[0] != 21 and pdg_codes[0] != 70021 and pdg_codes[0] != 80021:
             # change to all outgoing particles
-            pdg_codes[0] = -pdg_codes[0]
+            if pdg_codes[0] < 0:
+                pdg_codes[1] = -pdg_codes[1]
+            else:
+                pdg_codes[0] = -pdg_codes[0]
             #print('shuffled', pdg_codes)
             # Get new vertex id
             vertex.set('id', list(vert_id_to_pdgs_dict.keys())\
                 [list(vert_id_to_pdgs_dict.values()).index(pdg_codes)])
-        
+        misc.sprint(pdg_codes)
         return vertex
 
     # AL: New function to add LL and RR vertices to model after diagrams already generated
@@ -3740,8 +3747,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 new_vtx_mp = part_name_m + part_name_p + boson
                 new_vtx_pm = part_name_p + part_name_m + boson
             
-                misc.sprint(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]])
-                misc.sprint(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]]['color'])
+                #misc.sprint(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]])
+                #misc.sprint(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]]['color'])
                 
                 # Get new interaction that we'll add to dictionary
                 new_int_mp = copy.deepcopy(model.get('interaction_dict')[vert_to_id_dict[orig_vtx]])
@@ -3752,8 +3759,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 new_int_mp['color'] = model.get('interaction_dict')[vert_to_id_dict[orig_vtx]]['color']
                 new_int_pm['color'] = model.get('interaction_dict')[vert_to_id_dict[orig_vtx]]['color']
 
-                misc.sprint(new_int_mp)
-                misc.sprint(new_int_pm)
+                #misc.sprint(new_int_mp)
+                #misc.sprint(new_int_pm)
                 # AL: Give interaction an unused id
                 n_ints_in_model = len(model.get('interaction_dict'))
                 new_int_mp['id'] = n_ints_in_model + 1
@@ -3802,10 +3809,10 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 new_int_pm['particles'][1]['is_part'] = True
 
                 
-
+                
                 """ if new_int_mp['particles'][0]['color'] == 3:
                     new_int_mp['particles'][0]['chiral_color'] = -3
-                    new_int_mp['particles'][1]['chiral_color'] = 3
+                    new_int_mp['particles'][1]['chiral_color'] = 3fff
                     new_int_pm['particles'][0]['chiral_color'] = -3
                     new_int_pm['particles'][1]['chiral_color'] = 3 """
 
@@ -3821,7 +3828,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 model.get('interactions').append(new_int_pm)
 
        
-
+        misc.sprint(vert_ids_to_pdg)
         return model, vert_ids_to_pdg
 
     # AL: New function to get reference momenta for each gauge boson
@@ -3904,11 +3911,15 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # AL: get list of wf numbers for ref momenta
         # AL: was from function here, but now from the diagram generation process
         # keep ability to pick our own ref momenta for now
-        man_ref_mom = False
+        #man_ref_mom = False
+        man_ref_mom = True
+        # AW: ref_momenta = (1,1,0,0)
         if man_ref_mom:
             ref_momenta = self.get_ref_momenta(process)
         else:
             ref_momenta = amplitude.get('ref_momenta')
+            
+        misc.sprint(ref_momenta)
         # Generate wavefunctions for the external particles
         external_wavefunctions = dict([(leg.get('number'),
                                         HelasWavefunction(leg, 0, model,
@@ -6075,7 +6086,7 @@ class HelasMultiProcess(base_objects.PhysicsObject):
         """ Process the color information for a given matrix
         element made of a tree diagram. compute_loop_nc is dummy here for the
         tree-level Nc and present for structural reasons only."""
-        misc.sprint('Caller name', inspect.stack()[1][3])
+        #misc.sprint('Caller name', inspect.stack()[1][3])
         if compute_loop_nc:
             raise MadGraph5Error("The tree-level function 'process_color' "+\
              " of class HelasMultiProcess cannot be called with a value for compute_loop_nc")

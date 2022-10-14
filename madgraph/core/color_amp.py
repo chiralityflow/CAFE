@@ -37,6 +37,8 @@ from functools import reduce
 if madgraph.ordering:
     set = misc.OrderedSet
 
+# AW: inspect allows to find which functions calls eachother
+import inspect
 #===============================================================================
 # ColorBasis
 #===============================================================================
@@ -66,7 +68,7 @@ class ColorBasis(dict):
         """Takes a diagram and a model and outputs a dictionary with keys being
         color coefficient index tuples and values a color string (before 
         simplification)."""
-
+        #misc.sprint('Caller name', inspect.stack()[1][3])
         # The smallest value used to create new summed indices
         min_index = -1000
         # The dictionary to be output
@@ -85,7 +87,7 @@ class ColorBasis(dict):
             res_dict = dict((key, color_algebra.ColorString(
                                [color_algebra.ColorOne()])) for key in res_dict)
 
-        misc.sprint(res_dict) 
+        #misc.sprint(res_dict) 
         return res_dict
 
     
@@ -99,7 +101,7 @@ class ColorBasis(dict):
 
         # Create a list of (color,leg number) pairs for the vertex, where color
         # can be negative for anti particles
-
+        #misc.sprint('Caller name', inspect.stack()[1][3])
         color_num_pairs = []
         pdg_codes = []
                 
@@ -141,7 +143,7 @@ class ColorBasis(dict):
 
             color_num_pairs.append((curr_color, curr_num))
             pdg_codes.append(curr_pdg)
-        
+        #misc.sprint(color_num_pairs)
         if vertex != diagram.get('vertices')[-1]:
             # Put the resulting wavefunction first, to make
             # wavefunction call more natural
@@ -149,8 +151,9 @@ class ColorBasis(dict):
             color_num_pairs.insert(0, last_color_num)
             last_pdg = pdg_codes.pop(-1)
             pdg_codes.insert(0, last_pdg)
+        
         # AW: debug    
-        misc.sprint(color_num_pairs, pdg_codes)
+        #misc.sprint(color_num_pairs, pdg_codes)
         # Order the legs according to the interaction particles
         # AW: SOMETHING GOES WRONG HERE, interaction_pdgs are in wrong order
         if vertex.get('id')!=-1:
@@ -160,10 +163,13 @@ class ColorBasis(dict):
         else:
             interaction_pdgs = [l.get('id') for l in vertex.get('legs')]
         # AW: I think antiparticle should come before particle in interaction_pdgs. Ask MS, AL or ZW
+        misc.sprint(interaction_pdgs)
+        # AW: not nessesary anymore since this is fixed at set_new_vertex_id
         if interaction_pdgs[0] > 0 and interaction_pdgs[1] < 0:
             first_pdg = interaction_pdgs[1]
             interaction_pdgs[1] = interaction_pdgs[0]
             interaction_pdgs[0] = first_pdg
+            misc.sprint('ERROR', interaction_pdgs)
 
         #misc.sprint(interaction_pdgs)
         sorted_color_num_pairs = []
@@ -175,6 +181,7 @@ class ColorBasis(dict):
             pdg_codes.pop(index)
             sorted_color_num_pairs.append(color_num_pairs.pop(index))
 
+        #misc.sprint(sorted_color_num_pairs)
         if color_num_pairs:
             raise base_objects.PhysicsObject.PhysicsObjectError
 
@@ -185,7 +192,7 @@ class ColorBasis(dict):
         # ... and the associated dictionary for replacement
         # AW: list numbers get wrong order for some reason
         
-        misc.sprint(list_numbers)
+        #misc.sprint(list_numbers)
         match_dict = dict(enumerate(list_numbers))
 
         if vertex['id'] == -1:
@@ -198,7 +205,9 @@ class ColorBasis(dict):
                         model.get_interaction(vertex['id'])['couplings'].keys()]
         
         # AW: get_interaction(vertex['id'])['color'] has wrong type (array instead of T(2,1,0))
-        #misc.sprint(inter_color,inter_indices))
+        
+        #misc.sprint(model.get_interaction(vertex['id']))
+        #misc.sprint(inter_color,inter_indices)
         # For colorless vertices, return a copy of res_dict
         # Where one 0 has been added to each color index chain key
         if not inter_color:
@@ -252,7 +261,7 @@ class ColorBasis(dict):
                     new_col_str_chain.product(mod_col_str)
                     new_res_dict[tuple(list(ind_chain) + [i])] = \
                         new_col_str_chain
-        misc.sprint(new_res_dict)
+        #misc.sprint(new_res_dict)
         return (min_index, new_res_dict)
 
 
@@ -327,16 +336,19 @@ class ColorBasis(dict):
     def create_color_dict_list(self, amplitude):
         """Returns a list of colorize dict for all diagrams in amplitude. Also
         update the _list_color_dict object accordingly """
-
+        #misc.sprint('Caller name', inspect.stack()[1][3])
         list_color_dict = []
-
+        #misc.sprint(list_color_dict)
         for diagram in amplitude.get('diagrams'):
             colorize_dict = self.colorize(diagram,
                                           amplitude.get('process').get('model'))
+            #misc.sprint(colorize_dict)
             list_color_dict.append(colorize_dict)
 
         self._list_color_dict = list_color_dict
 
+        #misc.sprint(list_color_dict)
+        
         return list_color_dict
 
     def build(self, amplitude=None):

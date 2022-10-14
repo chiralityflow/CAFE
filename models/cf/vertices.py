@@ -249,3 +249,24 @@ V_36 = Vertex(name = 'V_36',
               color = [ 'Identity(1,2)' ],
               lorentz = [ L.RLV1 ],
               couplings = {(0,0):C.GC_1})
+
+
+# AW: Tripple gluon vertex
+
+V_37 = Vertex(name = 'V_37',
+              particles = [ P.g, P.g, P.g ],
+              color = [ 'f(1,2,3)' ],
+              lorentz = [ L.VVV1 ],
+              couplings = {(0,0):C.GC_10})
+
+V_38 = Vertex(name = 'V_38',
+              particles = [ P.g, P.g, P.gL ],
+              color = [ 'f(1,2,3)' ],
+              lorentz = [ L.VVV1 ],
+              couplings = {(0,0):C.GC_10})
+
+V_39 = Vertex(name = 'V_39',
+              particles = [ P.g, P.g, P.gR ],
+              color = [ 'f(1,2,3)' ],
+              lorentz = [ L.VVV1 ],
+              couplings = {(0,0):C.GC_10})
