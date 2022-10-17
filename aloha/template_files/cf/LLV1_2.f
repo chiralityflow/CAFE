@@ -1,0 +1,55 @@
+      SUBROUTINE LLV1_2(F1,LEF1,PF1,MOF1,V3,PV3,MO3L,MO3R,NEXTERNAL,
+     & MSQR,MANG,COUP,M2,W2,MOF2,F2,PF2,LEF2)
+      IMPLICIT NONE
+      COMPLEX*16 CI
+      PARAMETER (CI=(0D0,1D0))
+      DOUBLE PRECISION RTWO
+      PARAMETER (RTWO=2.0D0)
+      INTEGER LEF1,NEXTERNAL,I,J
+      INTEGER LEF2
+      INTEGER MOF1(*),MOF2(*),MO3L(*),MO3R(*)
+      COMPLEX*16 COUP
+      COMPLEX*16 F1(*)
+      COMPLEX*16 F2(*)
+      COMPLEX*16 PF1(*)
+      COMPLEX*16 PV3(*)
+      COMPLEX*16 PF2(*)
+      COMPLEX*16, DIMENSION(NEXTERNAL,NEXTERNAL) :: MSQR
+      COMPLEX*16, DIMENSION(NEXTERNAL,NEXTERNAL) :: MANG
+      REAL*8 M2
+      REAL*8 P2(0:3)
+      COMPLEX*16 V3(*)
+      REAL*8 W2
+      COMPLEX*16 DENOM
+      COMPLEX*16 SUMF1
+      
+      PF2(1) = +PF1(1)+PV3(1)
+      PF2(2) = +PF1(2)+PV3(2)
+      P2(0) = -DBLE(PF2(1))
+      P2(1) = -DBLE(PF2(2))
+      P2(2) = -DIMAG(PF2(2))
+      P2(3) = -DIMAG(PF2(1))
+      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)
+      SUMF1 = 0
+      
+      IF (LEF1.GT.0) THEN
+        LEF2=LEF1+1
+        DO I = 1,LEF1
+          SUMF1 = SUMF1 + F1(I)*MSQR(ABS(MOF1(I)),ABS(MO3L(1)))
+        ENDDO
+      ELSE
+        LEF2=LEF1+2
+        SUMF1 = MSQR(ABS(MOF1(1)),ABS(MO3L(1)))
+        
+      ENDIF
+      
+      DO J = 1, LEF2
+        IF (MOF2(J).GT.0) THEN
+         F2(J) = DENOM*CI*(DSQRT(RTWO)/PV3(3))*SUMF1*MANG(ABS(MO3R(1)),ABS(MOF2(J)))
+        ENDIF
+        IF (MOF2(J).LT.0) THEN
+         F2(J) = -DENOM*CI*(DSQRT(RTWO)/PV3(3))*SUMF1*MANG(ABS(MO3R(1)),ABS(MOF2(J)))
+        ENDIF
+            
+      ENDDO 
+      END
