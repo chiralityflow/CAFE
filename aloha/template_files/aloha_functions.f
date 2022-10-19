@@ -70,6 +70,7 @@ c rpprod = <rp>
          rbraan(2) = dcmplx ( - sqr0r3 )
 
 c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
+c AW: swap nsvhel from +1 to -1 in new convention
          if ( nsvhel.eq.1 ) then
             if ( sqp0p3.eq.rZero ) then
                pketsq(1) = dcmplx( dsqrt(rTwo*p(0)) )
@@ -85,11 +86,13 @@ c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
 c           rpprod = <rp> = rbraan*pketan
 c           pketan = |p> = (eps_{ab}|p]^b)^\dagger = (0 & -1)  (pketsq(1)^*) = (-pketsq(2)^*)
 c                                                    (1 &  0)  (pketsq(2)^*)   ( pketsq(1)^*)
+c           AW: in new convention the wavefunction is |r>[p|/<rp>, we get there by 
+c           using eps_{dot(a) dot(b)} |p]^dot(b) = [p|_dot(a) and  eps_{ab} <r|^b = |r>_a
             rpprod = rbraan(2)*dconjg(pketsq(1)) - rbraan(1)*dconjg(pketsq(2))
-            vcl(3) = pketsq(1)*dsqrt(rTwo)/rpprod
-            vcl(4) = pketsq(2)*dsqrt(rTwo)/rpprod
-            vcl(5) = rbraan(1)
-            vcl(6) = rbraan(2)
+            vcl(3) = -pketsq(2)*dsqrt(rTwo)/rpprod
+            vcl(4) = pketsq(1)*dsqrt(rTwo)/rpprod
+            vcl(5) = -rbraan(2)
+            vcl(6) = rbraan(1)
          
 c nsvhel = -1, i.e. right-chiral (outgoing - hel or incoming + hel)
          else
@@ -180,12 +183,14 @@ c nsvhel = -1, i.e. right-chiral (outgoing - hel or incoming + hel)
             endif
 c           prprod = [pr] = pbrasq*rketsq
 c           pbrasq = [p| = (-<p|^a*eps_{ab})^\dagger = -(pbraan(1)^*, pbraan(2)^*) (0 & -1)   = (-pbraan(2)^*, pbraan(1)^*)
-c                                                                                  (1 &  0)     
+c                                                                                  (1 &  0)
+c           AW: in new convention the wavefunction is |p>[r|/[pr], we get there by 
+c           using eps_{dot(a) dot(b)} |r]^dot(b) = [r|_dot(a) and  eps_{ab} <p|^b = |p>_a
             prprod = -conjg(pbraan(2))*rketsq(1) + conjg(pbraan(1))*rketsq(2)
-            vcr(3) = rketsq(1)*dsqrt(rTwo)/prprod
-            vcr(4) = rketsq(2)*dsqrt(rTwo)/prprod
-            vcr(5) = pbraan(1)
-            vcr(6) = pbraan(2)
+            vcr(3) = -rketsq(2)*dsqrt(rTwo)/prprod
+            vcr(4) = rketsq(1)*dsqrt(rTwo)/prprod
+            vcr(5) = -pbraan(2)
+            vcr(6) = pbraan(1)
          
 c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
          else

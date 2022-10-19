@@ -1555,9 +1555,10 @@ def right_prod(p1,p2):
 
 def levi_left_prod(p1,p2):
     "ZW: Writes out the explicit left inner product of particles p1 and p2"
-    "multiplied by the upper index Levi-Civita tensor acting on p1"
+    "multiplied by the upper index Levi-Civita tensor acting on p2"
     # ZW: Unused, but created in case it ever comes up
-    inprod = '({}(4)*{}(3) - {}(3)*{}(4))'.format(p1,p2,p1,p2)
+    # AW: Changed so Levi-Civita tensor acts on p2 instead of p1
+    inprod = '({}(3)*{}(4) - {}(4)*{}(3))'.format(p1,p2,p1,p2)
     return inprod
 
 def levi_right_prod(p1,p2):
@@ -1583,7 +1584,129 @@ def pbar_bra(ket,p):
     comp2 = '(({}(1) + CI*{}(2))*{}(3) + ({}(0) - {}(3))*{}(4))'.format(p,p,ket,p,p,ket)
     return [comp1,comp2]
 
+def pbar_levi_ket(bra,p):
+    "AW: writes out the explicit multiplication of"
+    "a right-handed bra multiplied with the Levi-Cevita tensor with the p-slash matrix in the HELAS Fortran convention"
+    "returns a two-component list, corresponding to the output left-handed spinor"
+    comp1 = '({}(6)*({}(0) + {}(3)) - {}(5)*({}(1) + CI*{}(2)))'.format(bra,p,p,bra,p,p)
+    comp2 = '({}(6)*({}(1) - CI*{}(2)) - {}(5)*({}(0) - {}(3)))'.format(bra,p,p,bra,p,p)
+    return [comp1,comp2]
+
+def pbar_levi_bra(ket,p):
+    "AW: writes out the explicit multiplication of"
+    "a left-handed ket multiplied with the Levi-Cevita tensor with the p-slash matrix in the HELAS Fortrant convention"
+    "returns a two-component list, corresponding to the output right-handed spinor"
+    comp1 = '(({}(0) + {}(3))*{}(4) - ({}(1) - CI*{}(2))*{}(3))'.format(p,p,ket,p,p,ket)
+    comp2 = '(({}(1) + CI*{}(2))*{}(4) - ({}(0) - {}(3))*{}(3))'.format(p,p,ket,p,p,ket)
+    return [comp1,comp2]
+
 def vertex_replacer(text, vertex):
+    "ZW: Function which takes the text of a Fortran vertex file as well as the vertex name as an input"
+    "and outputs the corresponding chiral vertex Fortran file"
+    #sprint("Replaced some files")
+    # AW: Updated with new conventions and vertices
+    text_copy = text
+    linebreaks = get_symbols(text_copy, '\n')
+    if (vertex == 'LRV1_0'):
+        sprint('LRV1_0')
+        equality = get_symbols(text_copy, '=')
+        LRV1_0_replace = '      VERTEX = -COUP*{}*{}\n'.format(levi_left_prod('F1','V3'),levi_right_prod('V3','F2'))
+        text_copy = text_copy[:linebreaks[-10]+1] + text_copy[linebreaks[-9]+1:linebreaks[-7]+1]\
+             + LRV1_0_replace + text_copy[linebreaks[-4]+1:]
+
+    """ if (vertex == 'LRV1_0'):
+        equality = get_symbols(text_copy, '=')
+        LRV1_0_replace = '      VERTEX = -COUP*{}*{}\n'.format(left_prod('F1','V3'),right_prod('V3','F2'))
+        text_copy = text_copy[:linebreaks[-10]+1] + text_copy[linebreaks[-9]+1:linebreaks[-7]+1]\
+             + LRV1_0_replace + text_copy[linebreaks[-4]+1:] """
+        
+    if (vertex == 'RLV1_0'):
+        sprint('RLV1_0')
+        equality = get_symbols(text_copy, '=')
+        RLV1_0_replace = '      VERTEX = -COUP*{}*{}\n'.format(levi_left_prod('F2','V3'),levi_right_prod('V3','F1'))
+        text_copy = text_copy[:linebreaks[-10]+1] + text_copy[linebreaks[-9]+1:linebreaks[-7]+1]\
+             + RLV1_0_replace + text_copy[linebreaks[-4]+1:]
+    if (vertex == 'LRV1P0_3'):
+        sprint('LRV1P0_3')
+        LRV1P0_3_replace = '      V3(3) = 2*DENOM*F1(3)\n'\
+            + '      V3(4) = 2*DENOM*F1(4)\n'\
+            + '      V3(5) = F2(5)\n'\
+            + '      V3(6) = F2(6)\n'
+        text_copy = text_copy[:linebreaks[-8]+1] + LRV1P0_3_replace + text_copy[linebreaks[-4]+1:]
+    if (vertex == 'RLV1P0_3'):
+        sprint('RLV1P0_3')
+        RLV1P0_3_replace = '      V3(3) = 2*DENOM*F2(3)\n'\
+            + '      V3(4) = 2*DENOM*F2(4)\n'\
+            + '      V3(5) = F1(5)\n'\
+            + '      V3(6) = F1(6)\n'
+        text_copy = text_copy[:linebreaks[-8]+1] + RLV1P0_3_replace + text_copy[linebreaks[-4]+1:]
+    if (vertex == 'LLV1_1'): 
+        sprint('LLV_1')
+        spinor = pbar_levi_ket('V3','(-1)*P1')
+        LLV1_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
+            + '      INPROD = {}\n'.format(levi_left_prod('F2','V3'))\
+            + '      F1(3) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
+            + '      F1(4) = DENOM*CI*INPROD*{}\n'.format(spinor[1])\
+            + '      F1(5) = 0\n'\
+            + '      F1(6) = 0\n'
+        text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
+        linebreaks = get_symbols(text_copy, '\n')
+        text_copy = text_copy[:linebreaks[-18]+1] + LLV1_1_replace + text_copy[linebreaks[-4]+1:]
+    if (vertex == 'LLV1_2'):
+        sprint('LLV_2')
+        spinor = pbar_levi_ket('V3','P2')
+        LLV1_2_replace = '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
+            + '      INPROD = {}\n'.format(levi_left_prod('F1','V3'))\
+            + '      F2(3) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
+            + '      F2(4) = DENOM*CI*INPROD*{}\n'.format(spinor[1])\
+            + '      F2(5) = 0\n'\
+            + '      F2(6) = 0\n'
+        text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
+        linebreaks = get_symbols(text_copy, '\n')
+        text_copy = text_copy[:linebreaks[-19]+1] + LLV1_2_replace + text_copy[linebreaks[-4]+1:]
+    
+    if (vertex == 'RRV1_1'):
+        sprint('RRV_1')
+        spinor = pbar_levi_bra('V3','(-1)*P1')
+        RRV1_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
+            + '      INPROD = {}\n'.format(levi_right_prod('V3','F2'))\
+            + '      F1(3) = 0\n'\
+            + '      F1(4) = 0\n'\
+            + '      F1(5) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
+            + '      F1(6) = DENOM*CI*INPROD*{}\n'.format(spinor[1])
+        text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
+        linebreaks = get_symbols(text_copy, '\n')
+        text_copy = text_copy[:linebreaks[-18]+1] + RRV1_1_replace + text_copy[linebreaks[-4]+1:]
+
+    """ if (vertex == 'RRV1_1'):
+        spinor = pbar_bra('V3','(-1)*P1')
+        RRV1_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
+            + '      INPROD = {}\n'.format(right_prod('V3','F2'))\
+            + '      F1(3) = 0\n'\
+            + '      F1(4) = 0\n'\
+            + '      F1(5) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
+            + '      F1(6) = DENOM*CI*INPROD*{}\n'.format(spinor[1])
+        text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
+        linebreaks = get_symbols(text_copy, '\n')
+        text_copy = text_copy[:linebreaks[-18]+1] + RRV1_1_replace + text_copy[linebreaks[-4]+1:] """
+
+    if (vertex == 'RRV1_2'):
+        sprint('RRV_2')
+        spinor = pbar_levi_bra('V3','P2')
+        RRV1_2_replace = '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
+            + '      INPROD = {}\n'.format(levi_right_prod('V3','F1'))\
+            + '      F2(3) = 0\n'\
+            + '      F2(4) = 0\n'\
+            + '      F2(5) = DENOM*CI*INPROD*{}\n'.format(spinor[0])\
+            + '      F2(6) = DENOM*CI*INPROD*{}\n'.format(spinor[1])
+        text_copy = text_copy[:linebreaks[15]+1] + '      COMPLEX*16 INPROD\n' + text_copy[linebreaks[15]+1:]
+        linebreaks = get_symbols(text_copy, '\n')
+        text_copy = text_copy[:linebreaks[-18]+1] + RRV1_2_replace + text_copy[linebreaks[-4]+1:]
+    text_copy = 'C     This file was automatically generated by ALOHA\n'\
+        + 'C     but has been modified by CAFE\n' + text_copy[linebreaks[3]:]
+    return text_copy
+
+""" def vertex_replacer(text, vertex):
     "ZW: Function which takes the text of a Fortran vertex file as well as the vertex name as an input"
     "and outputs the corresponding chiral vertex Fortran file"
     #sprint("Replaced some files")
@@ -1657,7 +1780,7 @@ def vertex_replacer(text, vertex):
         text_copy = text_copy[:linebreaks[-18]+1] + RRV1_2_replace + text_copy[linebreaks[-4]+1:]
     text_copy = 'C     This file was automatically generated by ALOHA\n'\
         + 'C     but has been modified by CAFE\n' + text_copy[linebreaks[3]:]
-    return text_copy
+    return text_copy """
 
 def postex_vertex_replacer(working_dir):
     "ZW: Function which checks the working directory to see what vertices are used in a given process"
