@@ -163,7 +163,7 @@ class ColorBasis(dict):
         else:
             interaction_pdgs = [l.get('id') for l in vertex.get('legs')]
         # AW: I think antiparticle should come before particle in interaction_pdgs. Ask MS, AL or ZW
-        misc.sprint(interaction_pdgs)
+        #misc.sprint(interaction_pdgs)
         # AW: not nessesary anymore since this is fixed at set_new_vertex_id
         if interaction_pdgs[0] > 0 and interaction_pdgs[1] < 0:
             first_pdg = interaction_pdgs[1]

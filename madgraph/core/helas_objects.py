@@ -3539,7 +3539,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         (without optimization then). This is called from the initialization
         and pulled out here in order to have the correct treatment in daughter
         classes."""
-        misc.sprint('Caller name', inspect.stack()[1][3])
+        #misc.sprint('Caller name', inspect.stack()[1][3])
         logger.debug('Computing the color basis')
         self.get('color_basis').build(self.get('base_amplitude'))
         self.set('color_matrix',
@@ -3622,7 +3622,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         fermions.sort()
         pdg_codes = fermions + bosons
 
-        misc.sprint(pdg_codes)
+        #misc.sprint(pdg_codes)
         # pdg_codes.sort()
         #print(pdg_codes, 'sorted')
         # If not all-outgoing, then we have an LL or RR vertex
@@ -3638,7 +3638,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             # Get new vertex id
             vertex.set('id', list(vert_id_to_pdgs_dict.keys())\
                 [list(vert_id_to_pdgs_dict.values()).index(pdg_codes)])
-        misc.sprint(pdg_codes)
+        #misc.sprint(pdg_codes)
         return vertex
 
     # AL: New function to add LL and RR vertices to model after diagrams already generated
@@ -3828,7 +3828,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 model.get('interactions').append(new_int_pm)
 
        
-        misc.sprint(vert_ids_to_pdg)
+        #misc.sprint(vert_ids_to_pdg)
         return model, vert_ids_to_pdg
 
     # AL: New function to get reference momenta for each gauge boson
@@ -3919,7 +3919,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         else:
             ref_momenta = amplitude.get('ref_momenta')
             
-        misc.sprint(ref_momenta)
+        #misc.sprint(ref_momenta)
         # Generate wavefunctions for the external particles
         external_wavefunctions = dict([(leg.get('number'),
                                         HelasWavefunction(leg, 0, model,

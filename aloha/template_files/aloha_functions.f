@@ -70,7 +70,6 @@ c rpprod = <rp>
          rbraan(2) = dcmplx ( - sqr0r3 )
 
 c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
-c AW: swap nsvhel from +1 to -1 in new convention
          if ( nsvhel.eq.1 ) then
             if ( sqp0p3.eq.rZero ) then
                pketsq(1) = dcmplx( dsqrt(rTwo*p(0)) )
@@ -88,12 +87,16 @@ c           pketan = |p> = (eps_{ab}|p]^b)^\dagger = (0 & -1)  (pketsq(1)^*) = (
 c                                                    (1 &  0)  (pketsq(2)^*)   ( pketsq(1)^*)
 c           AW: in new convention the wavefunction is |r>[p|/<rp>, we get there by 
 c           using eps_{dot(a) dot(b)} |p]^dot(b) = [p|_dot(a) and  eps_{ab} <r|^b = |r>_a
+c           AW: represent the vector bosons in a matrix (outer product)
             rpprod = rbraan(2)*dconjg(pketsq(1)) - rbraan(1)*dconjg(pketsq(2))
-            vcl(3) = -pketsq(2)*dsqrt(rTwo)/rpprod
-            vcl(4) = pketsq(1)*dsqrt(rTwo)/rpprod
-            vcl(5) = -rbraan(2)
-            vcl(6) = rbraan(1)
-         
+            vcl(3) = pketsq(2)*rbraan(2)*dsqrt(rTwo)/rpprod
+            vcl(4) = -pketsq(1)*rbraan(2)*dsqrt(rTwo)/rpprod
+            vcl(5) = -pketsq(2)*rbraan(1)*dsqrt(rTwo)/rpprod
+            vcl(6) = pketsq(1)*rbraan(1)*dsqrt(rTwo)/rpprod
+            
+ 
+
+
 c nsvhel = -1, i.e. right-chiral (outgoing - hel or incoming + hel)
          else
             vcl(3) = dcmplx(rZero)
@@ -125,7 +128,7 @@ c output:
 c       complex vcr(6)          : vector wavefunction       |r]<p|/[pr]
 c
       implicit none
-      double complex vcr(6), rketsq(2), pbraan(2), prprod
+      double complex vcr(6), rketsq(2), pbraan(2), prprod, ketbravec(4)
       double precision p(0:3),vmass,hel,hel0,pzpt,emp,sqh,r(0:3),sqp0p3,sqr0r3
       integer nhel,nsv,nsvahl,nsvhel,i
       double precision refmom(4)
@@ -186,11 +189,14 @@ c           pbrasq = [p| = (-<p|^a*eps_{ab})^\dagger = -(pbraan(1)^*, pbraan(2)^
 c                                                                                  (1 &  0)
 c           AW: in new convention the wavefunction is |p>[r|/[pr], we get there by 
 c           using eps_{dot(a) dot(b)} |r]^dot(b) = [r|_dot(a) and  eps_{ab} <p|^b = |p>_a
+c           AW: represent the vector bosons in a matrix (outer product) 
             prprod = -conjg(pbraan(2))*rketsq(1) + conjg(pbraan(1))*rketsq(2)
-            vcr(3) = -rketsq(2)*dsqrt(rTwo)/prprod
-            vcr(4) = rketsq(1)*dsqrt(rTwo)/prprod
-            vcr(5) = -pbraan(2)
-            vcr(6) = pbraan(1)
+            vcr(3) = rketsq(2)*pbraan(2)*dsqrt(rTwo)/prprod
+            vcr(4) = -rketsq(1)*pbraan(2)*dsqrt(rTwo)/prprod
+            vcr(5) = -rketsq(2)*pbraan(1)*dsqrt(rTwo)/prprod
+            vcr(6) = rketsq(1)*pbraan(1)*dsqrt(rTwo)/prprod
+
+
          
 c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
          else
