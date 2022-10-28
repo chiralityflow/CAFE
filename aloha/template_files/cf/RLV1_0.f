@@ -1,4 +1,4 @@
-      SUBROUTINE LRV1_0(F1,LEF1,PF1,MOF1,F2,LEF2,PF2,MOF2,V3,PV3,MO3L,MO3R,NEXTERNAL,
+      SUBROUTINE RLV1_0(F1,LEF1,PF1,MOF1,F2,LEF2,PF2,MOF2,V3,PV3,MO3L,MO3R,NEXTERNAL,
      & MSQR,MANG,COUP,VERTEX)      
       IMPLICIT NONE
       COMPLEX*16 CI
@@ -8,7 +8,7 @@
       INTEGER NEXTERNAL,I,J
 C     EB: Length of F1 and F2
       INTEGER LEF1,LEF2
-C     EB: Left resp. right external mothers of F1 resp. F2.
+C     EB: Right resp. left external mothers of F1 resp. F2.
       INTEGER MOF1(*),MOF2(*)
 C     EB: Left and right external mothers of V3.
       INTEGER MO3L(*),MO3R(*)
@@ -36,27 +36,27 @@ C         MANG contains the angle innerproducts.
 C     EB: if F1 is internal.
       IF (LEF1.GT.0) THEN
         DO I = 1, LEF1
-          SUMF1 = SUMF1 + F1(I)*MSQR(ABS(MOF1(I)),ABS(MO3L(1)))
+          SUMF1 = SUMF1 + F1(I)*MANG(ABS(MOF1(I)),ABS(MO3R(1)))
         ENDDO
 C     EB: else F1 is external.
       ELSE
-        SUMF1 = MSQR(ABS(MOF1(1)),ABS(MO3L(1)))
+        SUMF1 = MANG(ABS(MOF1(1)),ABS(MO3R(1)))
       ENDIF
       
 C     EB: if F2 is internal.
       IF (LEF2.GT.0) THEN
         DO J = 1, LEF2
-          SUMF2 = SUMF2 + F2(J)*MANG(ABS(MO3R(1)),ABS(MOF2(J)))
+          SUMF2 = SUMF2 + F2(J)*MSQR(ABS(MO3L(1)),ABS(MOF2(J)))
         ENDDO
 C     EB: else F2 is external.
       ELSE
-        SUMF2 = MANG(ABS(MO3R(1)),ABS(MOF2(1)))       
+        SUMF2 = MSQR(ABS(MO3L(1)),ABS(MOF2(1)))       
       ENDIF
       
       VERTEX = -COUP * (DSQRT(RTWO)/PV3(3)) * SUMF1 * SUMF2 
       END
       
-      SUBROUTINE LRV1I_0(F1,LEF1,PF1,MOF1,F2,
+      SUBROUTINE RLV1I_0(F1,LEF1,PF1,MOF1,F2,
      & LEF2,PF2,MOF2,V3L,
      & LEV3L,PV3,MO3L,MO3R,V3R,LEV3R,NEXTERNAL,
      & MSQR,MANG,COUP,VERTEX)      
@@ -68,7 +68,7 @@ C     EB: else F2 is external.
       INTEGER NEXTERNAL,I,J,K,L
 C     EB: Length of F1, F2, V3L, and V3R
       INTEGER LEF1,LEF2,LEV3L,LEV3R
-C     EB: Left resp. right external mothers of F1 resp. F2.
+C     EB: Right resp. left external mothers of F1 resp. F2.
       INTEGER MOF1(*),MOF2(*)
 C     EB: Left and right external mothers of V3.
       INTEGER MO3L(*),MO3R(*)
@@ -88,64 +88,65 @@ C         MANG contains the angle innerproducts.
       COMPLEX*16, DIMENSION(NEXTERNAL,NEXTERNAL) :: MANG
       COMPLEX*16 SUMF1
       COMPLEX*16 SUMF2
-      COMPLEX*16 VERTEX
+      COMPLEX*16 VERTEX, PREVDENOM
       
       SUMF1 = 0
       SUMF2 = 0
+      PREVDENOM = PV3(3)
 
 c     EB: if V3 has internal mothers in right part.      
       IF (LEV3R.GT.0) THEN
-C       EB: if F2 is internal.
-        IF (LEF2.GT.0) THEN 
-          DO I = 1, LEF2
+C       EB: if F1 is internal.
+        IF (LEF1.GT.0) THEN 
+          DO I = 1, LEF1
             DO J = 1, LEV3R 
-              SUMF2 = SUMF2 + F2(I)*V3R(J)*MANG(ABS(MO3R(J)),ABS(MOF2(I)))
+              SUMF1 = SUMF1 + F1(I)*V3R(J)*MANG(ABS(MOF1(I)),ABS(MO3R(J)))
             ENDDO
           ENDDO
-C       EB: else F2 is external.
+C       EB: else F1 is external.
         ELSE
           DO I = 1, LEV3R
-            SUMF2 = SUMF2 + V3R(I)*MANG(ABS(MO3R(I)),ABS(MOF2(1)))
+            SUMF1 = SUMF1 + V3R(I)*MANG(ABS(MOF1(1)),ABS(MO3R(I)))
           ENDDO
         ENDIF
       ELSE   
-C       EB: if F2 is internal.
-        IF (LEF2.GT.0) THEN
-          DO I = 1, LEF2
-            SUMF2 = SUMF2 + F2(I)*MANG(ABS(MO3R(1)),ABS(MOF2(I)))
+C       EB: if F1 is internal.
+        IF (LEF1.GT.0) THEN
+          DO I = 1, LEF1
+            SUMF1 = SUMF1 + F1(I)*MANG(ABS(MOF1(I)),ABS(MO3R(1)))
           ENDDO
-C       EB: else F2 is external.
+C       EB: else F1 is external.
         ELSE
-          SUMF2 = MANG(ABS(MO3R(1)),ABS(MOF2(1)))
+          SUMF1 = MANG(ABS(MOF1(1)),ABS(MO3R(1)))
         ENDIF
       ENDIF
 
 C     EB: if V3 has internal mothers in the left part.     
       IF (LEV3L.GT.0) THEN
-C       EB: if F1 is internal.
-        IF (LEF1.GT.0) THEN
-          DO K = 1, LEF1
+C       EB: if F2 is internal.
+        IF (LEF2.GT.0) THEN
+          DO K = 1, LEF2
             DO L = 1, LEV3L
-              SUMF1 = SUMF1 + F1(K)*V3L(L)*MSQR(ABS(MOF1(K)),ABS(MO3L(L)))
+              SUMF2 = SUMF2 + F2(K)*V3L(L)*MSQR(ABS(MO3L(L)),ABS(MOF2(K)))
             ENDDO
           ENDDO  
-C       EB: else F1 is external.     
+C       EB: else F2 is external.     
         ELSE
           DO K = 1, LEV3L
-            SUMF1 = SUMF1 + V3L(K)*MSQR(ABS(MOF1(1)),ABS(MO3L(K)))
+            SUMF2 = SUMF2 + V3L(K)*MSQR(ABS(MO3L(K)),ABS(MOF2(1)))
           ENDDO
         ENDIF
       ELSE
-C       EB: if F1 is internal.
-        IF (LEF1.GT.0) THEN
-          DO K = 1, LEF1
-            SUMF1 = SUMF1 + F1(K)*MSQR(ABS(MOF1(K)),ABS(MO3L(1)))
+C       EB: if F2 is internal.
+        IF (LEF2.GT.0) THEN
+          DO K = 1, LEF2
+            SUMF2 = SUMF2 + F2(K)*MSQR(ABS(MO3L(1)),ABS(MOF2(K)))
           ENDDO
-C       EB: else F1 is external.
+C       EB: else F2 is external.
         ELSE
-          SUMF1 = MSQR(ABS(MOF1(1)),ABS(MO3L(1)))       
+          SUMF2 = MSQR(ABS(MO3L(1)),ABS(MOF2(1)))       
         ENDIF
       ENDIF
       
-      VERTEX = -COUP * SQRT(RTWO) * PV3(3) * SUMF1 * SUMF2
+      VERTEX = -COUP * SQRT(RTWO) * PREVDENOM * SUMF1 * SUMF2
       END
