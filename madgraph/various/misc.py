@@ -1600,6 +1600,21 @@ def pbar_levi_bra(ket,p):
     comp2 = '(({}(1) + CI*{}(2))*{}(4) - ({}(0) - {}(3))*{}(3))'.format(p,p,ket,p,p,ket)
     return [comp1,comp2]
 
+def vec_vec(V1,V2):
+    "AW: writes out the explicit inner product of"
+    "two vector bosons V1 and V2 in the HELAS Fortran convention"
+    "in the matrix representation. Returns a scalar"
+    inprod = '{}(3)*{}(6) - {}(4)*{}(5) - {}(5)*{}(4) + {}(6)*{}(3)'.format(V1,V2,V1,V2,V1,V2,V1,V2)
+    return inprod 
+
+def vec_p(V,p):
+    "AW: writes out the explicit multiplication of"
+    "a vector boson V and the momentum bispinor p in the HELAS Fortran convention"
+    "in the matrix representation. Returns a scalar"
+    inprod = '({}(3)*({}(0) - {}(3)) - {}(4)*({}(1) + CI*{}(2)) - {}(5)*({}(1) - CI*{}(2)) + {}(6)*({}(0) + {}(3)))' \
+        .format(V,p,p,V,p,p,V,p,p,V,p,p)
+    return inprod 
+
 def bra_eme_ket(F1,V3,F2):
     "AW: Takes a bra F1, matrix V3, and ket F2 and outputs F1*eps*V3*eps^T*F2"
     inprod = '({}(4)*{}(3)*{}(6) - {}(3)*{}(4)*{}(6) - {}(4)*{}(5)*{}(5) + {}(3)*{}(6)*{}(5))' \
@@ -1613,14 +1628,6 @@ def bra_eme_pbar(F,V3,P):
     comp2 = '(({}(4)*{}(3) - {}(3)*{}(4))*({}(0) - {}(3)) + ({}(3)*{}(6) - {}(4)*{}(5))*({}(1) - CI*{}(2)))' \
         .format(F,V3,F,V3,P,P,F,V3,F,V3,P,P)
     return [comp1,comp2]
-
-""" def ket_eme_pbar(F,V3,P):
-    "AW: Takes a ket F, matrix V3, and slashed bispinor pbar P and outputs eps*V3*eps^T*P*F"
-    comp1 = '(({}(6)*{}(3) - {}(5)*{}(5))*({}(1) + CI*{}(2)) + ({}(5)*{}(6) - {}(6)*{}(4))*({}(0) + {}(3)))' \
-        .format(F,V3,F,V3,P,P,F,V3,F,V3,P,P)
-    comp2 = '(({}(6)*{}(3) - {}(5)*{}(5))*({}(0) - {}(3)) + ({}(5)*{}(6) - {}(6)*{}(4))*({}(1) - CI*{}(2)))' \
-        .format(F,V3,F,V3,P,P,F,V3,F,V3,P,P)
-    return [comp1,comp2] """
 
 def ket_eme_pbar(F,V3,P):
     """AW: Takes a ket F, matrix V3, and slashed bispinor pbar P and outputs eps*V3*eps^T*P*F"""
@@ -1638,33 +1645,28 @@ def vertex_replacer(text, vertex):
     text_copy = text
     linebreaks = get_symbols(text_copy, '\n')
     if (vertex == 'LRV1_0'):
-        sprint('LRV1_0')
         equality = get_symbols(text_copy, '=')
         LRV1_0_replace = '      VERTEX = -COUP*{}\n'.format(bra_eme_ket('F1','V3','F2'))
         text_copy = text_copy[:linebreaks[-10]+1] + text_copy[linebreaks[-9]+1:linebreaks[-7]+1]\
              + LRV1_0_replace + text_copy[linebreaks[-4]+1:]      
     if (vertex == 'RLV1_0'):
-        sprint('RLV1_0')
         equality = get_symbols(text_copy, '=')
         RLV1_0_replace = '      VERTEX = -COUP*{}\n'.format(bra_eme_ket('F2','V3','F1'))
         text_copy = text_copy[:linebreaks[-10]+1] + text_copy[linebreaks[-9]+1:linebreaks[-7]+1]\
              + RLV1_0_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'LRV1P0_3'):
-        sprint('LRV1P0_3')
         LRV1P0_3_replace = '      V3(3) = 2*DENOM*F2(5)*F1(3)\n'\
             + '      V3(4) = 2*DENOM*F2(5)*F1(4)\n'\
             + '      V3(5) = 2*DENOM*F2(6)*F1(3)\n'\
             + '      V3(6) = 2*DENOM*F2(6)*F1(4)\n'
         text_copy = text_copy[:linebreaks[-8]+1] + LRV1P0_3_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'RLV1P0_3'):
-        sprint('RLV1P0_3')
         RLV1P0_3_replace = '      V3(3) = 2*DENOM*F1(5)*F2(3)\n'\
             + '      V3(4) = 2*DENOM*F1(5)*F2(4)\n'\
             + '      V3(5) = 2*DENOM*F1(6)*F2(3)\n'\
             + '      V3(6) = 2*DENOM*F1(6)*F2(4)\n'
         text_copy = text_copy[:linebreaks[-8]+1] + RLV1P0_3_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'LLV1_1'): 
-        sprint('LLV_1')
         # AW: check sign on P1 here
         spinor = bra_eme_pbar('F2','V3','P1')
         LLV1_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
@@ -1675,7 +1677,6 @@ def vertex_replacer(text, vertex):
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[-18]+1] + LLV1_1_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'LLV1_2'):
-        sprint('LLV_2')
         spinor = bra_eme_pbar('F1','V3','P2')
         LLV1_2_replace = '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
             + '      F2(3) = DENOM*CI*{}\n'.format(spinor[0])\
@@ -1686,9 +1687,7 @@ def vertex_replacer(text, vertex):
         text_copy = text_copy[:linebreaks[-19]+1] + LLV1_2_replace + text_copy[linebreaks[-4]+1:]
     
     if (vertex == 'RRV1_1'):
-        sprint('RRV_1')
         spinor = ket_eme_pbar('F2','V3','P1')
-        sprint(spinor)
         RRV1_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
             + '      F1(3) = 0\n'\
             + '      F1(4) = 0\n'\
@@ -1698,9 +1697,7 @@ def vertex_replacer(text, vertex):
         text_copy = text_copy[:linebreaks[-18]+1] + RRV1_1_replace + text_copy[linebreaks[-4]+1:]
 
     if (vertex == 'RRV1_2'):
-        sprint('RRV_2')
         spinor = ket_eme_pbar('F1','V3','P2')
-        sprint(spinor)
         RRV1_2_replace = '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2)\n'\
             + '      F2(3) = 0\n'\
             + '      F2(4) = 0\n'\
@@ -1708,8 +1705,23 @@ def vertex_replacer(text, vertex):
             + '      F2(6) = DENOM*CI*{}\n'.format(spinor[1])
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[-18]+1] + RRV1_2_replace + text_copy[linebreaks[-4]+1:]
+    if (vertex == 'VVV1_0'):
+        VVV1_0_replace = '      TMP1 = {}\n'.format(vec_vec('V1','V2')) \
+        + '      TMP2 = {}\n'.format(vec_p('V3','P1')) \
+        + '      TMP3 = {}\n'.format(vec_p('V3','P2')) \
+        + '      TMP4 = {}\n'.format(vec_vec('V2','V3')) \
+        + '      TMP5 = {}\n'.format(vec_p('V1','P2')) \
+        + '      TMP6 = {}\n'.format(vec_p('V1','P3')) \
+        + '      TMP7 = {}\n'.format(vec_vec('V3','V1')) \
+        + '      TMP8 = {}\n'.format(vec_p('V2','P3')) \
+        + '      TMP9 = {}\n'.format(vec_p('V2','P1')) \
+        + '      VERTEX = COUP*CI*(TMP1*(TMP2 - TMP3) + TMP4*(TMP5 - TMP6) + TMP7*(TMP8 - TMP9))/4\n'
+        linebreaks = get_symbols(text_copy, '\n')
+        text_copy = text_copy[:linebreaks[12]+1] + '      COMPLEX*16 TMP1\n' + text_copy[linebreaks[13]+1:linebreaks[21]+1] + text_copy[linebreaks[21]+1:linebreaks[37]+1] + VVV1_0_replace + text_copy[linebreaks[48]+1:]
+
     text_copy = 'C     This file was automatically generated by ALOHA\n'\
         + 'C     but has been modified by CAFE\n' + text_copy[linebreaks[3]:]
+    
     return text_copy
 
 """ def vertex_replacer(text, vertex):
@@ -1796,8 +1808,9 @@ def postex_vertex_replacer(working_dir):
     # ZW: include the names of the fortran-files corresponding to any
     # new vertices in vertex_list and this function will automatically
     # open and rewrite the file using vertex_replacer
+    # AW: added VVV1_0.f
     vertex_list = [ 'LRV1_0.f', 'RLV1_0.f', 'LRV1_3.f', 'RLV1_3.f',\
-        'LRV1P0_3.f', 'RLV1P0_3.f', 'LLV1_1.f', 'LLV1_2.f', 'RRV1_1.f', 'RRV1_2.f' ]
+        'LRV1P0_3.f', 'RLV1P0_3.f', 'LLV1_1.f', 'LLV1_2.f', 'RRV1_1.f', 'RRV1_2.f', 'VVV1_0.f']
     onlyfiles = [f for f in os.listdir(write_dir) if os.path.isfile(os.path.join(write_dir, f))]
     konlyfiles = [f[:4] + f[-4:] for f in onlyfiles]
     for vertex in vertex_list:

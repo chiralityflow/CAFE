@@ -270,3 +270,21 @@ V_39 = Vertex(name = 'V_39',
               color = [ 'f(1,2,3)' ],
               lorentz = [ L.VVV1 ],
               couplings = {(0,0):C.GC_10})
+
+V_40 = Vertex(name = 'V_40',
+              particles = [ P.g, P.gR, P.gR ],
+              color = [ 'f(1,2,3)' ],
+              lorentz = [ L.VVV1 ],
+              couplings = {(0,0):C.GC_10})
+
+V_41 = Vertex(name = 'V_41',
+              particles = [ P.g, P.gL, P.gL ],
+              color = [ 'f(1,2,3)' ],
+              lorentz = [ L.VVV1 ],
+              couplings = {(0,0):C.GC_10})
+
+V_42 = Vertex(name = 'V_42',
+              particles = [ P.g, P.gL, P.gR ],
+              color = [ 'f(1,2,3)' ],
+              lorentz = [ L.VVV1 ],
+              couplings = {(0,0):C.GC_10})
