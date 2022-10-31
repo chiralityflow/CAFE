@@ -158,6 +158,9 @@ C     For this reason, we simply remove the filterin when there is only three ex
 		  ENDIF
 		ENDDO
 	  ENDIF
+C     EB: Quickfix for printing to file. Update to something better and remove.
+C      OPEN(1, FILE = '/home/emil/Desktop/MadCAFE/bin/testdata.txt', status = 'old', action = 'write', position='append')
+C      write(1,*) ANS
 	  END
 
 
@@ -166,7 +169,7 @@ C
 %(info_lines)s
 C
 C Returns amplitude squared -- no average over initial state/symmetry factor
-c for the point with external lines W(0:6,NEXTERNAL)
+c for the point with external lines V(*,NEXTERNAL)
 C  
 %(process_lines)s
 C  
@@ -191,22 +194,29 @@ C
       INTEGER NHEL(NEXTERNAL), IC(NEXTERNAL)
 C  
 C LOCAL VARIABLES 
-C     EB: added variable for length of W.
 C  
       INTEGER I,J,K,L
       COMPLEX*16 ZTEMP
       REAL*8 CF(NCOLOR,NCOLOR)
       COMPLEX*16 AMP(NGRAPHS), JAMP(NCOLOR), TMP_JAMP(%(nb_temp_jamp)i)
-      COMPLEX*16 V(20,NWAVEFUNCS)
-      COMPLEX*16 PV(3,NWAVEFUNCS)
-      INTEGER LENGTHW(NWAVEFUNCS)
+C     EB: Vector containing innerproducts for each particle, V(20,#particle).
+      COMPLEX*16 V(20,NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS)
+      COMPLEX*16 VI(20,NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS)
+C     EB: Momentum of each particle, PV(3,#particle).
+      COMPLEX*16 PV(3,NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS)
+C     EB: Matrices containing innerproducts for the process.
+C     MSQR contains the square innerproducts and
+C     MANG contains the angle innerproducts.
       COMPLEX*16, DIMENSION(NEXTERNAL,NEXTERNAL) :: MSQR
       COMPLEX*16, DIMENSION(NEXTERNAL,NEXTERNAL) :: MANG
       COMPLEX*16 DUM0,DUM1
-      INTEGER MOL(NWAVEFUNCS,NEXTERNAL)
-      INTEGER MOR(NWAVEFUNCS,NEXTERNAL)
-      INTEGER LEV(NWAVEFUNCS)
-      DATA DUM0, DUM1/(0d0, 0d0), (1d0, 0d0)/
+C     EB: The left and right external mothers for each particle.
+      INTEGER MOL(NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS,NEXTERNAL)
+      INTEGER MOR(NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS,NEXTERNAL)
+C     EB: The lenght of each vector V(:,#particle).
+      INTEGER LEV(NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS)
+      INTEGER LEVI(NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS)
+      DATA DUM0, DUM1/(0D0, 0D0), (1D0, 0D0)/
 C  
 C GLOBAL VARIABLES
 C  
