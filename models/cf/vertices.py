@@ -288,3 +288,95 @@ V_42 = Vertex(name = 'V_42',
               color = [ 'f(1,2,3)' ],
               lorentz = [ L.VVV1 ],
               couplings = {(0,0):C.GC_10})
+
+# AW: Quadruple gluon vertex. Ask ML or AL which chrialities are allowed. Adding all possible now to make sure
+
+V_43 = Vertex(name = 'V_43',
+              particles = [ P.g, P.g, P.g, P.g ],
+              color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
+              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
+
+V_44 = Vertex(name = 'V_44',
+              particles = [ P.g, P.g, P.g, P.gL ],
+              color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
+              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
+            
+V_45 = Vertex(name = 'V_45',
+              particles = [ P.g, P.g, P.g, P.gR ],
+              color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
+              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
+            
+V_46 = Vertex(name = 'V_46',
+              particles = [ P.g, P.g, P.gL, P.gR ],
+              color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
+              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
+
+V_47 = Vertex(name = 'V_47',
+              particles = [ P.g, P.g, P.gL, P.gL ],
+              color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
+              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
+            
+V_48 = Vertex(name = 'V_48',
+              particles = [ P.g, P.g, P.gR, P.gR ],
+              color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
+              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
+
+V_49 = Vertex(name = 'V_49',
+              particles = [ P.g, P.gL, P.gL, P.gL ],
+              color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
+              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
+
+V_50 = Vertex(name = 'V_50',
+              particles = [ P.g, P.gL, P.gL, P.gR ],
+              color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
+              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
+            
+V_51 = Vertex(name = 'V_51',
+              particles = [ P.g, P.gL, P.gR, P.gR ],
+              color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
+              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
+
+V_52 = Vertex(name = 'V_52',
+              particles = [ P.g, P.gR, P.gR, P.gR ],
+              color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
+              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
+
+V_53 = Vertex(name = 'V_53',
+              particles = [ P.gL, P.gL, P.gL, P.gL ],
+              color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
+              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
+            
+V_54 = Vertex(name = 'V_54',
+              particles = [ P.gL, P.gL, P.gL, P.gR ],
+              color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
+              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
+
+V_55 = Vertex(name = 'V_55',
+              particles = [ P.gL, P.gL, P.gR, P.gR ],
+              color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
+              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
+            
+V_56 = Vertex(name = 'V_56',
+              particles = [ P.gL, P.gR, P.gR, P.gR ],
+              color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
+              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
+
+V_57 = Vertex(name = 'V_57',
+              particles = [ P.gR, P.gR, P.gR, P.gR ],
+              color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
+              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})

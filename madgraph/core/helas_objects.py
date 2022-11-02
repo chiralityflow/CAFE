@@ -3842,7 +3842,6 @@ class HelasMatrixElement(base_objects.PhysicsObject):
 
         # First get all legs
         legs = process.get('legs')
-
         # find first left (anti)fermion and first right (anti)fermion
         # TODO: update this when updating pdg conventions!
         # AW: Added quarks
@@ -3861,6 +3860,13 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         
         # find photons and update its reference momenta
         # AW: same but for gluons
+        # AW: Some QCD processes have no fermions so we check for that
+        if not found_left_ferm and not found_right_ferm:
+            for i in range(len(legs)-1):
+                ref_moms.append(i+2)
+            ref_moms.append(1)
+            return ref_moms
+    
         for leg in legs:
             # if left photon, append right (anti)fermion
             if leg.get('id') == 90023 or leg.get('id') == 70021:

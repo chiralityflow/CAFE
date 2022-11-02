@@ -1602,7 +1602,7 @@ def pbar_levi_bra(ket,p):
 
 def vec_vec(V1,V2):
     "AW: writes out the explicit inner product of"
-    "two vector bosons V1 and V2 in the HELAS Fortran convention"
+    "two vector bosons V1 and V2 with missmatched flow in the HELAS Fortran convention"
     "in the matrix representation. Returns a scalar"
     inprod = '{}(3)*{}(6) - {}(4)*{}(5) - {}(5)*{}(4) + {}(6)*{}(3)'.format(V1,V2,V1,V2,V1,V2,V1,V2)
     return inprod 
@@ -1706,6 +1706,18 @@ def vertex_replacer(text, vertex):
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[-18]+1] + RRV1_2_replace + text_copy[linebreaks[-4]+1:]
     if (vertex == 'VVV1_0'):
+        # AW: we divide by 4 to take care of some extra factor of 2. Might be the *2 from LRV_3 in d d~ to g g
+        # and u u~ to d d~ g
+        TMP_replace = '      COMPLEX*16 TMP1\n' \
+        + '      COMPLEX*16 TMP2\n' \
+        + '      COMPLEX*16 TMP3\n' \
+        + '      COMPLEX*16 TMP4\n' \
+        + '      COMPLEX*16 TMP5\n' \
+        + '      COMPLEX*16 TMP6\n' \
+        + '      COMPLEX*16 TMP7\n' \
+        + '      COMPLEX*16 TMP8\n' \
+        + '      COMPLEX*16 TMP9\n' 
+
         VVV1_0_replace = '      TMP1 = {}\n'.format(vec_vec('V1','V2')) \
         + '      TMP2 = {}\n'.format(vec_p('V3','P1')) \
         + '      TMP3 = {}\n'.format(vec_p('V3','P2')) \
@@ -1717,8 +1729,15 @@ def vertex_replacer(text, vertex):
         + '      TMP9 = {}\n'.format(vec_p('V2','P1')) \
         + '      VERTEX = COUP*CI*(TMP1*(TMP2 - TMP3) + TMP4*(TMP5 - TMP6) + TMP7*(TMP8 - TMP9))/4\n'
         linebreaks = get_symbols(text_copy, '\n')
-        text_copy = text_copy[:linebreaks[12]+1] + '      COMPLEX*16 TMP1\n' + text_copy[linebreaks[13]+1:linebreaks[21]+1] + text_copy[linebreaks[21]+1:linebreaks[37]+1] + VVV1_0_replace + text_copy[linebreaks[48]+1:]
+        text_copy = text_copy[:linebreaks[12]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[37]+1] + VVV1_0_replace + text_copy[linebreaks[48]+1:]
     if (vertex == 'VVV1P0_1'):
+        # AW: we only divide by 2 here, could it be because we dont have the factor *2 from LRV_3 in g g to d d~ ?
+        TMP_replace = '      COMPLEX*16 TMP0\n' \
+        + '      COMPLEX*16 TMP1\n' \
+        + '      COMPLEX*16 TMP2\n' \
+        + '      COMPLEX*16 TMP3\n' \
+        + '      COMPLEX*16 TMP4\n'
+
         VVV1P0_1_replace = '      TMP0 = {}\n'.format(vec_p('V3','P1')) \
         + '      TMP1 = {}\n'.format(vec_p('V3','P2')) \
         + '      TMP2 = {}\n'.format(vec_p('V2','P3')) \
@@ -1729,9 +1748,94 @@ def vertex_replacer(text, vertex):
         + '      V1(5) = -DENOM*CI*((TMP0 - TMP1)*V2(5) + (TMP2 - TMP3)*V3(5) + TMP4*(P2(1)-P3(1)+CI*P2(2)-CI*P3(2)))/2\n' \
         + '      V1(6) = -DENOM*CI*((TMP0 - TMP1)*V2(6) + (TMP2 - TMP3)*V3(6) + TMP4*(P2(0)-P3(0)-P2(3)+P3(3)))/2\n'   
         linebreaks = get_symbols(text_copy, '\n')
-        sprint(text_copy)
-        sprint(text_copy[:linebreaks[37]+1] + text_copy[linebreaks[42]+1:linebreaks[44]+1] + VVV1P0_1_replace + text_copy[linebreaks[52]+1:])
-        text_copy = text_copy[:linebreaks[37]+1] + text_copy[linebreaks[42]+1:linebreaks[44]+1] + VVV1P0_1_replace + text_copy[linebreaks[52]+1:]
+        text_copy = text_copy[:linebreaks[13]+1] + TMP_replace + text_copy[linebreaks[18]+1:linebreaks[37]+1] + text_copy[linebreaks[42]+1:linebreaks[44]+1] + VVV1P0_1_replace + text_copy[linebreaks[52]+1:]
+    if (vertex == 'VVVV1_0'):
+        # AW:
+        TMP_replace = '      COMPLEX*16 TMP1\n' \
+        + '      COMPLEX*16 TMP2\n' \
+        + '      COMPLEX*16 TMP3\n' \
+        + '      COMPLEX*16 TMP4\n'
+
+        VVVV1_0_replace = '      TMP1 = {}\n'.format(vec_vec('V1','V4')) \
+        + '      TMP2 = {}\n'.format(vec_vec('V2','V3')) \
+        + '      TMP3 = {}\n'.format(vec_vec('V1','V3')) \
+        + '      TMP4 = {}\n'.format(vec_vec('V2','V4')) \
+        + '      VERTEX = COUP*CI*(TMP1*TMP2 - TMP3*TMP4)/4\n'
+
+        text_copy = text_copy[:linebreaks[8]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[17]+1] + VVVV1_0_replace + text_copy[linebreaks[22]+1:]
+        
+    if (vertex == 'VVVV3_0'):
+        # AW:
+        TMP_replace = '      COMPLEX*16 TMP1\n' \
+        + '      COMPLEX*16 TMP2\n' \
+        + '      COMPLEX*16 TMP3\n' \
+        + '      COMPLEX*16 TMP4\n'
+
+        VVVV3_0_replace = '      TMP1 = {}\n'.format(vec_vec('V1','V4')) \
+        + '      TMP2 = {}\n'.format(vec_vec('V2','V3')) \
+        + '      TMP3 = {}\n'.format(vec_vec('V1','V2')) \
+        + '      TMP4 = {}\n'.format(vec_vec('V3','V4')) \
+        + '      VERTEX = COUP*CI*(TMP1*TMP2 - TMP3*TMP4)/4\n'
+
+        text_copy = text_copy[:linebreaks[8]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[17]+1] + VVVV3_0_replace + text_copy[linebreaks[22]+1:]
+        
+    if (vertex == 'VVVV4_0'):
+        # AW:
+        TMP_replace = '      COMPLEX*16 TMP1\n' \
+        + '      COMPLEX*16 TMP2\n' \
+        + '      COMPLEX*16 TMP3\n' \
+        + '      COMPLEX*16 TMP4\n'
+
+        VVVV4_0_replace = '      TMP1 = {}\n'.format(vec_vec('V1','V3')) \
+        + '      TMP2 = {}\n'.format(vec_vec('V2','V4')) \
+        + '      TMP3 = {}\n'.format(vec_vec('V1','V2')) \
+        + '      TMP4 = {}\n'.format(vec_vec('V3','V4')) \
+        + '      VERTEX = COUP*CI*(TMP1*TMP2 - TMP3*TMP4)/4\n'
+
+        text_copy = text_copy[:linebreaks[8]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[17]+1] + VVVV4_0_replace + text_copy[linebreaks[22]+1:]
+
+    if (vertex == 'VVVV1P0_1'):
+        # AW:
+        TMP_replace = '      COMPLEX*16 TMP1\n' \
+        + '      COMPLEX*16 TMP2\n'
+
+        VVVV1P0_1_replace = '      TMP1 = {}\n'.format(vec_vec('V2','V3')) \
+        + '      TMP2 = {}\n'.format(vec_vec('V2','V4')) \
+        + '      V1(3) = -DENOM*CI*(TMP1*V4(3) - TMP2*V3(3))/2\n' \
+        + '      V1(4) = -DENOM*CI*(TMP1*V4(4) - TMP2*V3(4))/2\n' \
+        + '      V1(5) = -DENOM*CI*(TMP1*V4(5) - TMP2*V3(5))/2\n' \
+        + '      V1(6) = -DENOM*CI*(TMP1*V4(6) - TMP2*V3(6))/2\n'   
+        linebreaks = get_symbols(text_copy, '\n')
+        text_copy = text_copy[:linebreaks[10]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[24]+1] + text_copy[linebreaks[26]+1:linebreaks[28]+1] + VVVV1P0_1_replace + text_copy[linebreaks[32]+1:]
+
+    if (vertex == 'VVVV3P0_1'):
+        # AW:
+        TMP_replace = '      COMPLEX*16 TMP1\n' \
+        + '      COMPLEX*16 TMP2\n'
+
+        VVVV3P0_1_replace = '      TMP1 = {}\n'.format(vec_vec('V2','V3')) \
+        + '      TMP2 = {}\n'.format(vec_vec('V3','V4')) \
+        + '      V1(3) = -DENOM*CI*(TMP1*V4(3) - TMP2*V2(3))/2\n' \
+        + '      V1(4) = -DENOM*CI*(TMP1*V4(4) - TMP2*V2(4))/2\n' \
+        + '      V1(5) = -DENOM*CI*(TMP1*V4(5) - TMP2*V2(5))/2\n' \
+        + '      V1(6) = -DENOM*CI*(TMP1*V4(6) - TMP2*V2(6))/2\n'   
+        linebreaks = get_symbols(text_copy, '\n')
+        text_copy = text_copy[:linebreaks[10]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[24]+1] + text_copy[linebreaks[26]+1:linebreaks[28]+1] + VVVV3P0_1_replace + text_copy[linebreaks[32]+1:]
+
+    if (vertex == 'VVVV4P0_1'):
+        # AW:
+        TMP_replace = '      COMPLEX*16 TMP1\n' \
+        + '      COMPLEX*16 TMP2\n'
+
+        VVVV4P0_1_replace = '      TMP1 = {}\n'.format(vec_vec('V2','V4')) \
+        + '      TMP2 = {}\n'.format(vec_vec('V3','V4')) \
+        + '      V1(3) = -DENOM*CI*(TMP1*V3(3) - TMP2*V2(3))/2\n' \
+        + '      V1(4) = -DENOM*CI*(TMP1*V3(4) - TMP2*V2(4))/2\n' \
+        + '      V1(5) = -DENOM*CI*(TMP1*V3(5) - TMP2*V2(5))/2\n' \
+        + '      V1(6) = -DENOM*CI*(TMP1*V3(6) - TMP2*V2(6))/2\n'   
+        linebreaks = get_symbols(text_copy, '\n')
+        text_copy = text_copy[:linebreaks[10]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[24]+1] + text_copy[linebreaks[26]+1:linebreaks[28]+1] + VVVV4P0_1_replace + text_copy[linebreaks[32]+1:]
+        
 
     text_copy = 'C     This file was automatically generated by ALOHA\n'\
         + 'C     but has been modified by CAFE\n' + text_copy[linebreaks[3]:]
@@ -1822,9 +1926,11 @@ def postex_vertex_replacer(working_dir):
     # ZW: include the names of the fortran-files corresponding to any
     # new vertices in vertex_list and this function will automatically
     # open and rewrite the file using vertex_replacer
-    # AW: added VVV1_0.f
+    # AW: added VVV1_0.f, 'VVV1P0_1.f', 'VVVV1_0.f', 'VVVV3_0.f', 'VVVV4_0.f', 'VVVV1P0_1.f', 'VVVV3P0_1.f' and 'VVVV4P0_1.f'
     vertex_list = [ 'LRV1_0.f', 'RLV1_0.f', 'LRV1_3.f', 'RLV1_3.f',\
-        'LRV1P0_3.f', 'RLV1P0_3.f', 'LLV1_1.f', 'LLV1_2.f', 'RRV1_1.f', 'RRV1_2.f', 'VVV1_0.f', 'VVV1P0_1.f']
+        'LRV1P0_3.f', 'RLV1P0_3.f', 'LLV1_1.f', 'LLV1_2.f', 'RRV1_1.f',\
+        'RRV1_2.f', 'VVV1_0.f', 'VVV1P0_1.f', 'VVVV1_0.f', 'VVVV3_0.f',\
+        'VVVV4_0.f', 'VVVV1P0_1.f', 'VVVV3P0_1.f', 'VVVV4P0_1.f']
     onlyfiles = [f for f in os.listdir(write_dir) if os.path.isfile(os.path.join(write_dir, f))]
     konlyfiles = [f[:4] + f[-4:] for f in onlyfiles]
     for vertex in vertex_list:
