@@ -54,10 +54,9 @@ C     EB: Calculate the four-momentum of V3.
       P3(3) = -DIMAG(PV3(1))
       
 C     EB: Calculate prefactor of the vertex (coupling*vector boson propagator)
-      DENOM = (SQRT(RTWO) * COUP)/(P3(0)**2-P3(1)**2-P3(2)**2-P3(3)**2 - M3 * (M3 -CI
+      PV3(3) = -(SQRT(RTWO) * COUP)/(P3(0)**2-P3(1)**2-P3(2)**2-P3(3)**2 - M3 * (M3 -CI
      $ * W3))
      
-      PV3(3) = -DENOM
       LEV3L = LEF2
       LEV3R = LEF1
       EXTV3 = 0

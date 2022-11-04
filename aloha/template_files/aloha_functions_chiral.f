@@ -13,59 +13,146 @@ C###############################################################################
 
 
       subroutine lxxxxx (p,fmass,nhel,nsf,length,plf,lf)
+C This subroutine computes the momentum of a left-handed external fermion under the 
+C chirality-flow formalism. It sets the vector of inner products, lf, to (1). This is done 
+C to be able to treat external and internal fermions on the same footing.
+C
+C Input: real    p(0:3)         : four-momentum of fermion
+C        real    fmass          : mass          of fermion
+C        integer nhel = -1 or 1 : helicity      of fermion
+C        integer nsf  = -1 or 1 : +1 for final state, -1 initial state
+C
+C Output: 
+C        complex lf             : vector of inner products
+C        integer length         : length of lf
+C        complex plf            : vector containing the four-momentum of the fermion,
+C                                  multiplied by nsf to account for incoming or outgoing.
         implicit none
         integer length
         double complex lf(2)
         double complex plf(2)
         double precision p(0:3), fmass
-        integer nhel,nsf, i
+        integer nhel,nsf
   
          plf(1) = dcmplx(p(0),p(3))*nsf
          plf(2) = dcmplx(p(1),p(2))*nsf
-         length = 0
+         lf(1) = 1
+         length = 1
       end
 
       subroutine rxxxxx (p,fmass,nhel,nsf,length,prf,rf)
+C This subroutine computes the momentum of a right-handed external fermion under the 
+C chirality-flow formalism. It sets the vector of inner products, rf, to (1). This is done 
+C to be able to treat external and internal fermions on the same footing.
+C
+C Input: real    p(0:3)         : four-momentum of fermion
+C        real    fmass          : mass          of fermion
+C        integer nhel = -1 or 1 : helicity      of fermion
+C        integer nsf  = -1 or 1 : +1 for final state, -1 initial state
+C
+C Output: 
+C        complex rf             : vector of inner products
+C        integer length         : length of rf
+C        complex prf            : vector containing the four-momentum of the fermion,
+C                                  multiplied by nsf to account for incoming or outgoing
         implicit none
         integer length
         double complex rf(2)
         double complex prf(2)
         double precision p(0:3),r(0:3),fmass
-        integer nhel,nsf, i
+        integer nhel,nsf
   
         prf(1) = dcmplx(p(0),p(3))*nsf
         prf(2) = dcmplx(p(1),p(2))*nsf
-        length = 0
+        rf(1) = 1
+        length = 1
       end
 
-      subroutine vrxxxx (p,vmass,nhel,nsv,r,polprod,length,pvcr,vcr)
+      subroutine vrxxxx (p,vmass,nhel,nsv,r,polprod,vcr,lengthvcr,pvcr,vcl,lengthvcl,ext)
+C This subroutine computes the momentum of a right-handed external vector boson under the 
+C chirality-flow formalism. It sets the vectors of inner products, vcl and vcr, to (1). This is done 
+C to be able to treat external and internal bosons on the same footing.
+C
+C Input: real    p(0:3)         : four-momentum of vector boson
+C        real    vmass          : mass          of vector boson
+C        integer nhel = -1, 0, 1: helicity      of vector boson
+C                                  (0 is forbidden if vmass=0.0)
+C        integer nsv  = -1 or 1 : +1 for final, -1 for initial
+C        real    r(0:3)         : four-momentum of reference vector
+C        complex polprod        : Inner product needed for the polarization factor
+C                                  of the vector boson
+C Output:
+C        complex vcr            : vector of inner products for the right-handed part of the
+C                                  vector boson
+C        integer lengthvcr      : lenght of vcr
+C        complex pvcr           : vector containing the four-momentum of the vector boson,
+C                                  multiplied by nsv to account for incoming or outgoing
+C        complex vcl            : vector of inner products for the left-handed part of the
+C                                  vector boson
+C        integer lenghtvcl      : length of vcl
+C        integer ext            : -1 for external vector bosons and 0 for internal vector bosons.
+C                                  Term needed to be able to treat internal and external vector
+C                                  bosons on the same footing.
+      
         implicit none
-        integer length
-        double complex vcr(3)
+        integer lengthvcr,lengthvcl, ext
+        double complex vcr(3),vcl(3)
         double complex pvcr(3)
         double precision p(0:3),r(0:3),vmass
-        integer nhel,nsv, i
+        integer nhel,nsv
         double complex polprod
   
         pvcr(1) = dcmplx(p(0),p(3))*nsv
         pvcr(2) = dcmplx(p(1),p(2))*nsv
-        pvcr(3) = polprod
-        length = 0
+        pvcr(3) = 1/polprod
+        vcr(1) = 1
+        lengthvcr = 1
+        vcl(1) = 1
+        lengthvcl = 1
+        ext = -1
       end
 
-      subroutine vlxxxx (p,vmass,nhel,nsv,r,polprod,length,pvcl,vcl)
+      subroutine vlxxxx (p,vmass,nhel,nsv,r,polprod,vcl,lengthvcl,pvcl,vcr,lengthvcr,ext)
         implicit none
-        integer length
-        double complex vcl(3)
+C This subroutine computes the momentum of a left-handed external vector boson under the 
+C chirality-flow formalism. It sets the vectors of inner products, vcl and vcr, to (1). This is done 
+C to be able to treat external and internal bosons on the same footing.
+C
+C Input: real    p(0:3)         : four-momentum of vector boson
+C        real    vmass          : mass          of vector boson
+C        integer nhel = -1, 0, 1: helicity      of vector boson
+C                                  (0 is forbidden if vmass=0.0)
+C        integer nsv  = -1 or 1 : +1 for final, -1 for initial
+C        real    r(0:3)         : four-momentum of reference vector
+C        complex polprod        : Inner product needed for the polarization factor
+C                                  of the vector boson
+C Output:
+C        complex vcl            : vector of inner products for the left-handed part of the
+C                                  vector boson
+C        integer lenghtvcl      : length of vcl
+C        complex pvcl           : vector containing the four-momentum of the vector boson,
+C                                  multiplied by nsv to account for incoming or outgoing
+C        complex vcr            : vector of inner products for the right-handed part of the
+C                                  vector boson
+C        integer lengthvcr      : lenght of vcr
+C        integer ext            : -1 for external vector bosons and 0 for internal vector bosons.
+C                                  Term needed to be able to treat internal and external vector
+C                                  bosons on the same footing.
+        integer lengthvcr,lengthvcl, ext
+        double complex vcl(3),vcr(3)
         double complex pvcl(3)
         double precision p(0:3),r(0:3),vmass
-        integer nhel,nsv, i
+        integer nhel,nsv
         double complex polprod
   
         pvcl(1) = dcmplx(p(0),p(3))*nsv
         pvcl(2) = dcmplx(p(1),p(2))*nsv
-        pvcl(3) = polprod
-        length = 0
+        pvcl(3) = 1/polprod
+        vcl(1) = 1
+        lengthvcl = 1
+        vcr(1) = 1
+        lengthvcr = 1
+        ext = -1
       end
       
 C %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
