@@ -159,8 +159,8 @@ C     For this reason, we simply remove the filterin when there is only three ex
 		ENDDO
 	  ENDIF
 C     EB: Quickfix for printing to file. Update to something better and remove.
-C      OPEN(1, FILE = '/home/emil/Desktop/MadCAFE/bin/testdata.txt', status = 'old', action = 'write', position='append')
-C      write(1,*) ANS
+      OPEN(1, FILE = '/home/emil/Desktop/MadCAFE/bin/testdata.txt', status = 'old', action = 'write', position='append')
+      write(1,*) ANS
 	  END
 
 
@@ -200,7 +200,12 @@ C
       REAL*8 CF(NCOLOR,NCOLOR)
       COMPLEX*16 AMP(NGRAPHS), JAMP(NCOLOR), TMP_JAMP(%(nb_temp_jamp)i)
 C     EB: Vector containing innerproducts for each particle, V(20,#particle).
+C         For vector wavefunctions it contains the inner products 
+C         for the left-handed part.
       COMPLEX*16 V(20,NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS)
+C     EB: Vector containing inner products. Only used for vector 
+C         wavefunctions where it contains the inner products
+C         for the right-handed part.
       COMPLEX*16 VI(20,NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS)
 C     EB: Momentum of each particle, PV(3,#particle).
       COMPLEX*16 PV(3,NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS)
@@ -215,7 +220,12 @@ C     EB: The left and right external mothers for each particle.
       INTEGER MOR(NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS,NEXTERNAL)
 C     EB: The lenght of each vector V(:,#particle).
       INTEGER LEV(NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS)
+C     EB: The lenght of each vector VI(:,#particle).
       INTEGER LEVI(NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS)
+C     EB: EXT = -1 for external vectors and = 0 for internal vectors.
+C         Needed to be able to treat internal and external vectors
+C         on the same footing, see vertex files in Source/DHELAS.
+      INTEGER EXT(NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS)
       DATA DUM0, DUM1/(0D0, 0D0), (1D0, 0D0)/
 C  
 C GLOBAL VARIABLES
@@ -231,10 +241,12 @@ C BEGIN CODE
 C ----------
 C     EB: Calls to calculate all spinnor inner products
 C         To do: Might want to use the symmetry <ab>=-<ba> to reduce the number of calculations. 
-      DO K = 1, NEXTERNAL
-        DO L = 1, NEXTERNAL
+      DO K = 1, NEXTERNAL-1
+        DO L = K+1, NEXTERNAL
           CALL INPRODSQR (P(0,K),P(0,L),MSQR(K,L))
           CALL INPRODANG (P(0,K),P(0,L),MANG(K,L))
+          MSQR(L,K) = -MSQR(K,L)
+          MANG(L,K) = -MANG(K,L)
         ENDDO
       ENDDO
       
