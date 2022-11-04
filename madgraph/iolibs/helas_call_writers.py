@@ -284,8 +284,9 @@ class HelasCallWriter(base_objects.PhysicsObject):
             #misc.sprint(wavefunction['number_external'])
             call = self["wavefunctions"][wavefunction.get_call_key()](\
                                                                    wavefunction)
-            #EB: Test to see if chiral
+            #EB: if chiral
             if wavefunction.is_chiral():
+                # if external
                 if not wavefunction.get('mothers'):
                     call = self.get_external_chiral_wavefunction_call(wavefunction, call)
                 #else it is internal
@@ -333,11 +334,11 @@ class HelasCallWriter(base_objects.PhysicsObject):
             else: 
                 io_new = '+' + io_old[1:]
                 call = call.replace(io_old, io_new)
-            # EB: update to match lxxxxx in aloha_functions_chiral.py
+            # EB: update to match lxxxxx in aloha_functions_chiral.f
             # Added: Inner product vector, V, 
             #        lenght of V, LEV,
             #        the momentum vector, PV
-            #        MOL is the external mother.
+            #        MOL is the external mothers.
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
             call = call_lhs + ',' + 'LEV(' + str(number) + '),PV(1,' \
@@ -357,36 +358,41 @@ class HelasCallWriter(base_objects.PhysicsObject):
             else: 
                 io_new = '+' + io_old[1:]
                 call = call.replace(io_old, io_new)
-            # EB: update to match rxxxxx in aloha_functions_chiral.py
+            # EB: update to match rxxxxx in aloha_functions_chiral.f
             # Added: Inner product vector, V, 
             #        lenght of V, LEV,
             #        the momentum vector, PV,
-            #        MOR is the external mother.
+            #        MOR is the external mothers.
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
             call = call_lhs + ',LEV(' + str(number) + '),PV(1,' \
                  + str(number)+ '),V(1,' + str(number) + '))\n' \
                  + 'MOR(' + str(number) + ',:) = ' + str(external_mothersR) 
         
-        # AL: update LH vector wavefunction
-        # EB: calls updated to add:
+        
+        # EB: Update vector wavefunctions.
+            # calls updated to add:
             # inner product needed for polarization factor, MANG or MSQR
             # inner product vector, V
             # length of inner product vector, LEV
             # the momentum vector PV
             # W is no longer used - therefor no +call_rhs
             # MOL and MOR are the external mothers
+            # EXT = -1 for external vectors and = 0 for internal vectors.
+            #     Needed to be able to treat internal and external vectors
+            #     on the same footing (see vertex files in aloha/template_files/cf).
+        # AL: update LH vector wavefunction
         elif pdg_code == 90023:
             # update name
             call = call[:6] + 'L' + call[7:]
 
             # insert reference momentum as argument
             # EB: insert all new arguments
-            wavefunction.get('external_mothersR')[0] = ref_mom
+
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + 'MANG(' + str(ref_mom) + ',' + str(number) + '),LEV(' \
-                + str(number) + '),PV(1,' + str(number) + '),V(1,' +  str(number) + '))\n' \
+            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + 'MANG(' + str(ref_mom) + ',' + str(number) + '),V(1,' \
+                +  str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),VI(1,' +  str(number) + '),LEVI(' + str(number) + '),EXT(' + str(number) + '))\n' \
                 + 'MOL(' + str(number) + ',:) = ' + str(external_mothersL) + '\n' \
                 + 'MOR(' + str(number) + ',:) = ' + str(external_mothersR)
             
@@ -397,25 +403,97 @@ class HelasCallWriter(base_objects.PhysicsObject):
 
             # insert reference momentum as argument
             # EB: insert all new arguments
-            external_mothersL[0] = ref_mom
+
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + 'MSQR(' + str(number) + ',' + str(ref_mom) + '),LEV(' \
-                + str(number) + '),PV(1,' + str(number) + '),V(1,' +  str(number) + '))\n' \
+            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + 'MSQR(' + str(number) + ',' + str(ref_mom) + '),VI(1,' \
+                +  str(number) + '),LEVI(' + str(number) + '),PV(1,' + str(number) + '),V(1,' +  str(number) + '),LEV(' + str(number) + '),EXT(' + str(number) + '))\n' \
                 + 'MOL(' + str(number) + ',:) = ' + str(external_mothersL) + '\n' \
                 + 'MOR(' + str(number) + ',:) = ' + str(external_mothersR)
 
         return call
     
-    # EB: Added a function to change the chiral internal wavefunctions.
+    # EB: Added a function to change the chiral internal wavefunction calls.
     def get_internal_chiral_wavefunction_call(self, wavefunction, call):
-        """Return the call for internal chiral wavefunction"""
+        """Return the call for internal chiral wavefunction""" 
+        # EB: Calls updated to add:
+        #   Inner product vector, V. For vector wavefunctions it contains the 
+        #       inner products for the left-handed part.
+        #   Inner product vector, VI. Only used for vector wavefunctions where
+        #       it contains the inner products for the right-handed part.
+        #   Lenght of inner product vectors, LEV and LEVI.
+        #   The momentum vector, PV.
+        #   The external mothers for the left- and right-handed part, MOL and MOR.
+        #   The matrices containing all inner products for the process, MSQR and MANG.
+        #   EXT = -1 for external vectors and = 0 for internal vectors.
+        #       Needed to be able to treat internal and external vectors
+        #       on the same footing (see vertex files in aloha/template_files/cf).
 
         # EB: check to see if vertex has been implemented.
         # If so, update the call.
 
-        # EB: Update the call for LLV1_2
-        if call[5:11] == 'LLV1_2':
+        # EB: Update the call for RRV1_1
+        if call[5:11] == 'RRV1_1':
+
+            # EB: The part of the call that is kept the same.
+            call_keep = ','.join(call.split(',')[-5:-2])
+
+            call_1 = 'MOR(' + str(wavefunction.get('number')) + ',:) = ' \
+                + str(wavefunction.get('external_mothersR')) + '\n' 
+
+            for mother in wavefunction.get('mothers'):
+                number = mother.get('number')
+                pdg_code = mother.get('pdg_code')
+
+                # EB: if chiral fermion
+                if abs(pdg_code) < 90010 and abs(pdg_code) > 90000:
+                    call_2 = 'CALL RRV1_1(V(1,' + str(number) + '),LEV(' + str(number) \
+                        + '),PV(1,' + str(number) + '),MOR(' + str(number) + ',:),'
+
+                 # EB: Else is boson.
+                else:
+                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),MOL(' + str(number) \
+                       + ',:),MOR('  + str(number) + ',:),VI(1,' + str(number) + '),LEVI(' + str(number) + '),EXT(' + str(number) + '),NEXTERNAL,MSQR,MANG,'
+                    call_temp = call_2[11:]
+                    
+            call_4 = ',MOR(' + str(wavefunction.get('number')) + ',:),V(1,' \
+                + str(wavefunction.get('number')) + '),PV(1,' + str(wavefunction.get('number')) \
+                + '),LEV(' + str(wavefunction.get('number')) + '))'
+
+            call = call_1 + call_2 + call_3 + call_keep + call_4
+        
+        # EB: Update the call for RRV1_2
+        elif call[5:11] == 'RRV1_2':
+
+            # EB: The part of the call that is kept the same.
+            call_keep = ','.join(call.split(',')[-5:-2])
+
+            call_1 = 'MOR(' + str(wavefunction.get('number')) + ',:) = ' \
+                + str(wavefunction.get('external_mothersR')) + '\n' 
+
+            for mother in wavefunction.get('mothers'):
+                number = mother.get('number')
+                pdg_code = mother.get('pdg_code')
+
+                # EB: if chiral fermion
+                if abs(pdg_code) < 90010 and abs(pdg_code) > 90000:
+                    call_2 = 'CALL RRV1_2(V(1,' + str(number) + '),LEV(' + str(number) \
+                        + '),PV(1,' + str(number) + '),MOR(' + str(number) + ',:),'
+        
+               # EB: else is boson.
+                else:
+                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),MOL(' + str(number) \
+                       + ',:),MOR('  + str(number) + ',:),VI(1,' + str(number) + '),LEVI(' + str(number) + '),EXT(' + str(number) + '),NEXTERNAL,MSQR,MANG,'
+                    call_temp = call_2[11:]
+                    
+            call_4 = ',MOR(' + str(wavefunction.get('number')) + ',:),V(1,' \
+                + str(wavefunction.get('number')) + '),PV(1,' + str(wavefunction.get('number')) \
+                + '),LEV(' + str(wavefunction.get('number')) + '))'
+
+            call = call_1 + call_2 + call_3 + call_keep + call_4
+        
+        # EB: Update the call for LLV1_1
+        elif call[5:11] == 'LLV1_1':
 
             # EB: The part of the call that is kept the same.
             call_keep = ','.join(call.split(',')[-5:-2])
@@ -427,28 +505,117 @@ class HelasCallWriter(base_objects.PhysicsObject):
                 number = mother.get('number')
                 pdg_code = mother.get('pdg_code')
 
-                # EB: Is this check needed or are the
-                #       mothers always sorted correctly?
-                #     To do: check this. (sorting mothers in helas_objects)
+                # EB: if chiral fermion
+                if abs(pdg_code) < 90010 and abs(pdg_code) > 90000:
+                    call_2 = 'CALL LLV1_1(V(1,' + str(number) + '),LEV(' + str(number) \
+                        + '),PV(1,' + str(number) + '),MOL(' + str(number) + ',:),'
+        
+                # EB: else is boson.
+                else:
+                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),MOL(' + str(number) \
+                       + ',:),MOR('  + str(number) + ',:),VI(1,' + str(number) + '),LEVI(' + str(number) + '),EXT(' + str(number) + '),NEXTERNAL,MSQR,MANG,'
+                    call_temp = call_2[11:]
+                    
+            call_4 = ',MOL(' + str(wavefunction.get('number')) + ',:),V(1,' \
+                + str(wavefunction.get('number')) + '),PV(1,' + str(wavefunction.get('number')) \
+                + '),LEV(' + str(wavefunction.get('number')) + '))'
+
+            call = call_1 + call_2 + call_3 + call_keep + call_4    
+
+        # EB: Update the call for LLV1_2
+        elif call[5:11] == 'LLV1_2':
+
+            # EB: The part of the call that is kept the same.
+            call_keep = ','.join(call.split(',')[-5:-2])
+
+            call_1 = 'MOL(' + str(wavefunction.get('number')) + ',:) = ' \
+                + str(wavefunction.get('external_mothersL')) + '\n' 
+
+            for mother in wavefunction.get('mothers'):
+                number = mother.get('number')
+                pdg_code = mother.get('pdg_code')
 
                 # EB: if chiral fermion
                 if abs(pdg_code) < 90010 and abs(pdg_code) > 90000:
                     call_2 = 'CALL LLV1_2(V(1,' + str(number) + '),LEV(' + str(number) \
                         + '),PV(1,' + str(number) + '),MOL(' + str(number) + ',:),'
         
-                # EB: else is boson
+                # EB: else is boson.
                 else:
-                    call_3 = 'V(1,' + str(number) + '),PV(1,' + str(number) + '),MOL(' \
-                        + str(number) + ',:),MOR(' + str(number) + ',:),NEXTERNAL,MSQR,MANG,'
+                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),MOL(' + str(number) \
+                       + ',:),MOR('  + str(number) + ',:),VI(1,' + str(number) + '),LEVI(' + str(number) + '),EXT(' + str(number) + '),NEXTERNAL,MSQR,MANG,'
+                    call_temp = call_2[11:]
                     
             call_4 = ',MOL(' + str(wavefunction.get('number')) + ',:),V(1,' \
                 + str(wavefunction.get('number')) + '),PV(1,' + str(wavefunction.get('number')) \
                 + '),LEV(' + str(wavefunction.get('number')) + '))'
 
             call = call_1 + call_2 + call_3 + call_keep + call_4
-        
+
+        # EB: Update the call for LRV1PO_3
+        elif call[5:13] == 'LRV1P0_3':
+
+            # EB: The part of the call that is kept the same.
+            call_keep = ','.join(call.split(',')[-5:-2])
+            
+            call_1 = 'MOL(' + str(wavefunction.get('number')) + ',:) = ' \
+                + str(wavefunction.get('external_mothersL')) + '\n' \
+                + 'MOR(' + str(wavefunction.get('number')) + ',:) = ' \
+                + str(wavefunction.get('external_mothersR')) + '\n'
+
+            for mother in wavefunction.get('mothers'):
+                number = mother.get('number')
+                pdg_code = mother.get('pdg_code')
+
+                # EB: If left-handed fermion.
+                if pdg_code in (90001, -90001, 90005, -90005):
+                    call_2 = 'CALL LRV1P0_3(V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' \
+                        + str(number) + '),MOL(' + str(number) + ',:),'
+                # EB: Else is right-handed fermion.
+                else:
+                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' \
+                        + str(number) + '),MOR(' + str(number) + ',:),NEXTERNAL,MSQR,MANG,'
+            call_4 = ',V(1,' + str(wavefunction.get('number')) + '),LEV(' + str(wavefunction.get('number')) + '),PV(1,'\
+                         + str(wavefunction.get('number')) + '),MOL(' \
+                        + str(wavefunction.get('number')) + ',:),MOR(' + str(wavefunction.get('number')) \
+                         + ',:),VI(1,' + str(wavefunction.get('number')) + '),LEVI(' + str(wavefunction.get('number')) + '),EXT(' + str(wavefunction.get('number')) + '))'
+
+            call = call_1 + call_2 + call_3 + call_keep + call_4
+
+        # EB: Update the call for RLV1PO_3
+        elif call[5:13] == 'RLV1P0_3':
+
+            # EB: The part of the call that is kept the same.
+            call_keep = ','.join(call.split(',')[-5:-2])
+            
+            call_1 = 'MOL(' + str(wavefunction.get('number')) + ',:) = ' \
+                + str(wavefunction.get('external_mothersL')) + '\n' \
+                + 'MOR(' + str(wavefunction.get('number')) + ',:) = ' \
+                + str(wavefunction.get('external_mothersR')) + '\n'
+
+            for mother in wavefunction.get('mothers'):
+                number = mother.get('number')
+                pdg_code = mother.get('pdg_code')
+
+                # EB: If right-handed fermion.
+                if pdg_code in (90003, -90003, 90007, -90007):
+                    call_2 = 'CALL RLV1P0_3(V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' \
+                        + str(number) + '),MOR(' + str(number) + ',:),'
+                # EB: Else is left-handed fermion.
+                else:
+                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' \
+                        + str(number) + '),MOL(' + str(number) + ',:),NEXTERNAL,MSQR,MANG,'
+            call_4 = ',V(1,' + str(wavefunction.get('number')) + '),LEV(' + str(wavefunction.get('number')) \
+                        + '),PV(1,' + str(wavefunction.get('number')) + '),MOL(' \
+                        + str(wavefunction.get('number')) + ',:),MOR(' + str(wavefunction.get('number')) \
+                        + ',:),VI(1,' + str(wavefunction.get('number')) + '),LEVI(' + str(wavefunction.get('number')) + '),EXT(' + str(wavefunction.get('number')) + '))'
+
+            call = call_1 + call_2 + call_3 + call_keep + call_4
+
+
+          
         # EB: else: print the vertex name.
-        # TO DO: update to proper error print.
+        # To do: update to proper error print.
         else:
             misc.sprint('Vertex')
             misc.sprint(call[5:11])
@@ -460,8 +627,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
         corresponding to the key"""
     
         # EB: Moved (amplitude) from return to first line of try
-        #       for syntax to follow convention used for 
-        #       wavefunctions.
+        #       for syntax to follow convention used for wavefunctions.
         try:
             call = self["amplitudes"][amplitude.get_call_key()](amplitude)
             #EB: Update call if chiral
@@ -475,9 +641,18 @@ class HelasCallWriter(base_objects.PhysicsObject):
             return call
     
 
-    # EB: Added function to change the chiral amplitudes.
+    # EB: Added function to change the chiral amplitudes calls.
     def get_chiral_amplitude_call(self, amplitude, call):
         """Return the call for chiral amplitude."""
+        # EB: Calls updated to add:
+        #   Inner product vector, V. For vector wavefunctions it contains the 
+        #       inner products for the left-handed part.
+        #   Inner product vector, VI. Only used for vector wavefunctions where
+        #       it contains the inner products for the right-handed part.
+        #   Lenght of inner product vectors, LEV and LEVI.
+        #   The momentum vector, PV.
+        #   The external mothers for the left- and right-handed part, MOL and MOR.
+        #   The matrices containing all inner products for the process, MSQR and MANG.
 
         # EB: check to see if vertex has been implemented.
         # If so, update the call.
@@ -491,10 +666,6 @@ class HelasCallWriter(base_objects.PhysicsObject):
             for mother in amplitude.get('mothers'):
                 number = mother.get('number')
                 pdg_code = mother.get('pdg_code')
-            
-                # EB: Is this check needed or are the
-                #       mothers always sorted correctly?
-                #     To do: check this. (sorting mothers in helas_objects)
 
                 # EB: If left-handed fermion.
                 if pdg_code in (90001, -90001, 90005, -90005):
@@ -502,20 +673,47 @@ class HelasCallWriter(base_objects.PhysicsObject):
                         + str(number) + '),MOL(' + str(number) + ',:),'
                 
                 # EB: If right-handed fermion.
-                if pdg_code in (90003, -90003, 90007, -90007):
+                elif pdg_code in (90003, -90003, 90007, -90007):
                     call_2 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' \
                         + str(number) + '),MOR(' + str(number) + ',:),'
 
                 # EB: else is boson.
                 else:
-                    call_3 = 'V(1,' + str(number) + '),PV(1,' + str(number) + '),MOL(' + str(number) \
-                       + ',:),MOR('  + str(number) + ',:),NEXTERNAL,MSQR,MANG,'
-
+                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),MOL(' + str(number) \
+                       + ',:),MOR('  + str(number) + ',:),VI(1,' + str(number) + '),LEVI(' + str(number) + '),NEXTERNAL,MSQR,MANG,'
+                    call_temp = call_1[11:]
             
             call = call_1 + call_2 + call_3 + call_keep        
         
+        # EB: Update the call for RLV1_0
+        elif call[5:11] == 'RLV1_0':
+            # EB: The part of the call that is kept the same.
+            call_keep = ','.join(call.split(',')[-2:])
+            
+            for mother in amplitude.get('mothers'):
+                number = mother.get('number')
+                pdg_code = mother.get('pdg_code')
+
+                # EB: If right-handed fermion.
+                if pdg_code in (90003, -90003, 90007, -90007):
+                    call_1 = 'CALL RLV1_0(V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' \
+                        + str(number) + '),MOR(' + str(number) + ',:),'
+                
+                # EB: If left-handed fermion.
+                elif pdg_code in (90001, -90001, 90005, -90005):
+                    call_2 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' \
+                        + str(number) + '),MOL(' + str(number) + ',:),'
+
+                # EB: else is boson.
+                else:
+                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),MOL(' + str(number) \
+                       + ',:),MOR('  + str(number) + ',:),VI(1,' + str(number) + '),LEVI(' + str(number) + '),NEXTERNAL,MSQR,MANG,'
+                    call_temp = call_1[11:]
+                   
+            call = call_1 + call_2 + call_3 + call_keep
+
         # EB: else: print the vertex name.
-        # TO DO: update to proper error print.
+        # To do: update to proper error print.
         else:
             misc.sprint('Vertex')
             misc.sprint(call[5:11])

@@ -977,13 +977,26 @@ param_card.inc: ../Cards/param_card.dat\n\t../bin/madevent treatcards param\n'''
             cp(MG5DIR + '/aloha/template_files/aloha_functions_loop.f', 
                                                  write_dir+'/aloha_functions.f')
             aloha_model.loop_mode = False
+        #EB: If cf model use chirality template instead
+        elif model.get('name') == 'cf':
+            cp(MG5DIR + '/aloha/template_files/aloha_functions_chiral.f', 
+                                                 write_dir+'/aloha_functions.f')
         else:
             cp(MG5DIR + '/aloha/template_files/aloha_functions.f', 
                                                  write_dir+'/aloha_functions.f')
         create_aloha.write_aloha_file_inc(write_dir, '.f', '.o')
-	#ZW: Replaces vertices with corresponding chiral ones
-        misc.postex_vertex_replacer(self.dir_path) 
-    
+	    #ZW: Replaces vertices with corresponding chiral ones
+        #misc.postex_vertex_replacer(self.dir_path) 
+        #EB: If cf model use chirality version of vertex files.
+        # EB: New replacement. Take files from template folder instead.
+        if model.get('name') == 'cf':
+            vertex_list = ['LRV1_0.f', 'RLV1_0.f', 'LRV1P0_3.f', 'RLV1P0_3.f',\
+                'LLV1_1.f', 'LLV1_2.f', 'RRV1_1.f', 'RRV1_2.f']
+            onlyfiles = [f for f in os.listdir(write_dir) if os.path.isfile(os.path.join(write_dir, f))]
+
+            for vertex in vertex_list:
+                if vertex in onlyfiles:
+                    cp(MG5DIR + '/aloha/template_files/cf/' + vertex, write_dir, write_dir + '/' + vertex)
 
         # Make final link in the Process
         self.make_model_symbolic_link()
@@ -2992,6 +3005,9 @@ CF2PY integer, intent(in) :: new_value
 
         replace_dict['jamp_lines'] = '\n'.join(jamp_lines)    
 
+        #EB: Extract model, used to check if matrix_standalone_chiral_v4.inc should be used
+        model = matrix_element.get('processes')[0].get('model')
+
         matrix_template = self.matrix_template
         if self.opt['export_format']=='standalone_msP' :
             matrix_template = 'matrix_standalone_msP_v4.inc'
@@ -3000,6 +3016,9 @@ CF2PY integer, intent(in) :: new_value
         elif self.opt['export_format']=='matchbox':
             replace_dict["proc_prefix"] = 'MG5_%i_' % matrix_element.get('processes')[0].get('id')
             replace_dict["color_information"] = self.get_color_string_lines(matrix_element)
+        #EB: The check for the chiral case
+        if model.get('name') == 'cf' :
+            matrix_template = 'matrix_standalone_chiral_v4.inc'
 
         if len(split_orders)>0:
             if self.opt['export_format'] in ['standalone_msP', 'standalone_msF']:
