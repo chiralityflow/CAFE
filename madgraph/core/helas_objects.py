@@ -3860,18 +3860,25 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         for leg in process.get('legs'):
             # EB: if left-handed external particle
             if external_wavefunctions[leg.get('number')].get('particle').get('pdg_code') in (90001, -90001, 90005, -90005, 90023):
-                external_wavefunctions[leg.get('number')].set('external_mothersL', [leg.get('number')])
+                # EB: is final
+                if leg.get('state'):
+                    external_wavefunctions[leg.get('number')].set('external_mothersL', [leg.get('number')])
+                # EB: is inital
+                else:
+                    external_wavefunctions[leg.get('number')].set('external_mothersL', [-leg.get('number')])
             # EB: if right-handed external particle
             if external_wavefunctions[leg.get('number')].get('particle').get('pdg_code') in (90003, -90003, 90007, -90007, 90024):
-                external_wavefunctions[leg.get('number')].set('external_mothersR', [leg.get('number')])
+                # EB: is final
+                if leg.get('state'):
+                    external_wavefunctions[leg.get('number')].set('external_mothersR', [leg.get('number')])
+                # EB: is inital
+                else:
+                    external_wavefunctions[leg.get('number')].set('external_mothersR', [-leg.get('number')])
             # EB: for external bosons set the ref_mom in the other external_mothers
             if external_wavefunctions[leg.get('number')].get('particle').get('pdg_code') == 90023:
                 external_wavefunctions[leg.get('number')].set('external_mothersR', [external_wavefunctions[leg.get('number')].get('ref_mom')])
             if external_wavefunctions[leg.get('number')].get('particle').get('pdg_code') == 90024:
                 external_wavefunctions[leg.get('number')].set('external_mothersL', [external_wavefunctions[leg.get('number')].get('ref_mom')])
-            #misc.sprint(external_wavefunctions[leg.get('number')].get('particle').get('name'))
-            #misc.sprint(external_wavefunctions[leg.get('number')].get('external_mothersL'))
-            #misc.sprint(external_wavefunctions[leg.get('number')].get('external_mothersR'))
         # Initially, have one wavefunction for each external leg.
         wf_number = len(process.get('legs'))
 
@@ -3904,8 +3911,6 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         model, vert_id_to_pdgs_dict = self.add_LL_RR_vertices(\
                                  amplitude, external_wavefunctions)
         
-        # EB: I doesn't make it out of this loop before crashing
-        #     in the case where we don't remove diagrams.
         for diagram in diagram_list:
 
             # List of dictionaries from leg number to wave function,
@@ -3989,12 +3994,13 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                         wf.set('mothers', mothers)
 
                         # EB: set the external_mothers for the new wavefunction
-                        # EB: check to see which getexternal_mothers to use based on
-                        #     the particle of the new wavefunction.
                         if wf.get('particle').get('pdg_code') in (90001, -90001, 90005, -90005):
                             for mother in mothers:
                                 # EB: Only want to pass the physical momentum forward to fermions 
                                 if mother.get('particle').get('pdg_code') == 90024:
+                                    wf.get('external_mothersL').extend(mother.get('external_mothersR'))
+                                elif mother.get('particle').get('pdg_code') == 90022:
+                                    wf.get('external_mothersL').extend(mother.get('external_mothersL'))
                                     wf.get('external_mothersL').extend(mother.get('external_mothersR'))
                                 else:
                                     wf.get('external_mothersL').extend(mother.get('external_mothersL'))
@@ -4002,16 +4008,16 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                             for mother in mothers:
                                 # EB: Only want to pass the physical momentum forward to fermions 
                                 if mother.get('particle').get('pdg_code') == 90023:
-                                    wf.get('external_mothersL').extend(mother.get('external_mothersL'))
+                                    wf.get('external_mothersR').extend(mother.get('external_mothersL'))
+                                elif mother.get('particle').get('pdg_code') == 90022:
+                                    wf.get('external_mothersR').extend(mother.get('external_mothersL'))
+                                    wf.get('external_mothersR').extend(mother.get('external_mothersR'))
                                 else:
-                                    wf.get('external_mothersL').extend(mother.get('external_mothersR'))
+                                    wf.get('external_mothersR').extend(mother.get('external_mothersR'))
                         elif wf.get('particle').get('pdg_code') == 90022:
                             for mother in mothers:
                                 wf.get('external_mothersL').extend(mother.get('external_mothersL'))
                                 wf.get('external_mothersR').extend(mother.get('external_mothersR'))
-                        #misc.sprint(wf.get('particle').get('name'))
-                        #misc.sprint(wf.get('external_mothersL'))
-                        #misc.sprint(wf.get('external_mothersR'))
                        
                         # Need to set incoming/outgoing and
                         # particle/antiparticle according to the fermion flow
