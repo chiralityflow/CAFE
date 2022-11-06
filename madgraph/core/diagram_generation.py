@@ -1130,8 +1130,8 @@ class Amplitude(base_objects.PhysicsObject):
         if (is_first_it): 
 
             # AL: temporary switch to turn off removal of vanishing combinations
-            remove_combs = True
-            # remove_combs = False
+            #remove_combs = True
+            remove_combs = False
 
             # AL: now remove from comb_lists those processes which vanish due to ref momentum
             vanishing_combs = self.get_vanishing_combs(ext_legs)
