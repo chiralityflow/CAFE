@@ -161,7 +161,7 @@ C     For this reason, we simply remove the filterin when there is only three ex
 C     EB: Quickfix for printing to file. Update to something better and remove.
 C      OPEN(1, FILE = '/home/emil/Desktop/MadCAFE/bin/testdata.txt', status = 'old', action = 'write', position='append')
 C      write(1,*) ANS
-C	  END
+	  END
 
 
       REAL*8 FUNCTION %(proc_prefix)sMATRIX(P,NHEL,IC)
