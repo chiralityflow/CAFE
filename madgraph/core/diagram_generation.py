@@ -1394,13 +1394,27 @@ class Amplitude(base_objects.PhysicsObject):
                     #  particles.py to propagating = false?
                     #misc.sprint(leg_vert_ids)
                     leg_ids = [leg[0] for leg in leg_vert_ids]
-                    #misc.sprint(leg_ids)
+                    
+
+                                
                     if leg_ids == [90022, 90023, 90024]:
                         leg_vert_ids = [leg_vert_ids[0]]
                     # AW: Keep only non chiral gluon and photon propagator. Had some problems here check if nessesary
                     if leg_ids == [21, 70021, 80021, 90022, 90023, 90024]:
                         leg_vert_ids = [leg_vert_ids[0], leg_vert_ids[3]]   
                     #misc.sprint(leg_vert_ids)
+                    if leg_ids == [21, 70021, 80021]:
+                        leg_vert_ids = [leg_vert_ids[0]]
+                    
+                    if leg_ids == [21, 80021, 70021]:
+                        leg_vert_ids = [leg_vert_ids[0]]
+                    
+                    if leg_ids == [21, 70021, 70021]:
+                        leg_vert_ids = [leg_vert_ids[0]]
+                    
+                    if leg_ids == [21, 80021, 80021]:
+                        leg_vert_ids = [leg_vert_ids[0]]
+
 
                     # # AL: alternative option, keep say right photon in propagator
                     # if leg_ids == [90022, 90023, 90024] or leg_ids == [90023, 90024]:
@@ -2067,8 +2081,15 @@ class MultiProcess(base_objects.PhysicsObject):
                 # Setup process
                 process = process_definition.get_process_with_legs(legs) 
                 
+                
+            
                 fast_proc = \
                           array.array('i',[leg.get('id') for leg in legs])
+                
+                # AW: remove mirror processes
+                if is_chiral:
+                    collect_mirror_procs = False
+                
                 if collect_mirror_procs and \
                         process_definition.get_ninitial() == 2:
                     # Check if mirrored process is already generated

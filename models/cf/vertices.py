@@ -361,7 +361,7 @@ V_54 = Vertex(name = 'V_54',
               particles = [ P.gL, P.gL, P.gL, P.gR ],
               color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
               lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
-              couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
+              couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12}) 
 
 V_55 = Vertex(name = 'V_55',
               particles = [ P.gL, P.gL, P.gR, P.gR ],
