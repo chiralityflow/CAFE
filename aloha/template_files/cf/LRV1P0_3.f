@@ -43,7 +43,6 @@ C         MANG contains the angle innerproducts.
       COMPLEX*16, DIMENSION(NEXTERNAL,NEXTERNAL) :: MANG
       REAL*8 M3
       REAL*8 W3
-      COMPLEX*16 DENOM
       
 C     EB: Calculate the four-momentum of V3.        
       PV3(1) = +PF1(1)+PF2(1)
@@ -57,7 +56,6 @@ C     EB: Calculate prefactor of the vertex (coupling*vector boson propagator)
       PV3(3) = -(SQRT(RTWO) * COUP)/(P3(0)**2-P3(1)**2-P3(2)**2-P3(3)**2 - M3 * (M3 -CI
      $ * W3))
      
-      PV3(3) = -DENOM
       EXTV3 = 0
       LEV3L = LEF1
       LEV3R = LEF2

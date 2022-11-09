@@ -43,7 +43,6 @@ C         MANG contains the angle innerproducts.
       COMPLEX*16, DIMENSION(NEXTERNAL,NEXTERNAL) :: MANG
       REAL*8 M3
       REAL*8 W3
-      COMPLEX*16 DENOM
       
 C     EB: Calculate the four-momentum of V3.     
       PV3(1) = +PF1(1)+PF2(1)
