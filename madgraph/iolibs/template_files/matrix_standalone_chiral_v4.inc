@@ -241,12 +241,10 @@ C BEGIN CODE
 C ----------
 C     EB: Calls to calculate all spinnor inner products
 C         To do: Might want to use the symmetry <ab>=-<ba> to reduce the number of calculations. 
-      DO K = 1, NEXTERNAL-1
-        DO L = K+1, NEXTERNAL
+      DO K = 1, NEXTERNAL
+        DO L = 1, NEXTERNAL
           CALL INPRODSQR (P(0,K),P(0,L),MSQR(K,L))
           CALL INPRODANG (P(0,K),P(0,L),MANG(K,L))
-          MSQR(L,K) = -MSQR(K,L)
-          MANG(L,K) = -MANG(K,L)
         ENDDO
       ENDDO
       
