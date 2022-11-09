@@ -343,7 +343,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             call_rhs = ','.join(call.split(',')[-2:])
             call = call_lhs + ',' + 'LEV(' + str(number) + '),PV(1,' \
                  + str(number)+ '),V(1,' + str(number) + '))\n' \
-                 + 'MOL(' + str(number) + ',:) = ' + str(external_mothersL)
+                 + 'MOL(:,' + str(number) + ') = ' + str(external_mothersL)
         
         # AL: update RH spinor wavefunction
         elif pdg_code in [90003, 90007]:
@@ -367,7 +367,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             call_rhs = ','.join(call.split(',')[-2:])
             call = call_lhs + ',LEV(' + str(number) + '),PV(1,' \
                  + str(number)+ '),V(1,' + str(number) + '))\n' \
-                 + 'MOR(' + str(number) + ',:) = ' + str(external_mothersR) 
+                 + 'MOR(:,' + str(number) + ') = ' + str(external_mothersR) 
         
         
         # EB: Update vector wavefunctions.
@@ -393,8 +393,8 @@ class HelasCallWriter(base_objects.PhysicsObject):
             call_rhs = ','.join(call.split(',')[-2:])
             call = call_lhs + ',P(0,' + str(ref_mom) + '),' + 'MANG(' + str(ref_mom) + ',' + str(number) + '),V(1,' \
                 +  str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),VI(1,' +  str(number) + '),LEVI(' + str(number) + '),EXT(' + str(number) + '))\n' \
-                + 'MOL(' + str(number) + ',:) = ' + str(external_mothersL) + '\n' \
-                + 'MOR(' + str(number) + ',:) = ' + str(external_mothersR)
+                + 'MOL(:,' + str(number) + ') = ' + str(external_mothersL) + '\n' \
+                + 'MOR(:,' + str(number) + ') = ' + str(external_mothersR)
             
         # AL: update RH vector wavefunction
         elif pdg_code == 90024:
@@ -408,8 +408,8 @@ class HelasCallWriter(base_objects.PhysicsObject):
             call_rhs = ','.join(call.split(',')[-2:])
             call = call_lhs + ',P(0,' + str(ref_mom) + '),' + 'MSQR(' + str(number) + ',' + str(ref_mom) + '),VI(1,' \
                 +  str(number) + '),LEVI(' + str(number) + '),PV(1,' + str(number) + '),V(1,' +  str(number) + '),LEV(' + str(number) + '),EXT(' + str(number) + '))\n' \
-                + 'MOL(' + str(number) + ',:) = ' + str(external_mothersL) + '\n' \
-                + 'MOR(' + str(number) + ',:) = ' + str(external_mothersR)
+                + 'MOL(:,' + str(number) + ') = ' + str(external_mothersL) + '\n' \
+                + 'MOR(:,' + str(number) + ') = ' + str(external_mothersR)
 
         return call
     
@@ -438,7 +438,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             # EB: The part of the call that is kept the same.
             call_keep = ','.join(call.split(',')[-5:-2])
 
-            call_1 = 'MOR(' + str(wavefunction.get('number')) + ',:) = ' \
+            call_1 = 'MOR(:,' + str(wavefunction.get('number')) + ') = ' \
                 + str(wavefunction.get('external_mothersR')) + '\n' 
 
             for mother in wavefunction.get('mothers'):
@@ -448,15 +448,15 @@ class HelasCallWriter(base_objects.PhysicsObject):
                 # EB: if chiral fermion
                 if abs(pdg_code) < 90010 and abs(pdg_code) > 90000:
                     call_2 = 'CALL RRV1_1(V(1,' + str(number) + '),LEV(' + str(number) \
-                        + '),PV(1,' + str(number) + '),MOR(' + str(number) + ',:),'
+                        + '),PV(1,' + str(number) + '),MOR(1,' + str(number) + '),'
 
                  # EB: Else is boson.
                 else:
-                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),MOL(' + str(number) \
-                       + ',:),MOR('  + str(number) + ',:),VI(1,' + str(number) + '),LEVI(' + str(number) + '),EXT(' + str(number) + '),NEXTERNAL,MSQR,MANG,'
+                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),MOL(1,' + str(number) \
+                       + '),MOR(1,'  + str(number) + '),VI(1,' + str(number) + '),LEVI(' + str(number) + '),EXT(' + str(number) + '),NEXTERNAL,MSQR,MANG,'
                     call_temp = call_2[11:]
                     
-            call_4 = ',MOR(' + str(wavefunction.get('number')) + ',:),V(1,' \
+            call_4 = ',MOR(1,' + str(wavefunction.get('number')) + '),V(1,' \
                 + str(wavefunction.get('number')) + '),PV(1,' + str(wavefunction.get('number')) \
                 + '),LEV(' + str(wavefunction.get('number')) + '))'
 
@@ -468,7 +468,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             # EB: The part of the call that is kept the same.
             call_keep = ','.join(call.split(',')[-5:-2])
 
-            call_1 = 'MOR(' + str(wavefunction.get('number')) + ',:) = ' \
+            call_1 = 'MOR(:,' + str(wavefunction.get('number')) + ') = ' \
                 + str(wavefunction.get('external_mothersR')) + '\n' 
 
             for mother in wavefunction.get('mothers'):
@@ -478,15 +478,15 @@ class HelasCallWriter(base_objects.PhysicsObject):
                 # EB: if chiral fermion
                 if abs(pdg_code) < 90010 and abs(pdg_code) > 90000:
                     call_2 = 'CALL RRV1_2(V(1,' + str(number) + '),LEV(' + str(number) \
-                        + '),PV(1,' + str(number) + '),MOR(' + str(number) + ',:),'
+                        + '),PV(1,' + str(number) + '),MOR(1,' + str(number) + '),'
         
                # EB: else is boson.
                 else:
-                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),MOL(' + str(number) \
-                       + ',:),MOR('  + str(number) + ',:),VI(1,' + str(number) + '),LEVI(' + str(number) + '),EXT(' + str(number) + '),NEXTERNAL,MSQR,MANG,'
+                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),MOL(1,' + str(number) \
+                       + '),MOR(1,'  + str(number) + '),VI(1,' + str(number) + '),LEVI(' + str(number) + '),EXT(' + str(number) + '),NEXTERNAL,MSQR,MANG,'
                     call_temp = call_2[11:]
                     
-            call_4 = ',MOR(' + str(wavefunction.get('number')) + ',:),V(1,' \
+            call_4 = ',MOR(1,' + str(wavefunction.get('number')) + '),V(1,' \
                 + str(wavefunction.get('number')) + '),PV(1,' + str(wavefunction.get('number')) \
                 + '),LEV(' + str(wavefunction.get('number')) + '))'
 
@@ -498,7 +498,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             # EB: The part of the call that is kept the same.
             call_keep = ','.join(call.split(',')[-5:-2])
 
-            call_1 = 'MOL(' + str(wavefunction.get('number')) + ',:) = ' \
+            call_1 = 'MOL(:,' + str(wavefunction.get('number')) + ') = ' \
                 + str(wavefunction.get('external_mothersL')) + '\n'
 
             for mother in wavefunction.get('mothers'):
@@ -508,15 +508,15 @@ class HelasCallWriter(base_objects.PhysicsObject):
                 # EB: if chiral fermion
                 if abs(pdg_code) < 90010 and abs(pdg_code) > 90000:
                     call_2 = 'CALL LLV1_1(V(1,' + str(number) + '),LEV(' + str(number) \
-                        + '),PV(1,' + str(number) + '),MOL(' + str(number) + ',:),'
+                        + '),PV(1,' + str(number) + '),MOL(1,' + str(number) + '),'
         
                 # EB: else is boson.
                 else:
-                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),MOL(' + str(number) \
-                       + ',:),MOR('  + str(number) + ',:),VI(1,' + str(number) + '),LEVI(' + str(number) + '),EXT(' + str(number) + '),NEXTERNAL,MSQR,MANG,'
+                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),MOL(1,' + str(number) \
+                       + '),MOR(1,'  + str(number) + '),VI(1,' + str(number) + '),LEVI(' + str(number) + '),EXT(' + str(number) + '),NEXTERNAL,MSQR,MANG,'
                     call_temp = call_2[11:]
                     
-            call_4 = ',MOL(' + str(wavefunction.get('number')) + ',:),V(1,' \
+            call_4 = ',MOL(1,' + str(wavefunction.get('number')) + '),V(1,' \
                 + str(wavefunction.get('number')) + '),PV(1,' + str(wavefunction.get('number')) \
                 + '),LEV(' + str(wavefunction.get('number')) + '))'
 
@@ -528,7 +528,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             # EB: The part of the call that is kept the same.
             call_keep = ','.join(call.split(',')[-5:-2])
 
-            call_1 = 'MOL(' + str(wavefunction.get('number')) + ',:) = ' \
+            call_1 = 'MOL(:,' + str(wavefunction.get('number')) + ') = ' \
                 + str(wavefunction.get('external_mothersL')) + '\n' 
 
             for mother in wavefunction.get('mothers'):
@@ -538,15 +538,15 @@ class HelasCallWriter(base_objects.PhysicsObject):
                 # EB: if chiral fermion
                 if abs(pdg_code) < 90010 and abs(pdg_code) > 90000:
                     call_2 = 'CALL LLV1_2(V(1,' + str(number) + '),LEV(' + str(number) \
-                        + '),PV(1,' + str(number) + '),MOL(' + str(number) + ',:),'
+                        + '),PV(1,' + str(number) + '),MOL(1,' + str(number) + '),'
         
                 # EB: else is boson.
                 else:
-                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),MOL(' + str(number) \
-                       + ',:),MOR('  + str(number) + ',:),VI(1,' + str(number) + '),LEVI(' + str(number) + '),EXT(' + str(number) + '),NEXTERNAL,MSQR,MANG,'
+                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),MOL(1,' + str(number) \
+                       + '),MOR(1,'  + str(number) + '),VI(1,' + str(number) + '),LEVI(' + str(number) + '),EXT(' + str(number) + '),NEXTERNAL,MSQR,MANG,'
                     call_temp = call_2[11:]
                     
-            call_4 = ',MOL(' + str(wavefunction.get('number')) + ',:),V(1,' \
+            call_4 = ',MOL(1,' + str(wavefunction.get('number')) + '),V(1,' \
                 + str(wavefunction.get('number')) + '),PV(1,' + str(wavefunction.get('number')) \
                 + '),LEV(' + str(wavefunction.get('number')) + '))'
 
@@ -558,9 +558,9 @@ class HelasCallWriter(base_objects.PhysicsObject):
             # EB: The part of the call that is kept the same.
             call_keep = ','.join(call.split(',')[-5:-2])
             
-            call_1 = 'MOL(' + str(wavefunction.get('number')) + ',:) = ' \
+            call_1 = 'MOL(:,' + str(wavefunction.get('number')) + ') = ' \
                 + str(wavefunction.get('external_mothersL')) + '\n' \
-                + 'MOR(' + str(wavefunction.get('number')) + ',:) = ' \
+                + 'MOR(:,' + str(wavefunction.get('number')) + ') = ' \
                 + str(wavefunction.get('external_mothersR')) + '\n'
 
             for mother in wavefunction.get('mothers'):
@@ -570,15 +570,15 @@ class HelasCallWriter(base_objects.PhysicsObject):
                 # EB: If left-handed fermion.
                 if pdg_code in (90001, -90001, 90005, -90005):
                     call_2 = 'CALL LRV1P0_3(V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' \
-                        + str(number) + '),MOL(' + str(number) + ',:),'
+                        + str(number) + '),MOL(1,' + str(number) + '),'
                 # EB: Else is right-handed fermion.
                 else:
                     call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' \
-                        + str(number) + '),MOR(' + str(number) + ',:),NEXTERNAL,MSQR,MANG,'
+                        + str(number) + '),MOR(1,' + str(number) + '),NEXTERNAL,MSQR,MANG,'
             call_4 = ',V(1,' + str(wavefunction.get('number')) + '),LEV(' + str(wavefunction.get('number')) + '),PV(1,'\
-                         + str(wavefunction.get('number')) + '),MOL(' \
-                        + str(wavefunction.get('number')) + ',:),MOR(' + str(wavefunction.get('number')) \
-                         + ',:),VI(1,' + str(wavefunction.get('number')) + '),LEVI(' + str(wavefunction.get('number')) + '),EXT(' + str(wavefunction.get('number')) + '))'
+                         + str(wavefunction.get('number')) + '),MOL(1,' \
+                        + str(wavefunction.get('number')) + '),MOR(1,' + str(wavefunction.get('number')) \
+                         + '),VI(1,' + str(wavefunction.get('number')) + '),LEVI(' + str(wavefunction.get('number')) + '),EXT(' + str(wavefunction.get('number')) + '))'
 
             call = call_1 + call_2 + call_3 + call_keep + call_4
 
@@ -588,9 +588,9 @@ class HelasCallWriter(base_objects.PhysicsObject):
             # EB: The part of the call that is kept the same.
             call_keep = ','.join(call.split(',')[-5:-2])
             
-            call_1 = 'MOL(' + str(wavefunction.get('number')) + ',:) = ' \
+            call_1 = 'MOL(:,' + str(wavefunction.get('number')) + ') = ' \
                 + str(wavefunction.get('external_mothersL')) + '\n' \
-                + 'MOR(' + str(wavefunction.get('number')) + ',:) = ' \
+                + 'MOR(:,' + str(wavefunction.get('number')) + ') = ' \
                 + str(wavefunction.get('external_mothersR')) + '\n'
 
             for mother in wavefunction.get('mothers'):
@@ -600,15 +600,15 @@ class HelasCallWriter(base_objects.PhysicsObject):
                 # EB: If right-handed fermion.
                 if pdg_code in (90003, -90003, 90007, -90007):
                     call_2 = 'CALL RLV1P0_3(V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' \
-                        + str(number) + '),MOR(' + str(number) + ',:),'
+                        + str(number) + '),MOR(1,' + str(number) + '),'
                 # EB: Else is left-handed fermion.
                 else:
                     call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' \
-                        + str(number) + '),MOL(' + str(number) + ',:),NEXTERNAL,MSQR,MANG,'
+                        + str(number) + '),MOL(1,' + str(number) + '),NEXTERNAL,MSQR,MANG,'
             call_4 = ',V(1,' + str(wavefunction.get('number')) + '),LEV(' + str(wavefunction.get('number')) \
-                        + '),PV(1,' + str(wavefunction.get('number')) + '),MOL(' \
-                        + str(wavefunction.get('number')) + ',:),MOR(' + str(wavefunction.get('number')) \
-                        + ',:),VI(1,' + str(wavefunction.get('number')) + '),LEVI(' + str(wavefunction.get('number')) + '),EXT(' + str(wavefunction.get('number')) + '))'
+                        + '),PV(1,' + str(wavefunction.get('number')) + '),MOL(1,' \
+                        + str(wavefunction.get('number')) + '),MOR(1,' + str(wavefunction.get('number')) \
+                        + '),VI(1,' + str(wavefunction.get('number')) + '),LEVI(' + str(wavefunction.get('number')) + '),EXT(' + str(wavefunction.get('number')) + '))'
 
             call = call_1 + call_2 + call_3 + call_keep + call_4
 
@@ -670,17 +670,17 @@ class HelasCallWriter(base_objects.PhysicsObject):
                 # EB: If left-handed fermion.
                 if pdg_code in (90001, -90001, 90005, -90005):
                     call_1 = 'CALL LRV1_0(V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' \
-                        + str(number) + '),MOL(' + str(number) + ',:),'
+                        + str(number) + '),MOL(1,' + str(number) + '),'
                 
                 # EB: If right-handed fermion.
                 elif pdg_code in (90003, -90003, 90007, -90007):
                     call_2 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' \
-                        + str(number) + '),MOR(' + str(number) + ',:),'
+                        + str(number) + '),MOR(1,' + str(number) + '),'
 
                 # EB: else is boson.
                 else:
-                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),MOL(' + str(number) \
-                       + ',:),MOR('  + str(number) + ',:),VI(1,' + str(number) + '),LEVI(' + str(number) + '),NEXTERNAL,MSQR,MANG,'
+                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),MOL(1,' + str(number) \
+                       + '),MOR(1,'  + str(number) + '),VI(1,' + str(number) + '),LEVI(' + str(number) + '),NEXTERNAL,MSQR,MANG,'
                     call_temp = call_1[11:]
             
             call = call_1 + call_2 + call_3 + call_keep        
@@ -697,17 +697,17 @@ class HelasCallWriter(base_objects.PhysicsObject):
                 # EB: If right-handed fermion.
                 if pdg_code in (90003, -90003, 90007, -90007):
                     call_1 = 'CALL RLV1_0(V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' \
-                        + str(number) + '),MOR(' + str(number) + ',:),'
+                        + str(number) + '),MOR(1,' + str(number) + '),'
                 
                 # EB: If left-handed fermion.
                 elif pdg_code in (90001, -90001, 90005, -90005):
                     call_2 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' \
-                        + str(number) + '),MOL(' + str(number) + ',:),'
+                        + str(number) + '),MOL(1,' + str(number) + '),'
 
                 # EB: else is boson.
                 else:
-                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),MOL(' + str(number) \
-                       + ',:),MOR('  + str(number) + ',:),VI(1,' + str(number) + '),LEVI(' + str(number) + '),NEXTERNAL,MSQR,MANG,'
+                    call_3 = 'V(1,' + str(number) + '),LEV(' + str(number) + '),PV(1,' + str(number) + '),MOL(1,' + str(number) \
+                       + '),MOR(1,'  + str(number) + '),VI(1,' + str(number) + '),LEVI(' + str(number) + '),NEXTERNAL,MSQR,MANG,'
                     call_temp = call_1[11:]
                    
             call = call_1 + call_2 + call_3 + call_keep
