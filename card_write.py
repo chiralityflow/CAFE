@@ -1,3 +1,4 @@
+import time
 def getCList():
     return cList
 
@@ -29,7 +30,7 @@ cList='cardListee'
 
 ###################
 
-suffix = 'test_220203'
+suffix = 'test_' + time.strftime('%Y-%m-%d_%H.%M.%S')
 
 
 f = open(cList,'w')
@@ -42,8 +43,8 @@ f.close()
 
 #####################
 
-naMin = 2
-naMax = 3
+naMin = 4
+naMax = 4
 
 for proc in procs:
   for na in range(naMin,naMax+1):
@@ -51,7 +52,7 @@ for proc in procs:
     # numPho = str(na)+'a'
     numPho = str(na) + 'alr'
     card_name = 'card_' + numPho + '_' + proc + '_' + suffix
-    name = numPho + '_' + suffix
+    name = '_' + numPho + '_' + suffix
       
     #print(card_name)
     f = open(cList,'a')
