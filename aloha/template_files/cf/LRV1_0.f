@@ -40,8 +40,8 @@ C     EB: Amplitude of the diagram.
       SUMF2 = 0
 
 C     EB: Contract F2 with the right-handed part of V3.
-      DO I = 1, LEF2
-        DO J = 1, LEV3R 
+      DO J = 1, LEV3R
+        DO I = 1, LEF2
           SUMF2 = SUMF2 + F2(I)*V3R(J)*MANG(ABS(MO3R(J)),ABS(MOF2(I)))
         ENDDO
       ENDDO
