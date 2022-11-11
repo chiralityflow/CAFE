@@ -47,8 +47,8 @@ C     EB: Contract F1 with the right-handed part of V3.
       ENDDO
 
 C     EB: Contract F2 with the left-handed part of V3.
-      DO K = 1, LEF2
-        DO L = 1, LEV3L
+      DO L = 1, LEV3L
+        DO K = 1, LEF2
           SUMF2 = SUMF2 + F2(K)*V3L(L)*MSQR(ABS(MO3L(L)),ABS(MOF2(K)))
         ENDDO
       ENDDO  
