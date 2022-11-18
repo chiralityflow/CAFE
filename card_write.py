@@ -1,3 +1,4 @@
+import time
 def getCList():
     return cList
 
@@ -12,8 +13,8 @@ procs=['2lQED']
 cList='cardListee'
 
 ### Uncomment these for two lepton pairs amps/MEs
-# procs=['4lDiffQED', '4lSameQED']
-# cList='cardList4e'
+#procs=['4lDiffQED', '4lSameQED']
+#cList='cardList4e'
 
 ### Uncomment these for three lepton pairs amps/MEs
 # procs=['6lDiffQED', '6l4Same2DiffQED']
@@ -29,7 +30,7 @@ cList='cardListee'
 
 ###################
 
-suffix = 'test_220203'
+suffix = 'test_' + time.strftime('%Y-%m-%d_%H.%M.%S')
 
 
 f = open(cList,'w')
@@ -42,8 +43,8 @@ f.close()
 
 #####################
 
-naMin = 2
-naMax = 3
+naMin = 1
+naMax = 1
 
 for proc in procs:
   for na in range(naMin,naMax+1):
@@ -51,7 +52,7 @@ for proc in procs:
     # numPho = str(na)+'a'
     numPho = str(na) + 'alr'
     card_name = 'card_' + numPho + '_' + proc + '_' + suffix
-    name = numPho + '_' + suffix
+    name = '_' + numPho + '_' + suffix
       
     #print(card_name)
     f = open(cList,'a')
