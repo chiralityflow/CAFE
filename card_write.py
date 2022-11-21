@@ -43,8 +43,8 @@ f.close()
 
 #####################
 
-naMin = 1
-naMax = 1
+naMin = 2
+naMax = 2
 
 for proc in procs:
   for na in range(naMin,naMax+1):
