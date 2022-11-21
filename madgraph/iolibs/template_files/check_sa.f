@@ -77,7 +77,7 @@ c      call printout()
 c
 c	  write the information on the four momenta 
 c
- c     write (*,*)
+C      write (*,*)
 c      write (*,*) " Phase space point:"
 c      write (*,*)
 c      write (*,*) "-----------------------------------------------------------------------------"
