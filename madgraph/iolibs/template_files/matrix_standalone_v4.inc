@@ -158,6 +158,9 @@ C     For this reason, we simply remove the filterin when there is only three ex
 		  ENDIF
 		ENDDO
 	  ENDIF
+c AW: remove this later
+      OPEN(1, FILE = '/home/adam/Master_project/MadCAFE/bin/testdata.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append') 
+      WRITE(1,*) ANS
 	  END
        
        
@@ -192,7 +195,7 @@ C
 C  
 C LOCAL VARIABLES 
 C  
-      INTEGER I,J
+      INTEGER I,J,ZEROAMPS,TOTAMPS,ZEROWFS,TOTWFS
       COMPLEX*16 ZTEMP
       REAL*8 CF(NCOLOR,NCOLOR)
       COMPLEX*16 AMP(NGRAPHS), JAMP(NCOLOR), TMP_JAMP(%(nb_temp_jamp)i)
@@ -204,6 +207,11 @@ C GLOBAL VARIABLES
 C  
       include 'coupl.inc'
 %(global_variable)s
+      ZEROAMPS = 0
+      TOTAMPS = 0
+      ZEROWFS = 0
+      TOTWFS = 0
+
 C  
 C COLOR DATA
 C  
@@ -213,6 +221,10 @@ C BEGIN CODE
 C ----------
 %(helas_calls)s
 %(jamp_lines)s
+      WRITE(*,*) 'ZEROAMPS = ' ,ZEROAMPS
+      WRITE(*,*) 'TOTAMPS = ' ,TOTAMPS
+      WRITE(*,*) 'ZEROWFS = ' ,ZEROWFS
+      WRITE(*,*) 'TOTWFS = ' ,TOTWFS
 
       %(proc_prefix)sMATRIX = 0.D0 
       DO I = 1, NCOLOR

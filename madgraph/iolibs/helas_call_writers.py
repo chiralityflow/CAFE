@@ -232,7 +232,8 @@ class HelasCallWriter(base_objects.PhysicsObject):
             return self.get_loop_matrix_element_calls(matrix_element)
         
         me = matrix_element.get('diagrams')
-        matrix_element.reuse_outdated_wavefunctions(me)
+        #AW: commenting this out to count WFs correctly
+        #matrix_element.reuse_outdated_wavefunctions(me)
 
         res = []
         for diagram in matrix_element.get('diagrams'):
@@ -286,6 +287,9 @@ class HelasCallWriter(base_objects.PhysicsObject):
                                                                    wavefunction)
             if not wavefunction.get('mothers'):
                 call = self.get_chiral_wavefunction_call(wavefunction, call)
+            else:
+                #AW: for getting wavefunctions 
+                call = self.get_internal_wfs(wavefunction, call)
         except KeyError as error:
             return ""
         
@@ -295,6 +299,11 @@ class HelasCallWriter(base_objects.PhysicsObject):
                 self.width_tchannel_set_tozero = True
         return call
 
+    def get_internal_wfs(self, wavefunction, call):
+        
+        call = call + '\n TOTWFS = TOTWFS + 1 \n' + 'IF (ABS(W(3,' + str(wavefunction.get('number')) + ')).LE.1E-18.AND.(ABS(W(4,' + str(wavefunction.get('number')) + '))).LE.1E-18.AND.(ABS(W(5,' + str(wavefunction.get('number')) + '))).LE.1E-18.AND.(ABS(W(6,' + str(wavefunction.get('number')) + ')).LE.1E-18)) THEN \n ZEROWFS = ZEROWFS + 1 \n ENDIF'
+
+        return call
     # AL: Added a function to change the chiral external wavefunctions
     # MS: we likely want to similary create a line for calling the
     # vertex functions (LLV_1 (rather LLV1_1) etc), as we need more
@@ -367,11 +376,19 @@ class HelasCallWriter(base_objects.PhysicsObject):
         corresponding to the key"""
 
         try:
-            call = self["amplitudes"][amplitude.get_call_key()]
+            call = self["amplitudes"][amplitude.get_call_key()](amplitude) 
+            #AW
+            call = self.get_chiral_amps(amplitude, call)
         except KeyError as error:
             return ""
         else:
-            return call(amplitude)
+            return call
+    #AW
+    def get_chiral_amps(self, amplitude, call):
+        call = call + '\n TOTAMPS = TOTAMPS + 1 \n IF (ABS(AMP(' + str(amplitude.get('number')) + ')).le.1E-15) THEN \n ZEROAMPS = ZEROAMPS + 1 \n ENDIF'
+
+        return call
+
 
     def add_wavefunction(self, key, function):
         """Set the function for writing the wavefunction

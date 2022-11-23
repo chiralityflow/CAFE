@@ -1068,7 +1068,7 @@ class Amplitude(base_objects.PhysicsObject):
             for leg in ext_legs:
                 # if left photon, append right (anti)fermion
                 # AW: Look more here
-                if leg.get('id') == 90023:
+                if leg.get('id') == 90023 or leg.get('id') == 70021:
                     # ensure order is order of particle number
                     if leg.get('number') < right_ferm.get('number'):
                         vanishing_combs.append((leg, right_ferm))
@@ -1078,7 +1078,7 @@ class Amplitude(base_objects.PhysicsObject):
                     ref_mom.append(right_ferm.get('number'))
 
                 # if right photon, append left (anti)fermion
-                elif leg.get('id') == 90024:
+                elif leg.get('id') == 90024 or leg.get('id') == 80021:
                     if leg.get('number') < left_ferm.get('number'):
                         vanishing_combs.append((leg, left_ferm))
                     else:
@@ -1090,6 +1090,117 @@ class Amplitude(base_objects.PhysicsObject):
                 else: 
                     ref_mom.append(-1)
             self.set('ref_momenta', ref_mom)
+        else:
+            #AW: here we find vanishing combos for diagrams with no fermions
+            found_left_boson = False
+            found_right_boson = False
+            left_bosons = []
+            right_bosons = []
+            for leg in ext_legs:
+                if leg.get('id') == 70021 and found_left_boson:
+                    left_bosons.append(leg)
+                
+                if leg.get('id') == 80021 and found_right_boson:
+                    right_bosons.append(leg)
+
+                if leg.get('id') == 70021 and not found_left_boson:
+                    left_boson = leg
+                    found_left_boson = True
+                elif leg.get('id') == 80021 and not found_right_boson:
+                    right_boson = leg
+                    found_right_boson = True
+            
+            if found_left_boson and found_right_boson:
+                for leg in ext_legs:
+                    if leg.get('id') == 70021:
+                        ref_mom.append(right_boson.get('number'))
+                    elif leg.get('id') == 80021:
+                        ref_mom.append(left_boson.get('number'))
+                    else:
+                        misc.sprint('ERROR')
+            if found_left_boson and found_right_boson:
+                if left_boson.get('number') < right_boson.get('number'):
+                    vanishing_combs.append((left_boson,right_boson))
+                    if len(left_bosons) != 0:
+                        #AW: add combinations of first left, first right and all left bosons here
+                        for not_first_left_boson in left_bosons:
+                            if not_first_left_boson.get('number') < right_boson.get('number'):
+                                vanishing_combs.append((left_boson,not_first_left_boson,right_boson))
+                            else:
+                                vanishing_combs.append((left_boson,right_boson,not_first_left_boson))
+                    if len(right_bosons) != 0:
+                        #AW: add combinations of first left, first right and all right bosons here
+                        for not_first_right_boson in right_bosons:
+                            if not_first_right_boson.get('number') < right_boson.get('number'):
+                                vanishing_combs.append((left_boson,not_first_right_boson,right_boson))
+                            else:
+                                vanishing_combs.append((left_boson,right_boson,not_first_right_boson))
+                else:
+                    vanishing_combs.append((right_boson,left_boson))
+                    if len(right_bosons) != 0:
+                        #AW: add combinations of first right, first left and all right bosons here
+                        for not_first_right_boson in right_bosons:
+                            if not_first_right_boson.get('number') < left_boson.get('number'):
+                                vanishing_combs.append((right_boson,not_first_right_boson,left_boson))
+                            else:
+                                vanishing_combs.append((right_boson,left_boson,not_first_right_boson))
+                    if len(left_bosons) != 0:
+                        #AW: add combinations of first right, first left and all left bosons here
+                        for not_first_left_boson in left_bosons:
+                            if not_first_left_boson.get('number') < left_boson.get('number'):
+                                vanishing_combs.append((right_boson,not_first_left_boson,left_boson))
+                            else:
+                                vanishing_combs.append((right_boson,left_boson,not_first_left_boson))
+
+                if len(right_bosons) > 1:
+                    #AW: add combinations of first left with two right bosons
+                    for i in range(len(right_bosons)-1):
+                        for j in range(i+1,len(right_bosons)):
+                            if right_bosons[j].get('number') < left_boson.get('number'):
+                                vanishing_combs.append((right_bosons[i],right_bosons[j],left_boson))
+                            elif right_bosons[i].get('number') < left_boson.get('number'):
+                                vanishing_combs.append((right_bosons[i],left_boson,right_bosons[j]))
+                            else:
+                                vanishing_combs.append((left_boson,right_bosons[i],right_bosons[j]))
+                    #AW: add all combinations with just right bosons
+                    for i in range(len(right_bosons)-1):
+                        for j in range(i+1,len(right_bosons)):
+                            vanishing_combs.append((right_boson,right_bosons[i],right_bosons[j]))
+                
+                if len(left_bosons) > 1:
+                    #AW: add combinations of right left with two left bosons
+                    for i in range(len(left_bosons)-1):
+                        for j in range(i+1,len(left_bosons)):
+                            if left_bosons[j].get('number') < right_boson.get('number'):
+                                vanishing_combs.append((left_bosons[i],left_bosons[j],right_boson))
+                            elif left_bosons[i].get('number') < right_boson.get('number'):
+                                vanishing_combs.append((left_bosons[i],right_boson,left_bosons[j]))
+                            else:
+                                vanishing_combs.append((right_boson,left_bosons[i],left_bosons[j]))
+
+                    #AW: add all combinations with just left bosons
+                    for i in range(len(left_bosons)-1):
+                        for j in range(i+1,len(left_bosons)):
+                            vanishing_combs.append((left_boson,left_bosons[i],left_bosons[j]))
+            
+                #AW: for small diagrams check the limit
+                if len(ext_legs) < 6:
+                    #AW: add combinations with one initial boson and two bosons with opposite chirality
+                    if len(left_bosons) > 0 and len(right_bosons) > 0:
+                        for not_first_left_boson in left_bosons:
+                            for not_first_right_boson in right_bosons:
+                                if not_first_right_boson.get('number') < left_boson.get('number'):
+                                    vanishing_combs.append((not_first_right_boson,left_boson,not_first_left_boson))
+                                elif not_first_right_boson.get('number') < not_first_left_boson.get('number'):
+                                    vanishing_combs.append((left_boson,not_first_right_boson,not_first_left_boson))
+                                else:
+                                    vanishing_combs.append((left_boson,not_first_left_boson,not_first_right_boson))
+                                if not_first_left_boson.get('number') < right_boson.get('number'):
+                                    vanishing_combs.append((not_first_left_boson,right_boson,not_first_right_boson))
+                                elif not_first_left_boson.get('number') < not_first_right_boson.get('number'):
+                                    vanishing_combs.append((right_boson,not_first_left_boson,not_first_right_boson))
+                                else:
+                                    vanishing_combs.append((right_boson,not_first_right_boson,not_first_left_boson))
 
         return vanishing_combs
 
@@ -1114,6 +1225,23 @@ class Amplitude(base_objects.PhysicsObject):
         ref_dict_to1 = self.get('process').get('model').get('ref_dict_to1')
 
         ext_legs = self.get('process').get('legs')
+
+        
+        if (is_first_it):
+            #AW: check for forbidden chiralities
+            left_particles = [70021,70001,70002,90001,90005,90023]
+            right_particles = [80021,80001,80002,90003,90007,90024]
+            N_left = 0
+            N_right = 0
+            for leg in ext_legs:
+                if leg.get('id') in left_particles:
+                    N_left += 1
+                if leg.get('id') in right_particles:
+                    N_right += 1
+            if N_left < 2 or N_right < 2:
+                return None
+
+
 
         # If all legs can be combined in one single vertex, add this
         # vertex to res and continue.
@@ -1153,12 +1281,11 @@ class Amplitude(base_objects.PhysicsObject):
 
             # AL: temporary switch to turn off removal of vanishing combinations
             # AW: Look here later, switch to false to test
-            #remove_combs = True
-            remove_combs = False
+            remove_combs = True
+            #remove_combs = False
 
             # AL: now remove from comb_lists those processes which vanish due to ref momentum
             vanishing_combs = self.get_vanishing_combs(ext_legs)
-        
             # AL: remove combinations which vanish
             if remove_combs:
 
@@ -1170,8 +1297,10 @@ class Amplitude(base_objects.PhysicsObject):
                 # and check the next comb_list
                 for icomb, comb_list in enumerate(comb_lists):
                     is_removed = False
+                    
                     for van_comb in vanishing_combs:
                         for comb in comb_list:
+                            #misc.sprint(comb)
                             if van_comb == comb:
                                 to_remove.append(comb_lists[icomb])
                                 is_removed = True
@@ -1182,6 +1311,7 @@ class Amplitude(base_objects.PhysicsObject):
                 # now delete the combinations which are not allowed
                 comb_lists = [c_list for c_list in comb_lists if \
                               c_list not in to_remove]
+               
                         
 
         # AL: no longer 1st iteration (either wasn't anyway, 
@@ -1960,7 +2090,7 @@ class MultiProcess(base_objects.PhysicsObject):
 
         # AL: check if chiral processes (we only have chiral particles in cf model.
         # This can be updated if we add masses/have different needs for different particles)
-        is_chiral = model.get('name') == 'cf'
+        is_chiral = model.get('name') == 'cf' or model.get('name') == 'colorless_cf'
         
         islegs_orig = [leg for leg in process_definition['legs'] \
                  if leg['state'] == False]
