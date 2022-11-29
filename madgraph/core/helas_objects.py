@@ -631,11 +631,17 @@ class HelasWavefunction(base_objects.PhysicsObject):
         #           part of a wavefunction.
         #     external_mothersR = external mothers for the right-handed
         #           part of a wavefunction.
+        #     Reduced versions of external mothers are used for vertices where the
+        #           boson has opposite chirality to the fermions. The boson is not an 
+        #           external mother in the reduced external mothers list of the output fermion,
+        #           since the inner product for this element is zero.
         self['state'] = 'initial'
         self['leg_state'] = True
         self['mothers'] = HelasWavefunctionList()
         self['external_mothersL'] = []
         self['external_mothersR'] = []
+        self['reduced_external_mothersL'] = []
+        self['reduced_external_mothersR'] = []
         self['number_external'] = 0
         self['number'] = 0
         self['me_id'] = 0
@@ -3993,27 +3999,38 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                         wf.set('color_key', color)
                         wf.set('mothers', mothers)
 
-                        # EB: set the external_mothers for the new wavefunction
+                        # EB: set the external_mothers, and potential reduced_external_mothers for the new wavefunction
+                        # EB: If left-chiral fermion.
                         if wf.get('particle').get('pdg_code') in (90001, -90001, 90005, -90005):
                             for mother in mothers:
-                                # EB: Only want to pass the physical momentum forward to fermions 
+                                # EB: Only want to pass the physical momentum forward to fermions.
+                                # EB: Do not pass to reduced external mothers if boson with same chirality. 
                                 if mother.get('particle').get('pdg_code') == 90024:
                                     wf.get('external_mothersL').extend(mother.get('external_mothersR'))
                                 elif mother.get('particle').get('pdg_code') == 90022:
                                     wf.get('external_mothersL').extend(mother.get('external_mothersL'))
                                     wf.get('external_mothersL').extend(mother.get('external_mothersR'))
+                                    wf.get('reduced_external_mothersL').extend(mother.get('external_mothersL'))
+                                    wf.get('reduced_external_mothersL').extend(mother.get('external_mothersR'))
                                 else:
                                     wf.get('external_mothersL').extend(mother.get('external_mothersL'))
+                                    wf.get('reduced_external_mothersL').extend(mother.get('external_mothersL'))
+                        #EB: If right-chiral fermion
                         elif wf.get('particle').get('pdg_code') in (90003, -90003, -90007, 90007):
                             for mother in mothers:
-                                # EB: Only want to pass the physical momentum forward to fermions 
+                                # EB: Only want to pass the physical momentum forward to fermions. 
+                                # EB: Do not pass to reduced external mothers if boson with same chirality. 
                                 if mother.get('particle').get('pdg_code') == 90023:
                                     wf.get('external_mothersR').extend(mother.get('external_mothersL'))
                                 elif mother.get('particle').get('pdg_code') == 90022:
                                     wf.get('external_mothersR').extend(mother.get('external_mothersL'))
                                     wf.get('external_mothersR').extend(mother.get('external_mothersR'))
+                                    wf.get('reduced_external_mothersR').extend(mother.get('external_mothersL'))
+                                    wf.get('reduced_external_mothersR').extend(mother.get('external_mothersR'))
                                 else:
                                     wf.get('external_mothersR').extend(mother.get('external_mothersR'))
+                                    wf.get('reduced_external_mothersR').extend(mother.get('external_mothersR'))
+                        #EB: If internal boson
                         elif wf.get('particle').get('pdg_code') == 90022:
                             for mother in mothers:
                                 wf.get('external_mothersL').extend(mother.get('external_mothersL'))
@@ -4180,14 +4197,17 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             helas_diagrams.append(helas_diagram)
         
          
-        # EB: Fill up the array to the dimension needed for the current version
-        #     of the vertex fortran subroutines.
+        # EB: Fill up the array to the dimension needed for the vertex fortran subroutines.
         for diagram in helas_diagrams:
             for wf in diagram.get('wavefunctions'):   
                 for i in range(len(wf.get('external_mothersL'))+1,len(process.get('legs'))+1):
                     wf.get('external_mothersL').append(0)
                 for i in range(len(wf.get('external_mothersR'))+1,len(process.get('legs'))+1):
                     wf.get('external_mothersR').append(0)
+                for i in range(len(wf.get('reduced_external_mothersL'))+1,len(process.get('legs'))+1):
+                    wf.get('reduced_external_mothersL').append(0)
+                for i in range(len(wf.get('reduced_external_mothersR'))+1,len(process.get('legs'))+1):
+                    wf.get('reduced_external_mothersR').append(0)
         for leg in process.get('legs'):
             for i in range(len(external_wavefunctions[leg.get('number')].get('external_mothersL'))+1,len(process.get('legs'))+1):
                 external_wavefunctions[leg.get('number')].get('external_mothersL').append(0)
