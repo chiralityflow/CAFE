@@ -159,8 +159,8 @@ C     For this reason, we simply remove the filterin when there is only three ex
 		ENDDO
 	  ENDIF
 C     EB: Quickfix for printing to file. Update to something better and remove.
-C      OPEN(1, FILE = '/home/emil/Desktop/MadCAFE/bin/testdata.txt', status = 'old', action = 'write', position='append')
-C      write(1,*) ANS
+C        OPEN(1, FILE = '/home/emil/Desktop/MadCAFE/bin/testdata.txt', status = 'old', action = 'write', position='append')
+C        write(1,*) ANS
 	  END
 
 
@@ -218,6 +218,9 @@ C     MANG contains the angle innerproducts.
 C     EB: The left and right external mothers for each particle.
       INTEGER MOL(NEXTERNAL,NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS)
       INTEGER MOR(NEXTERNAL,NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS)
+C     EB: The left and right reduced external mothers for each particle.
+      INTEGER REMOL(NEXTERNAL,NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS)
+      INTEGER REMOR(NEXTERNAL,NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS)
 C     EB: The lenght of each vector V(:,#particle).
       INTEGER LEV(NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS)
 C     EB: The lenght of each vector VI(:,#particle).
@@ -225,6 +228,9 @@ C     EB: The lenght of each vector VI(:,#particle).
 C     EB: EXT = -1 for external vectors and = 0 for internal vectors.
 C         Needed to be able to treat internal and external vectors
 C         on the same footing, see vertex files in Source/DHELAS.
+C         0 for fermions generated with external mothers and 1 for fermions
+C         generated with reduced external mothers. Needed to have correct
+C         LEV and LEVI, see vertex files in Source/DHELAS.
       INTEGER EXT(NEXTERNAL+(NWAVEFUNCS-NEXTERNAL)*NGRAPHS)
       DATA DUM0, DUM1/(0D0, 0D0), (1D0, 0D0)/
 C  
@@ -249,7 +255,7 @@ C         To do: Might want to use the symmetry <ab>=-<ba> to reduce the number 
           MANG(L,K) = -MANG(K,L)
         ENDDO
       ENDDO
-      
+      EXT = 0
 %(helas_calls)s
 %(jamp_lines)s
 
