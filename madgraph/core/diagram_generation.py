@@ -1240,7 +1240,7 @@ class Amplitude(base_objects.PhysicsObject):
                     N_right += 1
             if N_left < 2 or N_right < 2:
                 return None
-
+    
 
 
         # If all legs can be combined in one single vertex, add this
@@ -1281,8 +1281,8 @@ class Amplitude(base_objects.PhysicsObject):
 
             # AL: temporary switch to turn off removal of vanishing combinations
             # AW: Look here later, switch to false to test
-            remove_combs = True
-            #remove_combs = False
+            #remove_combs = True
+            remove_combs = False
 
             # AL: now remove from comb_lists those processes which vanish due to ref momentum
             vanishing_combs = self.get_vanishing_combs(ext_legs)
@@ -1487,11 +1487,12 @@ class Amplitude(base_objects.PhysicsObject):
 
         res = []
 
+        misc.sprint(comb_lists)
         for comb_list in comb_lists:
 
             reduced_list = []
             vertex_list = []
-
+            misc.sprint(comb_list)
             for entry in comb_list:
 
                 # Act on all leg combinations
@@ -1525,12 +1526,14 @@ class Amplitude(base_objects.PhysicsObject):
                     #misc.sprint(leg_vert_ids)
                     leg_ids = [leg[0] for leg in leg_vert_ids]
                     
-
-                                
+                    misc.sprint(leg_vert_ids)
+                    misc.sprint(leg_ids)
+                    
+                    
                     if leg_ids == [90022, 90023, 90024]:
                         leg_vert_ids = [leg_vert_ids[0]]
                     # AW: Keep only non chiral gluon and photon propagator. Had some problems here check if nessesary
-                    if leg_ids == [21, 70021, 80021, 90022, 90023, 90024]:
+                    """ if leg_ids == [21, 70021, 80021, 90022, 90023, 90024]:
                         leg_vert_ids = [leg_vert_ids[0], leg_vert_ids[3]]   
                     #misc.sprint(leg_vert_ids)
                     if leg_ids == [21, 70021, 80021]:
@@ -1543,7 +1546,7 @@ class Amplitude(base_objects.PhysicsObject):
                         leg_vert_ids = [leg_vert_ids[0]]
                     
                     if leg_ids == [21, 80021, 80021]:
-                        leg_vert_ids = [leg_vert_ids[0]]
+                        leg_vert_ids = [leg_vert_ids[0]] """ 
 
 
                     # # AL: alternative option, keep say right photon in propagator
@@ -2090,7 +2093,7 @@ class MultiProcess(base_objects.PhysicsObject):
 
         # AL: check if chiral processes (we only have chiral particles in cf model.
         # This can be updated if we add masses/have different needs for different particles)
-        is_chiral = model.get('name') == 'cf' or model.get('name') == 'colorless_cf'
+        is_chiral = model.get('name') == 'cf' or model.get('name') == 'colorless_cf' or model.get('name') == 'gauge_cf'
         
         islegs_orig = [leg for leg in process_definition['legs'] \
                  if leg['state'] == False]
@@ -2250,7 +2253,7 @@ class MultiProcess(base_objects.PhysicsObject):
                 if not process.get('required_s_channels') and \
                    not process.get('forbidden_onsh_s_channels') and \
                    not process.get('forbidden_s_channels') and \
-                   not process.get('model').get('name') == 'cf' and \
+                   not process.get('model').get('name') == 'cf' and not process.get('model').get('name') == 'gauge_cf' and \
                    not process.get('is_decay_chain') and not diagram_filter:
                     try:
                         crossed_index = success_procs.index(sorted_legs)
