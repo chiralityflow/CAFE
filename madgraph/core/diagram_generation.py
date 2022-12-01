@@ -1224,6 +1224,7 @@ class Amplitude(base_objects.PhysicsObject):
         model = self.get('process').get('model')
         ref_dict_to1 = self.get('process').get('model').get('ref_dict_to1')
 
+
         ext_legs = self.get('process').get('legs')
 
         
@@ -1247,11 +1248,16 @@ class Amplitude(base_objects.PhysicsObject):
         # vertex to res and continue.
         # Special treatment for decay chain legs
 
+
+        #AW: need to add missing interactions
+        if model.get('name') == 'gauge_cf':
+            ref_dict_to0[(70021, 80021)] = [0]
+
         # AL: TODO: put is_first_it here in case of e.g. 4-gluon amplitude
-        
+        misc.sprint(ref_dict_to0)
         if curr_leglist.can_combine_to_0(ref_dict_to0, is_decay_proc):
             # Extract the interaction id associated to the vertex 
-            
+            misc.sprint('+1 diagrams')
             vertex_ids = self.get_combined_vertices(curr_leglist,
                        copy.copy(ref_dict_to0[tuple(sorted([leg.get('id') for \
                                                        leg in curr_leglist]))]))
@@ -1271,6 +1277,52 @@ class Amplitude(base_objects.PhysicsObject):
                 return res
             else:
                 return None
+
+
+        #AW: only keep the wanted propagators
+        #AW: bug: if (LLL) and (RRR) are there we dont generate the last correct diagram
+        # if one is there we have a 50/50 of generating the right one and if both are gone we generate two too much
+        if model.get('name') == 'gauge_cf':
+            for incoming, outgoing in ref_dict_to1.items():
+                #misc.sprint(incoming, outgoing)
+                if incoming == (21,21):
+                    ref_dict_to1[incoming] = [(21, 37)]
+                if incoming == (21,70021):
+                    ref_dict_to1[incoming] = [(21, 38)]
+                if incoming == (70021,70021):
+                    ref_dict_to1[incoming] = [(70021, 43)]
+                if incoming == (70021,80021):
+                    ref_dict_to1[incoming] = [(21, 42)]
+                if incoming == (80021,80021):
+                    ref_dict_to1[incoming] = [(80021, 44)]
+                if incoming == (21,80021):
+                    ref_dict_to1[incoming] = [(21, 39)]
+                # 4g starts here
+                if incoming == (70021, 70021, 70021):
+                    #AW: maybe need to remove element instead, set same particle for now just to not crash
+                    ref_dict_to1[incoming] = [(70021, 57)]
+                if incoming == (80021, 80021, 80021):
+                    ref_dict_to1[incoming] = [(80021, 61)]
+                if incoming == (70021, 70021, 80021):
+                    ref_dict_to1[incoming] = [(70021, 58)]
+                if incoming == (70021, 80021, 80021):
+                    ref_dict_to1[incoming] = [(80021, 60)]
+                if incoming == (21, 70021, 70021):
+                    ref_dict_to1[incoming] = [(70021, 53)]
+                if incoming == (21, 80021, 80021):
+                    ref_dict_to1[incoming] = [(80021, 56)]
+                if incoming == (21, 70021, 80021):
+                    ref_dict_to1[incoming] = [(21, 50)]
+                if incoming == (21, 21, 21):
+                    ref_dict_to1[incoming] = [(21, 47)]
+                if incoming == (21, 21, 70021):
+                    ref_dict_to1[incoming] = [(21, 48)]
+                if incoming == (21, 21, 80021):
+                    ref_dict_to1[incoming] = [(21, 49)]
+                
+        #misc.sprint(ref_dict_to1)
+        #misc.sprint(max_multi_to1)
+
 
         # Create a list of all valid combinations of legs
         comb_lists = self.combine_legs(curr_leglist, ref_dict_to1, 
@@ -1487,12 +1539,12 @@ class Amplitude(base_objects.PhysicsObject):
 
         res = []
 
-        misc.sprint(comb_lists)
+        #misc.sprint(comb_lists)
         for comb_list in comb_lists:
 
             reduced_list = []
             vertex_list = []
-            misc.sprint(comb_list)
+            #misc.sprint(comb_list)
             for entry in comb_list:
 
                 # Act on all leg combinations
@@ -1526,8 +1578,8 @@ class Amplitude(base_objects.PhysicsObject):
                     #misc.sprint(leg_vert_ids)
                     leg_ids = [leg[0] for leg in leg_vert_ids]
                     
-                    misc.sprint(leg_vert_ids)
-                    misc.sprint(leg_ids)
+                    #misc.sprint(leg_vert_ids)
+                    #misc.sprint(leg_ids)
                     
                     
                     if leg_ids == [90022, 90023, 90024]:

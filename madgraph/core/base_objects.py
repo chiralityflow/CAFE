@@ -2163,7 +2163,7 @@ class LegList(PhysicsObjectList):
 
     def from_group_elements(self):
         """Return all elements which have 'from_group' True"""
-
+        #misc.sprint([leg for leg in self])    
         return [leg for leg in self if leg.get('from_group')]
 
     def minimum_one_from_group(self):
@@ -2179,6 +2179,7 @@ class LegList(PhysicsObjectList):
     def can_combine_to_1(self, ref_dict_to1):
         """If has at least one 'from_group' True and in ref_dict_to1,
            return the return list from ref_dict_to1, otherwise return False"""
+        #misc.sprint(ref_dict_to1)
         if self.minimum_one_from_group():
             return tuple(sorted([leg.get('id') for leg in self])) in ref_dict_to1
         else:
@@ -2202,7 +2203,9 @@ class LegList(PhysicsObjectList):
                    tuple(sorted([leg.get('id') \
                                                       for leg in self])) in ref_dict_to0
 
+        #misc.sprint('test')
         if self.minimum_two_from_group():
+            misc.sprint(tuple(sorted([leg.get('id') for leg in self])) in ref_dict_to0)
             return tuple(sorted([leg.get('id') for leg in self])) in ref_dict_to0
         else:
             return False
