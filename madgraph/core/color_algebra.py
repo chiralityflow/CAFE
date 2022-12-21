@@ -30,7 +30,7 @@ import madgraph
 if madgraph.ordering:
     set = misc.OrderedSet
 
-# AW: Inspect can find how functions call eachother
+# AW: Inspect can find how functions call each other
 import inspect
 #===============================================================================
 # ColorObject
