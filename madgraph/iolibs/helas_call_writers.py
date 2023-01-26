@@ -245,7 +245,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
                        diagram.get('number'))
             for amplitude in diagram.get('amplitudes'):
                 res.append(self.get_amplitude_call(amplitude))
-
+        #misc.sprint(res)
         return res
 
     def get_wavefunction_calls(self, wavefunctions):
@@ -285,6 +285,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             #misc.sprint(wavefunction['number_external'])
             call = self["wavefunctions"][wavefunction.get_call_key()](\
                                                                    wavefunction)
+            #misc.sprint(call)
             if not wavefunction.get('mothers'):
                 call = self.get_chiral_wavefunction_call(wavefunction, call)
             else:
@@ -297,6 +298,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             call, n = re.subn(',\s*fk_(?!ZERO)\w*\s*,', ', ZERO,', str(call), flags=re.I)
             if n:
                 self.width_tchannel_set_tozero = True
+        
         return call
 
     def get_internal_wfs(self, wavefunction, call):
@@ -378,6 +380,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
         try:
             call = self["amplitudes"][amplitude.get_call_key()](amplitude) 
             #AW
+            #misc.sprint(call)
             call = self.get_chiral_amps(amplitude, call)
         except KeyError as error:
             return ""

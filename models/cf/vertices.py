@@ -250,9 +250,8 @@ V_36 = Vertex(name = 'V_36',
               lorentz = [ L.RLV1 ],
               couplings = {(0,0):C.GC_1})
 
-
 # AW: Tripple gluon vertex
-
+#AW: general vertices
 V_37 = Vertex(name = 'V_37',
               particles = [ P.g, P.g, P.g ],
               color = [ 'f(1,2,3)' ],

@@ -579,9 +579,19 @@ class ParticleList(PhysicsObjectList):
         ref_dict_to0 = {}
 
         for part in self:
+            #misc.sprint(part.get_pdg_code())
             ref_dict_to0[(part.get_pdg_code(), part.get_anti_pdg_code())] = [0]
             ref_dict_to0[(part.get_anti_pdg_code(), part.get_pdg_code())] = [0]
-
+        
+        #AW: Adding allowed combinations to 0
+        # ONLY FOR gauge_cf
+        ref_dict_to0[(21,70021)] = [0]
+        ref_dict_to0[(70021,21)] = [0]
+        ref_dict_to0[(21,80021)] = [0]
+        ref_dict_to0[(80021,21)] = [0]
+        ref_dict_to0[(70021,80021)] = [0]
+        ref_dict_to0[(80021,70021)] = [0]
+        #misc.sprint(ref_dict_to0)
         return ref_dict_to0
 
     def generate_dict(self):
@@ -860,6 +870,73 @@ class Interaction(PhysicsObject):
 
         # Create n>0 entries. Format is (p1,p2,p3,...):interaction_id.
         # We are interested in the unordered list, so use sorted()
+        #misc.sprint(self['id'])
+        #misc.sprint(ref_dict_to0)
+        #misc.sprint(ref_dict_to1)
+
+        pdg_tuple = tuple(sorted([p.get_pdg_code() for p in self['particles']]))
+        if pdg_tuple not in list(ref_dict_to0.keys()):
+            ref_dict_to0[pdg_tuple] = [self['id']]
+        else:
+            ref_dict_to0[pdg_tuple].append(self['id'])
+
+        #misc.sprint(ref_dict_to0)
+        # Create n-1>1 entries. Note that, in the n-1 > 1 dictionary,
+        # the n-1 entries should have opposite sign as compared to
+        # interaction, since the interaction has outgoing particles,
+        # while in the dictionary we treat the n-1 particles as
+        # incoming
+
+        # AW: added forbidden propagators
+        # ONLY FOR gauge_cf
+        gluons = [21,70021,80021]
+        forbidden_dict = {
+            (21,21): [70021,80021],
+            (21,70021): [70021,80021],
+            (21,80021): [70021,80021],
+            (70021,70021): [21,80021],
+            (70021,80021): [70021,80021],
+            (80021,80021): [21,70021],
+            (21,21,21): [70021,80021],
+            (21,21,70021): [70021,80021],
+            (21,21,80021): [70021,80021],
+            (21,70021,70021): [21,80021],
+            (21,70021,80021): [70021,80021],
+            (21,80021,80021): [21,70021],
+            (70021,70021,70021): [21,70021,80021],
+            (70021,70021,80021): [21,80021],
+            (70021,80021,80021): [21,70021],
+            (80021,80021,80021): [21,70021,80021]
+        }
+        # In this loop we must check for forbidden particles
+        for part in self['particles']:
+            # We are interested in the unordered list, so use sorted()
+            pdg_tuple = tuple(sorted([p.get_pdg_code() for (i, p) in \
+                                      enumerate(self['particles']) if \
+                                      i != self['particles'].index(part)]))
+            pdg_part = part.get_anti_pdg_code()
+            if pdg_tuple in list(ref_dict_to1.keys()):
+                if pdg_tuple in forbidden_dict.keys():
+                    if pdg_part not in forbidden_dict[pdg_tuple]:
+                        if (pdg_part, self['id']) not in  ref_dict_to1[pdg_tuple]:
+                            ref_dict_to1[pdg_tuple].append((pdg_part, self['id']))
+                else:
+                    if (pdg_part, self['id']) not in  ref_dict_to1[pdg_tuple]:
+                            ref_dict_to1[pdg_tuple].append((pdg_part, self['id']))
+            else:
+                if pdg_tuple in forbidden_dict.keys():
+                    if pdg_part not in forbidden_dict[pdg_tuple]:
+                        ref_dict_to1[pdg_tuple] = [(pdg_part, self['id'])]
+                else:
+                    ref_dict_to1[pdg_tuple] = [(pdg_part, self['id'])]
+
+
+    """ def generate_dict_entries(self, ref_dict_to0, ref_dict_to1):
+        Add entries corresponding to the current interactions to 
+        the reference dictionaries (for n>0 and n-1>1)
+
+        # Create n>0 entries. Format is (p1,p2,p3,...):interaction_id.
+        # We are interested in the unordered list, so use sorted()
 
         pdg_tuple = tuple(sorted([p.get_pdg_code() for p in self['particles']]))
         if pdg_tuple not in list(ref_dict_to0.keys()):
@@ -884,7 +961,7 @@ class Interaction(PhysicsObject):
                 if (pdg_part, self['id']) not in  ref_dict_to1[pdg_tuple]:
                     ref_dict_to1[pdg_tuple].append((pdg_part, self['id']))
             else:
-                ref_dict_to1[pdg_tuple] = [(pdg_part, self['id'])]
+                ref_dict_to1[pdg_tuple] = [(pdg_part, self['id'])] """
 
     def get_WEIGHTED_order(self, model):
         """Get the WEIGHTED order for this interaction, for equivalent
@@ -964,7 +1041,6 @@ class InteractionList(PhysicsObjectList):
                 inter.generate_dict_entries(ref_dict_to0, ref_dict_to1)
             if useUVCT and inter.is_UVCT():
                 inter.generate_dict_entries(ref_dict_to0, ref_dict_to1)
-                
         return [ref_dict_to0, ref_dict_to1]
 
     def generate_dict(self):
@@ -2205,7 +2281,7 @@ class LegList(PhysicsObjectList):
 
         #misc.sprint('test')
         if self.minimum_two_from_group():
-            misc.sprint(tuple(sorted([leg.get('id') for leg in self])) in ref_dict_to0)
+            #misc.sprint(tuple(sorted([leg.get('id') for leg in self])) in ref_dict_to0)
             return tuple(sorted([leg.get('id') for leg in self])) in ref_dict_to0
         else:
             return False
