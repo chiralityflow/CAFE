@@ -4180,7 +4180,6 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                             N_gl = 0
                             N_gr = 0
                             for part in lastvx['legs']:
-                                #misc.sprint(part['id'])
                                 if part['id'] == 21:
                                     N_g += 1
                                 if part['id'] == 70021:
@@ -4203,6 +4202,10 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                                 lastvx.set('id', 50)
                             if N_gl == 2 and N_gr == 2 and N_g == 0:
                                 lastvx.set('id', 55)
+                            if N_gl == 2 and N_gr == 0 and N_g == 2:
+                                lastvx.set('id', 47)
+                            if N_gl == 0 and N_gr == 2 and N_g == 2:
+                                lastvx.set('id', 48)
                             
                     #misc.sprint(lastvx.get('id'))
                     inter = model.get_interaction(lastvx.get('id'))

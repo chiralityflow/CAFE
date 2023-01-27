@@ -1183,9 +1183,9 @@ class Amplitude(base_objects.PhysicsObject):
                         for j in range(i+1,len(left_bosons)):
                             vanishing_combs.append((left_boson,left_bosons[i],left_bosons[j]))
             
-                #AW: for small diagrams check the limit
-                if len(ext_legs) < 6:
-                    #AW: add combinations with one initial boson and two bosons with opposite chirality
+                #AW: for small diagrams check the limit (this is checked up to < 6 but we use 2 as a placeholder for debug now)
+                if len(ext_legs) < 2:
+                    #AW: add combinations with one initial boson and two bosons with opposite chirality to eachother
                     if len(left_bosons) > 0 and len(right_bosons) > 0:
                         for not_first_left_boson in left_bosons:
                             for not_first_right_boson in right_bosons:
@@ -1250,14 +1250,14 @@ class Amplitude(base_objects.PhysicsObject):
 
 
         #AW: need to add missing interactions
-        if model.get('name') == 'gauge_cf':
-            ref_dict_to0[(70021, 80021)] = [0]
+        """ if model.get('name') == 'gauge_cf':
+            ref_dict_to0[(70021, 80021)] = [0] """
 
         # AL: TODO: put is_first_it here in case of e.g. 4-gluon amplitude
-        misc.sprint(ref_dict_to0)
+        #misc.sprint(ref_dict_to0)
         if curr_leglist.can_combine_to_0(ref_dict_to0, is_decay_proc):
             # Extract the interaction id associated to the vertex 
-            misc.sprint('+1 diagrams')
+            #misc.sprint('+1 diagrams')
             vertex_ids = self.get_combined_vertices(curr_leglist,
                        copy.copy(ref_dict_to0[tuple(sorted([leg.get('id') for \
                                                        leg in curr_leglist]))]))
@@ -1278,14 +1278,15 @@ class Amplitude(base_objects.PhysicsObject):
             else:
                 return None
 
-
+        #misc.sprint(ref_dict_to1)
         #AW: only keep the wanted propagators
         #AW: bug: if (LLL) and (RRR) are there we dont generate the last correct diagram
         # if one is there we have a 50/50 of generating the right one and if both are gone we generate two too much
-        if model.get('name') == 'gauge_cf':
+        """ if model.get('name') == 'gauge_cf':
             for incoming, outgoing in ref_dict_to1.items():
                 #misc.sprint(incoming, outgoing)
                 if incoming == (21,21):
+                    # [(21,),(70021,),(80021,)]
                     ref_dict_to1[incoming] = [(21, 37)]
                 if incoming == (21,70021):
                     ref_dict_to1[incoming] = [(21, 38)]
@@ -1318,7 +1319,7 @@ class Amplitude(base_objects.PhysicsObject):
                 if incoming == (21, 21, 70021):
                     ref_dict_to1[incoming] = [(21, 48)]
                 if incoming == (21, 21, 80021):
-                    ref_dict_to1[incoming] = [(21, 49)]
+                    ref_dict_to1[incoming] = [(21, 49)] """
                 
         #misc.sprint(ref_dict_to1)
         #misc.sprint(max_multi_to1)

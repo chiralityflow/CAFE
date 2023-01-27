@@ -1871,10 +1871,10 @@ def vertex_replacer(text, vertex):
 
         VVVV4P0_2_replace = '      TMP1 = {}\n'.format(vec_vec('V3','V4')) \
         + '      TMP2 = {}\n'.format(vec_vec('V1','V3')) \
-        + '      V2(3) = -DENOM*CI*(TMP1*V1(3) - TMP2*V4(3))/2\n' \
-        + '      V2(4) = -DENOM*CI*(TMP1*V1(4) - TMP2*V4(4))/2\n' \
-        + '      V2(5) = -DENOM*CI*(TMP1*V1(5) - TMP2*V4(5))/2\n' \
-        + '      V2(6) = -DENOM*CI*(TMP1*V1(6) - TMP2*V4(6))/2\n'   
+        + '      V2(3) = DENOM*CI*(TMP1*V1(3) - TMP2*V4(3))/2\n' \
+        + '      V2(4) = DENOM*CI*(TMP1*V1(4) - TMP2*V4(4))/2\n' \
+        + '      V2(5) = DENOM*CI*(TMP1*V1(5) - TMP2*V4(5))/2\n' \
+        + '      V2(6) = DENOM*CI*(TMP1*V1(6) - TMP2*V4(6))/2\n'   
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[10]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[24]+1] + text_copy[linebreaks[26]+1:linebreaks[28]+1] + VVVV4P0_2_replace + text_copy[linebreaks[32]+1:]
 
