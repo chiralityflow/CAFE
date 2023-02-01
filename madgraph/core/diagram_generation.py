@@ -764,6 +764,43 @@ class Amplitude(base_objects.PhysicsObject):
                                                   is_decay_proc,
                                                   process.get('orders'))
         
+        # AW: we can remove diagrams here that vanish. We want to do this for vanishing diagrams that are not already removed in reduce leglist
+        # TODO: add LLLR, LRRR and other vanishing combs to this
+        diag_index_to_remove = []
+        for i, diag in enumerate(reduced_leglist):
+            if i == 156 or i == 160: 
+                misc.sprint(i-4,reduced_leglist[i])
+            # We remove diagrams which have a LLRR gluon vertex and one of the gluons are the first left or right gluon in the diagram
+            if reduced_leglist[i][-1]['id'] == 55:
+                found_left = False
+                found_right = False
+                can_remove = False
+                #misc.sprint(i+1, reduced_leglist[i][-1])
+                for boson in reduced_leglist[i][-1]['legs']:
+                    if boson['id'] == 70021 and not found_left:
+                        found_left = True
+                        if not boson['from_group']:
+                            can_remove = True
+                            if len(diag_index_to_remove) == 0 or diag_index_to_remove[-1] != i:
+                                diag_index_to_remove.append(i)
+                    if boson['id'] == 80021 and not found_right:
+                        found_right = True
+                        if not boson['from_group']:
+                            can_remove = True
+                            if len(diag_index_to_remove) == 0 or  diag_index_to_remove[-1] != i:
+                                diag_index_to_remove.append(i)
+                    if can_remove:
+                        break
+            # AW: If id == 0 we must check earlier parts of the leglist to figure out which vertices we have
+            if reduced_leglist[i][-1]['id'] == 0:
+                vanish_ids = [49,52,53,54,56,57]
+                if reduced_leglist[i][-2]['id'] in vanish_ids and reduced_leglist[i][-3]['id'] in vanish_ids:
+                    diag_index_to_remove.append(i)
+        diag_index_to_remove.reverse()
+        misc.sprint(diag_index_to_remove)        
+        for index in diag_index_to_remove:
+            reduced_leglist.pop(index)
+
         #In LoopAmplitude the function below is overloaded such that it
         #converts back all DGLoopLegs to Legs. In the default tree-level
         #diagram generation, this does nothing.
@@ -1045,6 +1082,7 @@ class Amplitude(base_objects.PhysicsObject):
         found_left_ferm = False
         found_right_ferm = False
         for leg in ext_legs:
+            #misc.sprint(leg)
             if abs(leg.get('id')) in [90001, 90005, 70001, 70002] and not found_left_ferm:
                 left_ferm = copy.copy(leg)
                 # if incoming particle, flip to outgoing id
@@ -1105,9 +1143,11 @@ class Amplitude(base_objects.PhysicsObject):
 
                 if leg.get('id') == 70021 and not found_left_boson:
                     left_boson = leg
+                    left_bosons.append(leg)
                     found_left_boson = True
                 elif leg.get('id') == 80021 and not found_right_boson:
                     right_boson = leg
+                    right_bosons.append(leg)
                     found_right_boson = True
             
             if found_left_boson and found_right_boson:
@@ -1168,7 +1208,7 @@ class Amplitude(base_objects.PhysicsObject):
                             vanishing_combs.append((right_boson,right_bosons[i],right_bosons[j]))
                 
                 if len(left_bosons) > 1:
-                    #AW: add combinations of right left with two left bosons
+                    #AW: add combinations of first right with two left bosons
                     for i in range(len(left_bosons)-1):
                         for j in range(i+1,len(left_bosons)):
                             if left_bosons[j].get('number') < right_boson.get('number'):
@@ -1182,9 +1222,18 @@ class Amplitude(base_objects.PhysicsObject):
                     for i in range(len(left_bosons)-1):
                         for j in range(i+1,len(left_bosons)):
                             vanishing_combs.append((left_boson,left_bosons[i],left_bosons[j]))
-            
+                
+                # AW: add combinations with first boson together with two other bosons of opposite chirality
+                for i in range(len(left_bosons)):
+                    for j in range(len(right_bosons)):
+                        if left_bosons[i].get('number') < right_boson.get('number'):
+                            pass
+                            #vanishing_combs.append((left_bosons[i],right_bosons[j],right_boson))
+                
+
+
                 #AW: for small diagrams check the limit (this is checked up to < 6 but we use 2 as a placeholder for debug now)
-                if len(ext_legs) < 2:
+                if len(ext_legs) < 6:
                     #AW: add combinations with one initial boson and two bosons with opposite chirality to eachother
                     if len(left_bosons) > 0 and len(right_bosons) > 0:
                         for not_first_left_boson in left_bosons:
@@ -1201,7 +1250,7 @@ class Amplitude(base_objects.PhysicsObject):
                                     vanishing_combs.append((right_boson,not_first_left_boson,not_first_right_boson))
                                 else:
                                     vanishing_combs.append((right_boson,not_first_right_boson,not_first_left_boson))
-
+        #misc.sprint(vanishing_combs)
         return vanishing_combs
 
     def reduce_leglist(self, curr_leglist, max_multi_to1, ref_dict_to0,
@@ -1253,9 +1302,15 @@ class Amplitude(base_objects.PhysicsObject):
         """ if model.get('name') == 'gauge_cf':
             ref_dict_to0[(70021, 80021)] = [0] """
 
+        # AL: temporary switch to turn off removal of vanishing combinations
+        remove_combs = True
+        #remove_combs = False
         # AL: TODO: put is_first_it here in case of e.g. 4-gluon amplitude
-        #misc.sprint(ref_dict_to0)
-        if curr_leglist.can_combine_to_0(ref_dict_to0, is_decay_proc):
+        # AW: removes the vanishing 4g vertex of the 4g amplitude assuming smart gauge choice
+        remove_4g = False
+        if is_first_it and len(curr_leglist) == 4 and remove_combs:
+            remove_4g = True 
+        if curr_leglist.can_combine_to_0(ref_dict_to0, is_decay_proc) and not remove_4g:
             # Extract the interaction id associated to the vertex 
             #misc.sprint('+1 diagrams')
             vertex_ids = self.get_combined_vertices(curr_leglist,
@@ -1265,6 +1320,7 @@ class Amplitude(base_objects.PhysicsObject):
             final_vertices = [base_objects.Vertex({'legs':curr_leglist,
                                                    'id':vertex_id}) for \
                               vertex_id in vertex_ids]
+
             # Check for coupling orders. If orders < 0, skip vertex
             for final_vertex in final_vertices:
                 if self.reduce_orders(coupling_orders, model,
@@ -1278,53 +1334,6 @@ class Amplitude(base_objects.PhysicsObject):
             else:
                 return None
 
-        #misc.sprint(ref_dict_to1)
-        #AW: only keep the wanted propagators
-        #AW: bug: if (LLL) and (RRR) are there we dont generate the last correct diagram
-        # if one is there we have a 50/50 of generating the right one and if both are gone we generate two too much
-        """ if model.get('name') == 'gauge_cf':
-            for incoming, outgoing in ref_dict_to1.items():
-                #misc.sprint(incoming, outgoing)
-                if incoming == (21,21):
-                    # [(21,),(70021,),(80021,)]
-                    ref_dict_to1[incoming] = [(21, 37)]
-                if incoming == (21,70021):
-                    ref_dict_to1[incoming] = [(21, 38)]
-                if incoming == (70021,70021):
-                    ref_dict_to1[incoming] = [(70021, 43)]
-                if incoming == (70021,80021):
-                    ref_dict_to1[incoming] = [(21, 42)]
-                if incoming == (80021,80021):
-                    ref_dict_to1[incoming] = [(80021, 44)]
-                if incoming == (21,80021):
-                    ref_dict_to1[incoming] = [(21, 39)]
-                # 4g starts here
-                if incoming == (70021, 70021, 70021):
-                    #AW: maybe need to remove element instead, set same particle for now just to not crash
-                    ref_dict_to1[incoming] = [(70021, 57)]
-                if incoming == (80021, 80021, 80021):
-                    ref_dict_to1[incoming] = [(80021, 61)]
-                if incoming == (70021, 70021, 80021):
-                    ref_dict_to1[incoming] = [(70021, 58)]
-                if incoming == (70021, 80021, 80021):
-                    ref_dict_to1[incoming] = [(80021, 60)]
-                if incoming == (21, 70021, 70021):
-                    ref_dict_to1[incoming] = [(70021, 53)]
-                if incoming == (21, 80021, 80021):
-                    ref_dict_to1[incoming] = [(80021, 56)]
-                if incoming == (21, 70021, 80021):
-                    ref_dict_to1[incoming] = [(21, 50)]
-                if incoming == (21, 21, 21):
-                    ref_dict_to1[incoming] = [(21, 47)]
-                if incoming == (21, 21, 70021):
-                    ref_dict_to1[incoming] = [(21, 48)]
-                if incoming == (21, 21, 80021):
-                    ref_dict_to1[incoming] = [(21, 49)] """
-                
-        #misc.sprint(ref_dict_to1)
-        #misc.sprint(max_multi_to1)
-
-
         # Create a list of all valid combinations of legs
         comb_lists = self.combine_legs(curr_leglist, ref_dict_to1, 
                                     max_multi_to1)
@@ -1332,10 +1341,6 @@ class Amplitude(base_objects.PhysicsObject):
 
         if (is_first_it): 
 
-            # AL: temporary switch to turn off removal of vanishing combinations
-            # AW: Look here later, switch to false to test
-            #remove_combs = True
-            remove_combs = False
 
             # AL: now remove from comb_lists those processes which vanish due to ref momentum
             vanishing_combs = self.get_vanishing_combs(ext_legs)

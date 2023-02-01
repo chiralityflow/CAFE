@@ -4186,16 +4186,26 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                                     N_gl += 1
                                 if part['id'] == 80021:
                                     N_gr += 1
-                            if N_gl == 2 and N_gr == 1 and N_g == 0:
-                                lastvx.set('id', 45)
-                            if N_gl == 2 and N_gr == 0 and N_g == 1:
-                                lastvx.set('id', 41)
-                            if N_gl == 1 and N_gr == 2 and N_g == 0:
-                                lastvx.set('id', 46)
+                            if N_gl == 0 and N_gr == 0 and N_g == 3:
+                                lastvx.set('id', 37)
+                            if N_gl == 1 and N_gr == 0 and N_g == 2:
+                                lastvx.set('id', 38)
+                            if N_gl == 0 and N_gr == 1 and N_g == 2:
+                                lastvx.set('id', 39)
                             if N_gl == 0 and N_gr == 2 and N_g == 1:
                                 lastvx.set('id', 40)
+                            if N_gl == 2 and N_gr == 0 and N_g == 1:
+                                lastvx.set('id', 41)
                             if N_gl == 1 and N_gr == 1 and N_g == 1:
                                 lastvx.set('id', 42)
+                            if N_gl == 3 and N_gr == 0 and N_g == 0:
+                                lastvx.set('id', 43)
+                            if N_gl == 0 and N_gr == 3 and N_g == 0:
+                                lastvx.set('id', 44)
+                            if N_gl == 2 and N_gr == 1 and N_g == 0:
+                                lastvx.set('id', 45)
+                            if N_gl == 1 and N_gr == 2 and N_g == 0:
+                                lastvx.set('id', 46)
                             if N_gl == 1 and N_gr == 2 and N_g == 1:
                                 lastvx.set('id', 51)
                             if N_gl == 2 and N_gr == 1 and N_g == 1:
