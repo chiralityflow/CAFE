@@ -796,56 +796,6 @@ class Amplitude(base_objects.PhysicsObject):
                     if reduced_leglist[i][-2]['id'] in vanish_ids and reduced_leglist[i][-3]['id'] in vanish_ids:
                         diag_index_to_remove.append(i)
                 # If the last vertex is a gLLR or gLRR vertex we need to check the other vertices to find out if the diagram can be removed
-                """ if reduced_leglist[i][-1]['id'] in [50,51]:
-                    # AW: 100 is larger than any leg number
-                    first_left_number = 100
-                    first_right_number = 100
-                    # find the first right and left boson number since we set ref momenta after those
-                    for legs in reduced_leglist[i]:
-                        for boson in legs['legs']:
-                            if boson['id'] == 70021:
-                                first_left_number = min(boson['number'],first_left_number)
-                            if boson['id'] == 80021:
-                                first_right_number = min(boson['number'],first_right_number)
-                    found_left = False
-                    found_right = False
-                    found_g = False 
-                    condition_1 = False
-                    # check if either first boson is in the final vertex
-                    for boson in reduced_leglist[i][-1]['legs']:
-                        if boson['id'] == 70021 and not found_left:
-                            found_left = True
-                            if not boson['from_group'] and boson['number'] == first_left_number:
-                                condition_1 = True
-                        if boson['id'] == 80021 and not found_right:
-                            found_right = True
-                            if not boson['from_group'] and boson['number'] == first_right_number:
-                                condition_1 = True
-                        if boson['id'] == 21:
-                            found_g = True
-                            g_number = boson['number']
-                        if condition_1 and found_g:
-                            break
-                    if condition_1:
-                        # check if the g propagator came from a vertex with chiral bosons and if it contained either first boson
-                        for legs in reduced_leglist[i]:
-                            is_from_group = False
-                            all_chiral = True
-                            numbers_in_legs = []
-                            for boson in legs['legs']:
-                                numbers_in_legs.append(boson['number'])
-                                if boson['number'] == g_number:
-                                    # kolla om g_number leq first_right_number?
-                                    if g_number == first_left_number or g_number == first_right_number:
-                                        is_from_group = True
-                            if is_from_group:
-                                for boson in legs['legs']:
-                                    if boson['number'] != g_number:
-                                        if boson['id'] not in [70021,80021]:
-                                            all_chiral = False
-                        if all_chiral and is_from_group:
-                            diag_index_to_remove.append(i) """
-
                 def find_left_and_right_number(leglist):
                     first_left_number = 100
                     first_right_number = 100 
@@ -887,6 +837,7 @@ class Amplitude(base_objects.PhysicsObject):
                             return True
                     return False
 
+                # Remove vertices with a final gLLR or gLRR vertex under certain conditions
                 if reduced_leglist[i][-1]['id'] in [50,51]:
                     can_remove = False
                     first_L, first_R = find_left_and_right_number(reduced_leglist[i])
@@ -894,6 +845,13 @@ class Amplitude(base_objects.PhysicsObject):
                     L_in_first = number_in_vertex(reduced_leglist[i][-1],first_L)
                     R_in_first = number_in_vertex(reduced_leglist[i][-1],first_R)
 
+                    if L_in_first and R_in_first:
+                        diag_index_to_remove.append(i)
+                    elif reduced_leglist[i][-1]['id'] == 50 and R_in_first:
+                        diag_index_to_remove.append(i)
+                    elif reduced_leglist[i][-1]['id'] == 51 and L_in_first:
+                        diag_index_to_remove.append(i)
+                        
                     # if yes, then find the vertex where the g propagator comes from
                     if L_in_first or R_in_first:
                         g_number = find_number_from_id(reduced_leglist[i][-1],21)
@@ -910,8 +868,76 @@ class Amplitude(base_objects.PhysicsObject):
                         #misc.sprint(i,reduced_leglist[i])
                         diag_index_to_remove.append(i)
 
-        diag_index_to_remove.reverse()        
+                # Remove final LLLR and LRRR vertices
+                if reduced_leglist[i][-1]['id'] in [54,56]:
+                    diag_index_to_remove.append(i)
+
+                # Remove if final vertex is LLR and R is initial
+                if reduced_leglist[i][-1]['id'] == 45:
+                    first_L, first_R = find_left_and_right_number(reduced_leglist[i])
+                    for boson in reduced_leglist[i][-1]['legs']:
+                        if boson['number'] == first_R and boson['id'] == 80021 and boson['from_group'] == False:
+                            diag_index_to_remove.append(i)
+                # Remove if final vertex is LRR and L is initial
+                if reduced_leglist[i][-1]['id'] == 46:
+                    first_L, first_R = find_left_and_right_number(reduced_leglist[i])
+                    for boson in reduced_leglist[i][-1]['legs']:
+                        if boson['number'] == first_L and boson['id'] == 70021 and boson['from_group'] == False:
+                            diag_index_to_remove.append(i)
+
+                # Remove if final vertex has RR and a propagator is coming from the first L
+                if reduced_leglist[i][-1]['id'] in [40,48,51]:
+                    first_L, first_R = find_left_and_right_number(reduced_leglist[i])
+                    for boson in reduced_leglist[i][-2]['legs']:
+                        if boson['id'] == 70021 and boson['number'] == first_L and boson['from_group'] == True and reduced_leglist[i][-2]['id'] in [42,54]:
+                            diag_index_to_remove.append(i)
+        
+                    for boson in reduced_leglist[i][-3]['legs']:
+                        if boson['id'] == 70021 and boson['number'] == first_L and boson['from_group'] == True and reduced_leglist[i][-3]['id'] in [42,54]:
+                            diag_index_to_remove.append(i)
+        
+                 
+                # Remove if final vertex has LL and a g propagator is coming from the first R
+                # TODO fix bug where this removes non-zero diagrams for 7-g amplitude
+                if reduced_leglist[i][-1]['id'] in [41,47,50]:
+                    first_L, first_R = find_left_and_right_number(reduced_leglist[i])
+                    for boson in reduced_leglist[i][-2]['legs']:
+                        if boson['id'] == 80021 and boson['number'] == first_R and boson['from_group'] == True and reduced_leglist[i][-2]['id'] in [42,56]:
+                            diag_index_to_remove.append(i)
+                    for boson in reduced_leglist[i][-3]['legs']:
+                        if boson['id'] == 80021 and boson['number'] == first_R and boson['from_group'] == True and reduced_leglist[i][-3]['id'] in [42,56]:
+                            diag_index_to_remove.append(i)   
+
+                # Remove if final vertex has RR and a gL is coming from a 4g vertex containing the first L
+                # TODO fix bug where this removes non-zero diagrams for 7-g amplitude
+                if reduced_leglist[i][-1]['id'] == 46:
+                    first_L, first_R = find_left_and_right_number(reduced_leglist[i])
+                    for boson in reduced_leglist[i][-2]['legs']:
+                        if boson['id'] == 70021 and boson['number'] == first_L and reduced_leglist[i][-2]['id'] == 54:
+                            diag_index_to_remove.append(i)
+                    for boson in reduced_leglist[i][-3]['legs']:
+                        if boson['id'] == 70021 and boson['number'] == first_L and reduced_leglist[i][-3]['id'] == 54:
+                            diag_index_to_remove.append(i)
+                
+                # Remove if final vertex has LL and a gR is coming from a 4g vertex containing the first R
+                if reduced_leglist[i][-1]['id'] == 45:
+                    first_L, first_R = find_left_and_right_number(reduced_leglist[i])
+                    for boson in reduced_leglist[i][-2]['legs']:
+                        if boson['id'] == 80021 and boson['number'] == first_R and reduced_leglist[i][-2]['id'] == 56:
+                            diag_index_to_remove.append(i)
+                    for boson in reduced_leglist[i][-3]['legs']:
+                        if boson['id'] == 80021 and boson['number'] == first_R and reduced_leglist[i][-3]['id'] == 56:
+                            diag_index_to_remove.append(i) 
+                
+        # AW: check for and remove duplicates in the list
+        checked_list = []
+        last_index = -1
         for index in diag_index_to_remove:
+            if index != last_index:
+                checked_list.append(index)
+            last_index = index
+        checked_list.reverse()    
+        for index in checked_list:
             reduced_leglist.pop(index)
 
         #In LoopAmplitude the function below is overloaded such that it
