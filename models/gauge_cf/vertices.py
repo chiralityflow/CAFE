@@ -303,14 +303,13 @@ V_44 = Vertex(name = 'V_44',
 V_45 = Vertex(name = 'V_45',
               particles = [ P.gL, P.gL, P.gR ],
               color = [ 'f(1,2,3)' ],
-              lorentz = [ L.VVV1 ],
-#              lorentz = [ L.VLVLVR1 ],
+              lorentz = [ L.VLVLVR1 ],
               couplings = {(0,0):C.GC_10})
 
 V_46 = Vertex(name = 'V_46',
               particles = [P.gL, P.gR, P.gR ],
               color = [ 'f(1,2,3)' ],
-              lorentz = [ L.VVV1 ],
+              lorentz = [ L.VLVRVR1 ],
               couplings = {(0,0):C.GC_10})
 
 # AW: Quadruple gluon vertex. Ask ML or AL which chrialities are allowed. Adding all possible now to make sure
@@ -336,13 +335,13 @@ V_49 = Vertex(name = 'V_49',
 V_50 = Vertex(name = 'V_50',
               particles = [ P.g, P.gL, P.gL, P.gR ],
               color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
-              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              lorentz = [ L.VVLVLVR1, L.VVLVLVR3, L.VVLVLVR4 ],
               couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
             
 V_51 = Vertex(name = 'V_51',
               particles = [ P.g, P.gL, P.gR, P.gR ],
               color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
-              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              lorentz = [ L.VVLVRVR1, L.VVLVRVR3, L.VVLVRVR4 ],
               couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
 
 V_52 = Vertex(name = 'V_52',
@@ -366,7 +365,7 @@ V_54 = Vertex(name = 'V_54',
 V_55 = Vertex(name = 'V_55',
               particles = [ P.gL, P.gL, P.gR, P.gR ],
               color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
-              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              lorentz = [ L.VLVLVRVR1, L.VLVLVRVR3, L.VLVLVRVR4 ],
               couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
             
 # AW: R is the propagator
