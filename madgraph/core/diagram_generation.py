@@ -763,18 +763,61 @@ class Amplitude(base_objects.PhysicsObject):
                                                   is_decay_proc,
                                                   process.get('orders'))
         
+        def find_left_and_right_number(leglist):
+            first_left_number = 100
+            first_right_number = 100 
+            for legs in leglist:
+                for boson in legs['legs']:
+                    if boson['id'] == 70021:
+                        first_left_number = min(boson['number'],first_left_number)
+                    if boson['id'] == 80021:
+                        first_right_number = min(boson['number'],first_right_number)
+            return first_left_number,first_right_number
+                
+        def number_in_vertex(vertex,number):
+            in_vertex = False
+            for boson in vertex['legs']:
+                if boson['number'] == number and boson['from_group'] == False:
+                    in_vertex = True
+            return in_vertex
+
+        def find_vertex_with_prop(vertex_list,number):
+            for vertex in vertex_list:
+                N_matches = 0
+                for boson in vertex['legs']:
+                    if boson['number'] == number:
+                        N_matches += 1
+                if N_matches == 2:
+                    return vertex
+            return None
+                        
+        def find_number_from_id(vertex,pdg_code):
+            for boson in vertex['legs']:
+                if boson['id'] == pdg_code:
+                    return boson['number']
+            return None
+                
+        def find_chiral_from_number(vertex,number):
+            for boson in vertex['legs']:
+                #misc.sprint(vertex,number)
+                if boson['number'] == number and boson['id'] != 21:
+                    return True
+            return False
         # AW: we can remove diagrams here that vanish. We want to do this for vanishing diagrams that are not already removed in reduce leglist
         # TODO: add LLLR, LRRR and other vanishing combs to this
+
         diag_index_to_remove = []
         if reduced_leglist:
             for i, diag in enumerate(reduced_leglist):
             # We remove diagrams which have a LLRR gluon vertex and one of the gluons are the first left or right gluon in the diagram
                 if reduced_leglist[i][-1]['id'] == 55:
-                    found_left = False
-                    found_right = False
-                    can_remove = False
-                #misc.sprint(i+1, reduced_leglist[i][-1])
-                    for boson in reduced_leglist[i][-1]['legs']:
+                    first_L, first_R = find_left_and_right_number(reduced_leglist[i])
+                    if number_in_vertex(reduced_leglist[i][-1],first_L):
+                        diag_index_to_remove.append(i)
+                    elif number_in_vertex(reduced_leglist[i][-1],first_R):
+                        diag_index_to_remove.append(i)
+
+                    """ for boson in reduced_leglist[i][-1]['legs']:
                         if boson['id'] == 70021 and not found_left:
                             found_left = True
                             if not boson['from_group']:
@@ -788,54 +831,15 @@ class Amplitude(base_objects.PhysicsObject):
                                 if len(diag_index_to_remove) == 0 or  diag_index_to_remove[-1] != i:
                                     diag_index_to_remove.append(i)
                         if can_remove:
-                            break
+                            break """
                 # AW: If id == 0 we must check earlier parts of the leglist to figure out which vertices we have
+                # AW: TODO: For 7-g amp we need to check LLRR vertices here too
                 if reduced_leglist[i][-1]['id'] == 0:
                     # if the last two vertices both would be vanishing as an amplitude the diagram must vanish
                     vanish_ids = [49,52,53,54,56,57]
                     if reduced_leglist[i][-2]['id'] in vanish_ids and reduced_leglist[i][-3]['id'] in vanish_ids:
                         diag_index_to_remove.append(i)
                 # If the last vertex is a gLLR or gLRR vertex we need to check the other vertices to find out if the diagram can be removed
-                def find_left_and_right_number(leglist):
-                    first_left_number = 100
-                    first_right_number = 100 
-                    for legs in leglist:
-                        for boson in legs['legs']:
-                            if boson['id'] == 70021:
-                                first_left_number = min(boson['number'],first_left_number)
-                            if boson['id'] == 80021:
-                                first_right_number = min(boson['number'],first_right_number)
-                    return first_left_number,first_right_number
-                
-                def number_in_vertex(vertex,number):
-                    in_vertex = False
-                    for boson in vertex['legs']:
-                        if boson['number'] == number and boson['from_group'] == False:
-                            in_vertex = True
-                    return in_vertex
-
-                def find_vertex_with_prop(vertex_list,number):
-                    for vertex in vertex_list:
-                        N_matches = 0
-                        for boson in vertex['legs']:
-                            if boson['number'] == number:
-                                N_matches += 1
-                        if N_matches == 2:
-                            return vertex
-                    return None
-                        
-                def find_number_from_id(vertex,pdg_code):
-                    for boson in vertex['legs']:
-                        if boson['id'] == pdg_code:
-                            return boson['number']
-                    return None
-                
-                def find_chiral_from_number(vertex,number):
-                    for boson in vertex['legs']:
-                        #misc.sprint(vertex,number)
-                        if boson['number'] == number and boson['id'] != 21:
-                            return True
-                    return False
 
                 # Remove vertices with a final gLLR or gLRR vertex under certain conditions
                 if reduced_leglist[i][-1]['id'] in [50,51]:

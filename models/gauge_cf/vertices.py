@@ -273,13 +273,13 @@ V_39 = Vertex(name = 'V_39',
 V_40 = Vertex(name = 'V_40',
               particles = [ P.g, P.gR, P.gR ],
               color = [ 'f(1,2,3)' ],
-              lorentz = [ L.VVV1 ],
+              lorentz = [ L.VVRVR1 ],
               couplings = {(0,0):C.GC_10})
 
 V_41 = Vertex(name = 'V_41',
               particles = [ P.g, P.gL, P.gL ],
               color = [ 'f(1,2,3)' ],
-              lorentz = [ L.VVV1 ],
+              lorentz = [ L.VVLVL1 ],
               couplings = {(0,0):C.GC_10})
 
 V_42 = Vertex(name = 'V_42',
@@ -291,13 +291,13 @@ V_42 = Vertex(name = 'V_42',
 V_43 = Vertex(name = 'V_43',
               particles = [ P.gL, P.gL, P.gL ],
               color = [ 'f(1,2,3)' ],
-              lorentz = [ L.VVV1 ],
+              lorentz = [ L.VLVLVL1 ],
               couplings = {(0,0):C.GC_10})
 
 V_44 = Vertex(name = 'V_44',
               particles = [ P.gR, P.gR, P.gR ],
               color = [ 'f(1,2,3)' ],
-              lorentz = [ L.VVV1 ],
+              lorentz = [ L.VRVRVR1 ],
               couplings = {(0,0):C.GC_10})
 
 V_45 = Vertex(name = 'V_45',
@@ -359,7 +359,7 @@ V_53 = Vertex(name = 'V_53',
 V_54 = Vertex(name = 'V_54',
               particles = [ P.gL, P.gL, P.gL, P.gR ],
               color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
-              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              lorentz = [ L.VLVLVLVR1, L.VLVLVLVR3, L.VLVLVLVR4 ],
               couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12}) 
 
 V_55 = Vertex(name = 'V_55',
@@ -368,17 +368,10 @@ V_55 = Vertex(name = 'V_55',
               lorentz = [ L.VLVLVRVR1, L.VLVLVRVR3, L.VLVLVRVR4 ],
               couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
             
-# AW: R is the propagator
-""" V_56 = Vertex(name = 'V_56',
-              particles = [ P.gL, P.gR, P.gR, P.gR ],
-              color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
-              lorentz = [ L.VLVRVRVR1, L.VLVRVRVR3, L.VLVRVRVR4 ],
-              couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12}) """
-
 V_56 = Vertex(name = 'V_56',
               particles = [ P.gL, P.gR, P.gR, P.gR ],
               color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
-              lorentz = [ L.VVVV1, L.VVVV3, L.VVVV4 ],
+              lorentz = [ L.VLVRVRVR1, L.VLVRVRVR3, L.VLVRVRVR4 ],
               couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
 
 V_57 = Vertex(name = 'V_57',
