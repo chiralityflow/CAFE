@@ -302,6 +302,10 @@ class HelasCallWriter(base_objects.PhysicsObject):
         return call
 
     def get_internal_wfs(self, wavefunction, call):
+        # AW: to see the number of WFs and how many of those that vanish
+        should_print = True
+        if not should_print:
+            return call
         
         call = call + '\n TOTWFS = TOTWFS + 1 \n' + 'IF (ABS(W(3,' + str(wavefunction.get('number')) + ')).LE.1E-18.AND.(ABS(W(4,' + str(wavefunction.get('number')) + '))).LE.1E-18.AND.(ABS(W(5,' + str(wavefunction.get('number')) + '))).LE.1E-18.AND.(ABS(W(6,' + str(wavefunction.get('number')) + ')).LE.1E-18)) THEN \n ZEROWFS = ZEROWFS + 1 \n ENDIF'
 
@@ -388,6 +392,9 @@ class HelasCallWriter(base_objects.PhysicsObject):
             return call
     #AW
     def get_chiral_amps(self, amplitude, call):
+        should_print = True
+        if not should_print:
+            return call
         call = call + '\n TOTAMPS = TOTAMPS + 1 \n IF (ABS(AMP(' + str(amplitude.get('number')) + ')).le.1E-15) THEN \n ZEROAMPS = ZEROAMPS + 1 \n ENDIF'
 
         return call
