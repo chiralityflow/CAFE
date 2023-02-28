@@ -20,6 +20,9 @@ proc = proc.replace('murp','mur+ ')
 # proc = proc.replace('a','a ')
 proc = proc.replace('al','al ')
 proc = proc.replace('ar','ar ')
+# gluons
+proc = proc.replace('gl','gl')
+proc = proc.replace('gr','gr')
 
 # group same final-state particles for easier human reading
 final_state = proc.split('> ')[-1]

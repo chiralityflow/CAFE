@@ -662,7 +662,7 @@ class Amplitude(base_objects.PhysicsObject):
         # Copy leglist from process, so we can flip leg identities
         # without affecting the original process
         leglist = self.copy_leglist(process.get('legs'))
-
+        initial_leglist = copy.copy(leglist)
         for leg in leglist:
             # For the first step, ensure the tag from_group 
             # is true for all legs
@@ -781,13 +781,13 @@ class Amplitude(base_objects.PhysicsObject):
         def find_first_fermions(leglist):
             first_left_number = 100
             first_right_number = 100 
-            for legs in leglist:
-                for fermion in legs['legs']:
-                    if fermion['id'] in left_chiral_fermions:
-                        first_left_number = min(fermion['number'],first_left_number)
-                    if fermion['id'] in right_chiral_fermions:
-                        first_right_number = min(fermion['number'],first_right_number)
+            for fermion in leglist:
+                if fermion['id'] in left_chiral_fermions:
+                    first_left_number = min(fermion['number'],first_left_number)
+                if fermion['id'] in right_chiral_fermions:
+                    first_right_number = min(fermion['number'],first_right_number)
             return first_left_number,first_right_number
+            
 
         def number_in_vertex(vertex,number):
             in_vertex = False
@@ -822,7 +822,10 @@ class Amplitude(base_objects.PhysicsObject):
         # AW: we can remove diagrams here that vanish. We want to do this for vanishing diagrams that are not already removed in reduce leglist        
 
         diag_index_to_remove = []
-        if reduced_leglist:       
+        # AW: Set to false if diagram removal is not wanted. TODO: do this in a nicer 
+        #remove_after = False
+        remove_after = True
+        if reduced_leglist and remove_after:       
             for i, diag in enumerate(reduced_leglist):
             # We remove diagrams which have a LLRR gluon vertex and one of the gluons are the first left or right gluon in the diagram
                 if reduced_leglist[i][-1]['id'] == 55:
@@ -832,21 +835,6 @@ class Amplitude(base_objects.PhysicsObject):
                     elif number_in_vertex(reduced_leglist[i][-1],first_R):
                         diag_index_to_remove.append(i)
 
-                    """ for boson in reduced_leglist[i][-1]['legs']:
-                        if boson['id'] == 70021 and not found_left:
-                            found_left = True
-                            if not boson['from_group']:
-                                can_remove = True
-                                if len(diag_index_to_remove) == 0 or diag_index_to_remove[-1] != i:
-                                    diag_index_to_remove.append(i)
-                        if boson['id'] == 80021 and not found_right:
-                            found_right = True
-                            if not boson['from_group']:
-                                can_remove = True
-                                if len(diag_index_to_remove) == 0 or  diag_index_to_remove[-1] != i:
-                                    diag_index_to_remove.append(i)
-                        if can_remove:
-                            break """
                 # AW: If id == 0 we must check earlier parts of the leglist to figure out which vertices we have
                 # AW: TODO: For 7-g amp we need to check LLRR vertices here too
                 if reduced_leglist[i][-1]['id'] == 0:
@@ -955,56 +943,74 @@ class Amplitude(base_objects.PhysicsObject):
                 # If a gluon comes from both the first left and first right fermion it carries both ref. momenta
                 # Hence it can be seen as both a left and right gluon
                 if reduced_leglist[i][-1]['id'] == 0:
-                    l_ferm, r_ferm = find_first_fermions(reduced_leglist[i]) 
+                    l_ferm, r_ferm = find_first_fermions(initial_leglist) 
+                    found_first_l = False
+                    found_first_r = False
                     if reduced_leglist[i][-2]['id'] in [54,56] and reduced_leglist[i][-3]['id'] in [13,14,15,16]:
                         for fermion in reduced_leglist[i][-3]['legs'][:-1]:
-                            if fermion['number'] in [l_ferm,r_ferm] and fermion['from_group']:
-                                diag_index_to_remove.append(i)
+                            if fermion['number'] == l_ferm and fermion['from_group']:
+                                found_first_l = True
+                            if fermion['number'] == r_ferm and fermion['from_group']:
+                                found_first_r = True
+                    if found_first_l and found_first_r:     
+                        diag_index_to_remove.append(i)
+                    found_first_l = False
+                    found_first_r = False
                     if reduced_leglist[i][-3]['id'] in [54,56] and reduced_leglist[i][-2]['id'] in [13,14,15,16]:
                         for fermion in reduced_leglist[i][-2]['legs'][:-1]:
-                            if fermion['number'] in [l_ferm,r_ferm] and fermion['from_group']:
-                                diag_index_to_remove.append(i)
-
-                if reduced_leglist[i][-1]['id'] in [40,41,50,51]:
-                    l_ferm, r_ferm = find_first_fermions(reduced_leglist[i]) 
-                    found_l = False
-                    found_r = False
-                    for fermion in reduced_leglist[i][0]['legs'][:-1]:
-                        if fermion['number'] == l_ferm:
-                            found_l = True
-                        if fermion['number'] == r_ferm:
-                            found_r = True
-                    is_prop = True
-                    if found_l and found_r:
-                        for vertex in reduced_leglist[i][1:-1]:
-                            for particle in vertex['legs']:
-                                if particle['number'] in [l_ferm,r_ferm]:
-                                    is_prop = False
-                        if is_prop:
+                            if fermion['number'] == l_ferm and fermion['from_group']:
+                                found_first_l = True
+                            if fermion['number'] == r_ferm and fermion['from_group']:
+                                found_first_r = True
+                    if found_first_l and found_first_r:     
+                        diag_index_to_remove.append(i)
+                
+                # This part causes problems for u ubar to 5g
+                """ if reduced_leglist[i][-1]['id'] in [40,41,50,51]:
+                    l_ferm, r_ferm = find_first_fermions(initial_leglist) 
+                    index = -1
+                    for vertex in reduced_leglist[i][-3:-1]:
+                        found_l = False
+                        found_r = False
+                        for particle in vertex['legs']:
+                            if particle['number'] == l_ferm:
+                                found_l = True
+                            if particle['number'] == r_ferm:
+                                found_r = True
+                        if found_l and found_r:
+                            diag_index_to_remove.append(i) """
+                # AW: specific diagram removal for the process ul ubarr to gl gr gr gr gr 
+                if len(initial_leglist) == 7:
+                    if reduced_leglist[i][0]['id'] == 13 and reduced_leglist[i][-1]['id'] == 0:
+                        if reduced_leglist[i][-2]['id'] in [40,49,50,51,52,57] or reduced_leglist[i][-3]['id'] in [40,49,50,51,52,57]:
                             diag_index_to_remove.append(i)
-
+                    
                 # Check if the first left or right fermion is connected to a gluon with opposite chirality
-                l_ferm, r_ferm = find_first_fermions(reduced_leglist[i])
+                l_ferm, r_ferm = find_first_fermions(initial_leglist)
                 for vertex in reduced_leglist[i]:
                     # TODO: add d-quarks
-                    found_left_boson = False
-                    found_right_boson = False
-                    found_left_fermion = False
-                    found_right_fermion = False
                     if vertex['id'] in [17,18,19,20]:
+                        found_right_boson = False
+                        found_left_fermion = False
+                        found_left_boson = False
+                        found_right_fermion = False
                         for particle in vertex['legs']:
                             if particle['number'] == l_ferm and not particle['from_group']:
                                 found_left_fermion = True
+                            if particle['id'] == 80021:
+                                found_right_boson = True
+                            if found_right_boson and found_left_fermion:
+                                diag_index_to_remove.append(i)
+                                #misc.sprint(reduced_leglist[i],i+1)
+                        for particle in vertex['legs']:
                             if particle['number'] == r_ferm and not particle['from_group']:
                                 found_right_fermion = True
                             if particle['id'] == 70021:
                                 found_left_boson = True
-                            if particle['id'] == 80021:
-                                found_right_boson = True
-                    if (found_left_boson and found_right_fermion) or (found_right_boson and found_left_fermion):
-                        diag_index_to_remove.append(i)
+                            if found_left_boson and found_right_fermion:
+                                diag_index_to_remove.append(i) 
+                                #misc.sprint(reduced_leglist[i],i+1)
                         
-
 
         # AW: check for and remove duplicates in the list
         checked_list = []
@@ -1016,8 +1022,7 @@ class Amplitude(base_objects.PhysicsObject):
         checked_list.reverse()    
         for index in checked_list:
             reduced_leglist.pop(index)
-
-        #misc.sprint(reduced_leglist[35])
+       
         #In LoopAmplitude the function below is overloaded such that it
         #converts back all DGLoopLegs to Legs. In the default tree-level
         #diagram generation, this does nothing.

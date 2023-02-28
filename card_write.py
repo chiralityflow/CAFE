@@ -8,7 +8,10 @@ def getCList():
 ########################
 
 ### Uncomment these for single lepton pair amps/MEs
-procs=['2lQED']
+#procs=['0lQCD']
+#procs=['2lQCD']
+procs=['hel_sample']
+
 cList='cardListee'
 
 ### Uncomment these for two lepton pairs amps/MEs
@@ -29,7 +32,7 @@ cList='cardListee'
 
 ###################
 
-suffix = 'test_220203'
+suffix = 'test_230210'
 
 
 f = open(cList,'w')
@@ -42,16 +45,20 @@ f.close()
 
 #####################
 
+QCD = True
+ngMin = 2
+ngMax = 2
 naMin = 2
 naMax = 3
 
+	
 for proc in procs:
-  for na in range(naMin,naMax+1):
+  for ng in range(ngMin,ngMax+1):
     # here choose type of photon
     # numPho = str(na)+'a'
-    numPho = str(na) + 'alr'
-    card_name = 'card_' + numPho + '_' + proc + '_' + suffix
-    name = numPho + '_' + suffix
+    numGlue = str(ng) + 'glr'
+    card_name = 'card_' + numGlue + '_' + proc + '_' + suffix
+    name = numGlue + '_' + suffix
       
     #print(card_name)
     f = open(cList,'a')
@@ -59,6 +66,14 @@ for proc in procs:
     f.close()
     f = open('cards/'+card_name, 'w')
       
+    if proc == 'hel_sample':
+      f.write("import model gauge_cf;\ngenerate ul ur~ > gl gr gl gr gl" + ";\noutput standalone " + proc + "/PROC" + name)
+      
+    if proc == '0lQCD':
+      f.write("import model gauge_cf;\ngenerate glr glr > " + numGlue + ";\noutput standalone " + proc + "/PROC" + name)
+    
+    if proc == '2lQCD':
+      f.write("import model gauge_cf;\ngenerate u u~ > " + numGlue + ";\noutput standalone " + proc + "/PROC" + name)
     # 2l processes
     if proc == '2lQED':
       f.write("import model cf;\ngenerate e+ e- > " + numPho + ";\noutput standalone " + proc + "/PROC" + name)

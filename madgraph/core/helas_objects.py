@@ -2434,6 +2434,7 @@ class HelasWavefunctionList(base_objects.PhysicsObjectList):
 
         mother_codes = [ wf.get_pdg_code() for wf \
                          in mothers ]    
+        #misc.sprint(mother_codes, pdg_codes)
         if pdg_codes == mother_codes:
             # Already sorted - skip sort below
             return mothers, my_index
@@ -2441,7 +2442,6 @@ class HelasWavefunctionList(base_objects.PhysicsObjectList):
         # AW: debug
         #misc.sprint(mother_codes, pdg_codes)
         sorted_mothers = []
-        #misc.sprint(mother_codes, pdg_codes)
         for i, code in enumerate(pdg_codes):
             #misc.sprint(mother_codes)
             index = mother_codes.index(code)
@@ -4167,14 +4167,57 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     #misc.sprint(lastvx.get('id'))
 
                     # AW: we should only change the ref dict in gauge_cf
+
+                    
+
                     if model.get('name') == 'gauge_cf':
+                        # AW: we need to set the correct vertex ids for the last vertex since we have modified the ref dicts
+                        # TODO: automate this in a nicer way
+
+                        # we start with FFV vertices
+                        N_g = 0
+                        N_gl = 0
+                        N_gr = 0
+                        N_ul = 0
+                        N_ur = 0
+                        N_ul_bar = 0
+                        N_ur_bar = 0
+                        for part in lastvx['legs']:
+                            if part['id'] == 21:
+                                N_g += 1
+                            if part['id'] == 70021:
+                                N_gl += 1
+                            if part['id'] == 80021:
+                                N_gr += 1
+                            if part['id'] == 70002:
+                                N_ul += 1
+                            if part['id'] == 80002:
+                                N_ur += 1
+                            if part['id'] == -70002:
+                                N_ul_bar += 1
+                            if part['id'] == -80002:
+                                N_ur_bar += 1
+                        if N_ul_bar == 1 and N_ur == 1 and N_g == 1:
+                                lastvx.set('id', 13)
+                        if N_ul_bar == 1 and N_ur == 1 and N_gl == 1:
+                                lastvx.set('id', 17)
+                        if N_ul_bar == 1 and N_ur == 1 and N_gr == 1:
+                                lastvx.set('id', 18)
+                        if N_ur_bar == 1 and N_ul == 1 and N_g == 1:
+                                lastvx.set('id', 14)
+                        if N_ur_bar == 1 and N_ul == 1 and N_gl == 1:
+                                lastvx.set('id', 19)
+                        if N_ur_bar == 1 and N_ul == 1 and N_gr == 1:
+                                lastvx.set('id', 20)
+
                         is_ggg = True
                         for part in lastvx['legs']:
                             if part['id'] not in [21,70021,80021]:
                                 is_ggg = False 
                     
-                        # AW: we need to set the correct vertex ids for the last vertex since we have modified the ref dicts
+                        # AW: here we do it for vertices with only gluons
                         # TODO: automate this in a nicer way
+
                         if is_ggg:
                             N_g = 0
                             N_gl = 0

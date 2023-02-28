@@ -2203,7 +2203,7 @@ def postex_vertex_replacer(working_dir):
         'VVVV4_0.f', 'VVVV1P0_1.f', 'VVVV3P0_1.f', 'VVVV4P0_1.f', 'VVVV1P0_2.f', 'VVVV3P0_2.f', 'VVVV4P0_2.f', \
         'VLVRVR1_0.f','VLVLVR1_0.f', 'VLVLVRVR1_0.f','VLVLVRVR3_0.f','VLVLVRVR4_0.f', 'VVLVRVR1_0.f','VVLVRVR3_0.f','VVLVRVR4_0.f', \
         'VVLVLVR1_0.f','VVLVLVR3_0.f','VVLVLVR4_0.f','VLVLVLVR1P0_1.f','VLVLVLVR3P0_1.f','VLVLVLVR4P0_1.f', \
-        'VLVRVRVR1P0_2.f','VLVRVRVR3P0_2.f','VLVRVRVR4P0_2.f', 'VLVLVL1P0_1.f', 'VRVRVR1P0_1.f', 'VVRVR1_0.f', 'VVLVL1_0.f'      ]
+        'VLVRVRVR1P0_2.f','VLVRVRVR3P0_2.f','VLVRVRVR4P0_2.f', 'VLVLVL1P0_1.f', 'VRVRVR1P0_1.f', 'VVRVR1_0.f', 'VVLVL1_0.f']
     onlyfiles = [f for f in os.listdir(write_dir) if os.path.isfile(os.path.join(write_dir, f))]
     konlyfiles = [f[:4] + f[-4:] for f in onlyfiles]
     for vertex in vertex_list:
