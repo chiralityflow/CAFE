@@ -234,19 +234,49 @@ class HelasCallWriter(base_objects.PhysicsObject):
         me = matrix_element.get('diagrams')
         #AW: commenting this out to count WFs correctly
         #matrix_element.reuse_outdated_wavefunctions(me)
-
+        
         res = []
+        # EB: Need to make sure that the external fermion with photon momentum in q
+        #     vector is treated first. The resutling P^b is needed for other fermions.
+        #     TODO: Include treatment of other fermions and bosons when they are implemented.
+        # EB: Add counter to keep track of the number of massive external fermions.
+        numb_mass_ferm = 0
         for diagram in matrix_element.get('diagrams'):
-            
-            
+            #EB: Find number of massive external fermions.
+            for wf in diagram.get('wavefunctions'):
+                if abs(wf.get('particle').get('pdg_code')) >= 70000 and\
+                    abs(wf.get('particle').get('pdg_code'))<90000 and\
+                    wf.get('ref_mom') > 0:
+                        numb_mass_ferm += 1
+                    
+                #Break if found first internal particle.
+                if wf.get('ref_mom') == -1:
+                    break
             res.extend([ self.get_wavefunction_call(wf) for \
                          wf in diagram.get('wavefunctions') ])
             res.append("# Amplitude(s) for diagram number %d" % \
                        diagram.get('number'))
             for amplitude in diagram.get('amplitudes'):
                 res.append(self.get_amplitude_call(amplitude))
-        #misc.sprint(res)
-        return res
+        # EB: check if first fermion has q = momentum of other fermion.
+        check_call = res[0].split(',')
+        if int(check_call[6][0]) <= numb_mass_ferm:
+            new_res = []
+            # EB: if there is a fermion with q = photon momentum, move it first.
+            for ext in range(numb_mass_ferm):
+                check_call = res[ext].split(',')
+                if int(check_call[6][0]) > numb_mass_ferm:
+                    new_res.extend(res)
+                    new_res[0] = res[ext]
+                    new_res[ext] = res[0]
+                    return new_res
+            # EB: in the case of no external photons, set q of first fermion to 0.4*momentum.
+            first_call_split = res[0].split(',')
+            first_call_split[5] = '0.4*PB(0'
+            res[0] = 'PB(:,' + first_call_split[6] + '=0.4*P(:,' + first_call_split[6] + '\n' + res[0]
+            return res
+        else:
+            return res
 
     def get_wavefunction_calls(self, wavefunctions):
         """Return a list of strings, corresponding to the Helas calls
@@ -257,7 +287,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
                repr(wavefunctions)
 
         res = [self.get_wavefunction_call(wf) for wf in wavefunctions]
-
+        
         return res
 
     def get_amplitude_calls(self, matrix_element):
@@ -274,7 +304,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
                        diagram.get('number'))
             for amplitude in diagram.get('amplitudes'):
                 res.append(self.get_amplitude_call(amplitude))
-
+        
         return res
 
     def get_wavefunction_call(self, wavefunction):
@@ -285,7 +315,6 @@ class HelasCallWriter(base_objects.PhysicsObject):
             #misc.sprint(wavefunction['number_external'])
             call = self["wavefunctions"][wavefunction.get_call_key()](\
                                                                    wavefunction)
-            #misc.sprint(call)
             if not wavefunction.get('mothers'):
                 call = self.get_chiral_wavefunction_call(wavefunction, call)
             else:
@@ -298,7 +327,6 @@ class HelasCallWriter(base_objects.PhysicsObject):
             call, n = re.subn(',\s*fk_(?!ZERO)\w*\s*,', ', ZERO,', str(call), flags=re.I)
             if n:
                 self.width_tchannel_set_tozero = True
-        
         return call
 
     def get_internal_wfs(self, wavefunction, call):
@@ -316,10 +344,13 @@ class HelasCallWriter(base_objects.PhysicsObject):
         of VXXXXX"""    
         
         # AL: first get pdg_code. If left- or right-particle, 
-        # ref momentum for gauge boson, then update call 
+        # ref momentum for gauge boson, then update call
+        # EB: Added updates to calles for massive external fermions.
+        # EB: TODO: Add additional fermions when they are implemented. 
         pdg_code = wavefunction.get('particle').get('pdg_code')
         nsv_new = wavefunction.get('leg_state')
         ref_mom = wavefunction.get('ref_mom')
+        leg_num = wavefunction.get('number')
         
         # AL: update LH spinor wavefunction
         # AW: adding paricle codes for quarks and gluons
@@ -352,6 +383,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
         
         # AL: update LH vector wavefunction
         # AW: hope this works
+        # EB: Updated to use PB as ref mom.
         elif pdg_code == 90023 or pdg_code == 70021:
             # update name
             call = call[:6] + 'L' + call[7:]
@@ -359,9 +391,10 @@ class HelasCallWriter(base_objects.PhysicsObject):
             # insert reference momentum as argument
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
+            call = call_lhs + ',PB(0,' + str(ref_mom) + '),' + call_rhs
 
         # AL: update RH vector wavefunction
+        # EB: Updated to use PB as ref mom.
         elif pdg_code == 90024 or pdg_code == 80021:
             # update name
             call = call[:6] + 'R' + call[7:]
@@ -369,7 +402,29 @@ class HelasCallWriter(base_objects.PhysicsObject):
             # insert reference momentum as argument
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
+            call = call_lhs + ',PB(0,' + str(ref_mom) + '),' + call_rhs
+
+        # EB: update massive spinnor wavefunction with possitive spin direction.
+        elif pdg_code in [70011,70013,70015]:
+
+            # Update name
+            call = call[:6] + 'M' + call[7:]
+
+            # insert q momentum as argument
+            call_lhs = ','.join(call.split(',')[:-2])
+            call_rhs = ','.join(call.split(',')[-2:])
+            call = call_lhs + ',PB(0,' + str(ref_mom) + '),PB(0,' + str(leg_num)+ '),' + call_rhs
+
+        # EB: update massive spinnor wavefunction with negative spin direction.
+        elif pdg_code in [80011,80013,80015]:
+
+             # Update name
+            call = call[:6] + 'M' + call[7:]
+
+            # insert q momentum as argument
+            call_lhs = ','.join(call.split(',')[:-2])
+            call_rhs = ','.join(call.split(',')[-2:])
+            call = call_lhs + ',PB(0,' + str(ref_mom) + '),PB(0,' + str(leg_num) + '),' + call_rhs
 
         return call
 
@@ -380,7 +435,6 @@ class HelasCallWriter(base_objects.PhysicsObject):
         try:
             call = self["amplitudes"][amplitude.get_call_key()](amplitude) 
             #AW
-            #misc.sprint(call)
             call = self.get_chiral_amps(amplitude, call)
         except KeyError as error:
             return ""
@@ -684,7 +738,7 @@ class FortranHelasCallWriter(HelasCallWriter):
         corresponding to the key. If the function doesn't exist,
         generate_helas_call is called to automatically create the
         function."""
-
+        
         if wavefunction.get('spin') == 1 and \
                wavefunction.get('interaction_id') != 0:
             # Special feature: For HVS vertices with the two
