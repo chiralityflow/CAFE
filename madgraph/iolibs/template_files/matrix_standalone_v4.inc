@@ -159,7 +159,7 @@ C     For this reason, we simply remove the filterin when there is only three ex
 		ENDDO
 	  ENDIF
 c AW: remove this later
-      OPEN(1, FILE = '/home/adam/Master_project/MadCAFE/bin/testdata.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append') 
+      OPEN(1, FILE = '/home/emil/Desktop/MadCAFE-Massive/MadCAFE/bin/testdata.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append') 
       WRITE(1,*) ANS
 	  END
        
@@ -191,6 +191,7 @@ C
 C ARGUMENTS 
 C  
       REAL*8 P(0:3,NEXTERNAL)
+      REAL*8 PB(0:3,NEXTERNAL)
       INTEGER NHEL(NEXTERNAL), IC(NEXTERNAL)
 C  
 C LOCAL VARIABLES 
@@ -219,6 +220,9 @@ C
 C ----------
 C BEGIN CODE
 C ----------
+C EB: Set PB to P. This will be updated for the fermions.
+      PB = P
+      MDL_MM = 100.000
 %(helas_calls)s
 %(jamp_lines)s
       WRITE(*,*) 'ZEROAMPS = ' ,ZEROAMPS
