@@ -342,6 +342,508 @@ c                    ((p^1+i*p^2)/sqrt(p^0+p^3))                   (sqrt(p^0-p^3
 
 
 
+
+
+      subroutine fpxxxx(p,fmass,nhel,nsf,q,pb,fp)
+c
+c This subroutine computes a wavefunction for a massive fermion   
+c with positive spin direction under the chirality-flow formalism.
+c
+c input:
+c       real    p(0:3)         : four-momentum of fermion
+c       real    fmass          : mass          of fermion
+c       integer nhel = -1 or 1 : helicity      of fermion
+c       integer nsf  = -1 or 1 : +1 for final, -1 for initial
+c       real    q(0:3)         : arbitrary light-like momenta in p = pb + a*q
+c
+c output:
+c       real    pb(0:3)        : light-like momenta in p=pb + a*q
+c       complex fp(6)          : fermion wavefunction    ( [pb| , -m|q>/<pb q> )
+c
+      implicit none
+      double complex fp(6), pbbrasq(2), qketan(2)
+      double precision p(0:3), fmass, q(0:3), pb(0:3), a, sqpb0pb3, 
+     & sqq0q3, pbqprod
+      integer nhel, nsf
+      double precision rZero, rHalf, rTwo
+      parameter( rZero = 0.0d0, rHalf = 0.5d0, rTwo = 2.0d0 )
+      
+c     EB: Calc. a and pb
+      a = ((fmass**2)*rHalf)/(p(0)*q(0) - p(1)*q(1) - p(2)*q(2) - p(3)*q(3))
+      pb(0) = p(0) - a*q(0)
+      pb(1) = p(1) - a*q(1)
+      pb(2) = p(2) - a*q(2)
+      pb(3) = p(3) - a*q(3)
+      
+      fp(1) = dcmplx(p(0),p(3))*nsf
+      fp(2) = dcmplx(p(1),p(2))*nsf
+      
+c     pbbrasq = [pb| = (sqrt(pb^0+pb^3), (pb^1-i*pb^2)/sqrt(pb^0+pb^3))
+c                  = (0,sqrt(pb^0-pb^3)) if pb^3=-pb^0
+
+
+      if(pb(1).eq.0d0.and.pb(2).eq.0d0.and.pb(3).lt.0d0) then
+         sqpb0pb3 = 0d0
+      else
+         sqpb0pb3 = dsqrt(max(pb(0)+pb(3),rZero))
+      end if
+      pbbrasq(1) = dcmplx( sqpb0pb3 )
+      
+      if ( sqpb0pb3.eq.rZero ) then
+         pbbrasq(2) = dcmplx( dsqrt(rTwo*pb(0)) )
+      else
+         pbbrasq(2) = dcmplx( pb(1), -pb(2) )/sqpb0pb3
+      endif
+      
+      fp(3) = pbbrasq(1)
+      fp(4) = pbbrasq(2)
+
+c     qketan = |q> = (sqrt(q^0+q^3)            ) = (if q^0 = -q^3) (0            ) 
+c                    ((q^1+i*q^2)/sqrt(q^0+q^3))                   (sqrt(q^0-q^3)) 
+
+      if(q(1).eq.0d0.and.q(2).eq.0d0.and.q(3).lt.0d0) then
+         sqq0q3 = 0d0
+      else
+         sqq0q3 = dsqrt(max(q(0)+q(3),rZero))
+      endif
+      qketan(1) = dcmplx( sqq0q3 )
+      
+      if ( sqq0q3.eq.rZero ) then
+         qketan(2) = dcmplx( dsqrt(rTwo*q(0)) )
+      else
+         qketan(2) = dcmplx( q(1), q(2) )/sqq0q3
+      endif
+
+c     pbqprod = <pb q>
+c     pbbraan = <pb| = |pb]^dagger = (epsilon*[pb|)^dagger =( ( 0 1 )*[pb|)^dagger = (pbbrasq(2)^*, -pbbrasq(1)^*)
+c                                                             (-1 0 )
+c                    
+
+      pbqprod = conjg(pbbrasq(2))*qketan(1)-conjg(pbbrasq(1))*qketan(2)
+      
+      fp(5) = -fmass*qketan(1)/pbqprod
+      fp(6) = -fmass*qketan(2)/pbqprod
+      
+      return
+      end
+      
+     
+      
+      subroutine fmxxxx(p,fmass,nhel,nsf,q,pb,fm)
+c
+c This subroutine computes a wavefunction for a massive fermion   
+c with negative spin direction under the chirality-flow formalism.
+c
+c input:
+c       real    p(0:3)         : four-momentum of fermion
+c       real    fmass          : mass          of fermion
+c       integer nhel = -1 or 1 : helicity      of fermion
+c       integer nsf  = -1 or 1 : +1 for final, -1 for initial
+c       real    q(0:3)         : arbitrary light-like momenta in p = pb + a*q
+c
+c output:
+c       real    pb(0:3)        : light-like momenta in p=pb + a*q
+c       complex fm(6)          : fermion wavefunction    (  m[q|/[q pb], |pb> )
+c
+      implicit none
+      double complex fm(6), pbketan(2), qbrasq(2)
+      double precision p(0:3), fmass, q(0:3), pb(0:3), a, sqpb0pb3, 
+     & sqq0q3, qpbprod
+      integer nhel, nsf
+      double precision rZero, rHalf, rTwo
+      parameter( rZero = 0.0d0, rHalf = 0.5d0, rTwo = 2.0d0 )
+
+c     EB: Calc. a and pb      
+      a = ((fmass**2)*rHalf)/(p(0)*q(0) - p(1)*q(1) - p(2)*q(2) - p(3)*q(3))
+      pb(0) = p(0) - a*q(0)
+      pb(1) = p(1) - a*q(1)
+      pb(2) = p(2) - a*q(2)
+      pb(3) = p(3) - a*q(3)
+      
+      fm(1) = dcmplx(p(0),p(3))*nsf
+      fm(2) = dcmplx(p(1),p(2))*nsf
+
+c     pbketan = |pb> = (sqrt(pb^0+pb^3)            ) = (if pb^0 = -pb^3) (0            ) 
+c                    ((pb^1+i*pb^2)/sqrt(pb^0+pb^3))                    (sqrt(pb^0-pb^3))      
+      
+      if(pb(1).eq.0d0.and.pb(2).eq.0d0.and.pb(3).lt.0d0) then
+         sqpb0pb3 = 0d0
+      else
+         sqpb0pb3 = dsqrt(max(pb(0)+pb(3),rZero))
+      endif
+      pbketan(1) = dcmplx( sqpb0pb3 )
+      
+      if ( sqpb0pb3.eq.rZero ) then
+         pbketan(2) = dcmplx( dsqrt(rTwo*pb(0)) )
+      else
+         pbketan(2) = dcmplx( pb(1), pb(2) )/sqpb0pb3
+      endif
+      
+      fm(5) = pbketan(1)
+      fm(6) = pbketan(2)
+      
+c     qbrasq = [q| = (sqrt(q^0+q^3), (q^1-i*q^2)/sqrt(q^0+q^3))
+c                  = (0,sqrt(q^0-q^3)) if q^3=-q^0
+
+      if(q(1).eq.0d0.and.q(2).eq.0d0.and.q(3).lt.0d0) then
+         sqq0q3 = 0d0
+      else
+         sqq0q3 = dsqrt(max(q(0)+q(3),rZero))
+      end if
+      qbrasq(1) = dcmplx( sqq0q3 )
+      
+      if ( sqq0q3.eq.rZero ) then
+         qbrasq(2) = dcmplx( dsqrt(rTwo*q(0)) )
+      else
+         qbrasq(2) = dcmplx( q(1), -q(2) )/sqq0q3
+      endif
+
+c     qpbprod = [q pb]
+c     pbketsq = |pb] = <pb|^dagger = (epsilon*|pb>^dagger = ( ( 0 1 )*|pb> )^dagger = (pbketan(2)^*)
+c                                                             (-1 0 )                 (-pbketan(1)^*)
+
+      qpbprod = qbrasq(1)*conjg(pbketan(2))-qbrasq(2)*conjg(pbketan(1))
+      
+      fm(3) = fmass*qbrasq(1)/qpbprod
+      fm(4) = fmass*qbrasq(2)/qpbprod  
+      
+      return
+      end
+      
+      subroutine imxxxx(p, fmass, nspin, nsf, q, pb, fmi)
+c
+c This subroutine computes a massive fermion wavefunction for 
+c an inflowing fermion under the chirality-flow formalism.
+c
+c input:
+c       real    p(0:3)          : four-momentum  of fermion
+c       real    fmass           : mass           of fermion
+c       integer nspin = -1 or 1 : spin direction of fermion
+c       integer nsf   = -1 or 1 : +1 for particle, -1 for anti-particle
+c       real    q(0:3)          : arbitrary light-like momenta in p = pb + a*q
+c
+c output:
+c       real    pb(0:3)         : light-like momenta in p=pb + a*q
+c       complex fmi(6)          : fermion wavefunction   
+c
+      implicit none
+      double complex fmi(6), pbbrasq(2), qketan(2), pbketan(2), qbrasq(2)
+      double precision p(0:3), fmass, q(0:3), pb(0:3), a, sqpb0pb3,
+     & sqq0q3, pbqprod, qpbprod, lfor, lback, ph(1:3), pabs
+      integer nspin, nsf
+      double precision rZero, rHalf, rTwo
+      parameter( rZero = 0.0d0, rHalf = 0.5d0, rTwo = 2.0d0 )
+      
+c     EB: Calc. a and pb      
+c      a = ((fmass**2)*rHalf)/(p(0)*q(0) - p(1)*q(1) - p(2)*q(2) - p(3)*q(3))
+c      pb(0) = p(0) - a*q(0)
+c      pb(1) = p(1) - a*q(1)
+c      pb(2) = p(2) - a*q(2)
+c      pb(3) = p(3) - a*q(3)
+      
+C     EB: change pb to p-forward and q to p-backward for now
+
+      pabs = sqrt(p(1)**2+p(2)**2+p(3)**2)
+      
+      lfor = p(0) + pabs
+      lback = p(0) - pabs
+      
+      ph(1) = p(1)/pabs
+      ph(2) = p(2)/pabs
+      ph(3) = p(3)/pabs
+      
+      pb(0) = lfor*rHalf
+      pb(1) = lfor*rHalf*ph(1)
+      pb(2) = lfor*rHalf*ph(2)
+      pb(3) = lfor*rHalf*ph(3)
+      
+      q(0) = lback*rHalf
+      q(1) = -1*lback*rHalf*ph(1)
+      q(2) = -1*lback*rHalf*ph(2)
+      q(3) = -1*lback*rHalf*ph(3)
+      
+      fmi(1) = dcmplx(p(0),p(3))*nsf*-1
+      fmi(2) = dcmplx(p(1),p(2))*nsf*-1
+      
+c     EB: anti-fermion with positive spin or fermion with negative spin.
+c
+c     fmi = ( [pb| , nsf*fmass|q>/<pb q> )
+c     
+      if ((nsf.eq.(-1).and.nspin.eq.(1)).or.
+     &(nsf.eq.(1).and.nspin.eq.(-1))) then
+              
+c       pbbrasq = [pb| = (sqrt(pb^0+pb^3), (pb^1-i*pb^2)/sqrt(pb^0+pb^3))
+c                      = (0,sqrt(pb^0-pb^3)) if pb^3=-pb^0
+
+
+        if(pb(1).eq.0d0.and.pb(2).eq.0d0.and.pb(3).lt.0d0) then
+           sqpb0pb3 = 0d0
+        else
+           sqpb0pb3 = dsqrt(max(pb(0)+pb(3),rZero))
+        end if
+        pbbrasq(1) = dcmplx( sqpb0pb3 )
+      
+        if ( sqpb0pb3.eq.rZero ) then
+           pbbrasq(2) = dcmplx( dsqrt(rTwo*pb(0)) )
+        else
+           pbbrasq(2) = dcmplx( pb(1), -pb(2) )/sqpb0pb3
+        endif
+      
+        fmi(3) = pbbrasq(1)
+        fmi(4) = pbbrasq(2)
+
+c       qketan = |q> = (sqrt(q^0+q^3)            ) = (if q^0 = -q^3) (0            ) 
+c                      ((q^1+i*q^2)/sqrt(q^0+q^3))                   (sqrt(q^0-q^3)) 
+
+        if(q(1).eq.0d0.and.q(2).eq.0d0.and.q(3).lt.0d0) then
+           sqq0q3 = 0d0
+        else
+           sqq0q3 = dsqrt(max(q(0)+q(3),rZero))
+        endif
+        qketan(1) = dcmplx( sqq0q3 )
+      
+        if ( sqq0q3.eq.rZero ) then
+           qketan(2) = dcmplx( dsqrt(rTwo*q(0)) )
+        else
+           qketan(2) = dcmplx( q(1), q(2) )/sqq0q3
+        endif
+
+c       pbqprod = <pb q>
+c       pbbraan = <pb| = |pb]^dagger = (epsilon*[pb|)^dagger =( ( 0 1 )*[pb|)^dagger = (pbbrasq(2)^*, -pbbrasq(1)^*)
+c                                                               (-1 0 )
+c                    
+
+        pbqprod = conjg(pbbrasq(2))*qketan(1)-conjg(pbbrasq(1))*qketan(2)
+      
+        fmi(5) = nsf*fmass*qketan(1)/pbqprod
+        fmi(6) = nsf*fmass*qketan(2)/pbqprod       
+       
+      endif
+      
+c     EB: anti-fermion with negative spin or fermion with positive spin.
+c
+c     fmi = (  -nsf*fmass[q|/[q pb], |pb> )
+c
+      if ((nsf.eq.(-1).and.nspin.eq.(-1)).or.
+     &(nsf.eq.(1).and.nspin.eq.(1))) then
+       
+c       pbketan = |pb> = (sqrt(pb^0+pb^3)            ) = (if pb^0 = -pb^3) (0            ) 
+c                       ((pb^1+i*pb^2)/sqrt(pb^0+pb^3))                    (sqrt(pb^0-pb^3))      
+      
+        if(pb(1).eq.0d0.and.pb(2).eq.0d0.and.pb(3).lt.0d0) then
+           sqpb0pb3 = 0d0
+        else
+           sqpb0pb3 = dsqrt(max(pb(0)+pb(3),rZero))
+        endif
+        pbketan(1) = dcmplx( sqpb0pb3 )
+      
+        if ( sqpb0pb3.eq.rZero ) then
+           pbketan(2) = dcmplx( dsqrt(rTwo*pb(0)) )
+        else
+           pbketan(2) = dcmplx( pb(1), pb(2) )/sqpb0pb3
+        endif
+      
+        fmi(5) = pbketan(1)
+        fmi(6) = pbketan(2)
+      
+c       qbrasq = [q| = (sqrt(q^0+q^3), (q^1-i*q^2)/sqrt(q^0+q^3))
+c                    = (0,sqrt(q^0-q^3)) if q^3=-q^0
+
+        if(q(1).eq.0d0.and.q(2).eq.0d0.and.q(3).lt.0d0) then
+           sqq0q3 = 0d0
+        else
+           sqq0q3 = dsqrt(max(q(0)+q(3),rZero))
+        end if
+        qbrasq(1) = dcmplx( sqq0q3 )
+      
+        if ( sqq0q3.eq.rZero ) then
+           qbrasq(2) = dcmplx( dsqrt(rTwo*q(0)) )
+        else
+           qbrasq(2) = dcmplx( q(1), -q(2) )/sqq0q3
+        endif
+
+c       qpbprod = [q pb]
+c       pbketsq = |pb] = <pb|^dagger = (epsilon*|pb>^dagger = ( ( 0 1 )*|pb> )^dagger = (pbketan(2)^*)
+c                                                               (-1 0 )                 (-pbketan(1)^*)
+
+        qpbprod = qbrasq(1)*conjg(pbketan(2))-qbrasq(2)*conjg(pbketan(1))
+      
+        fmi(3) = -1*nsf*fmass*qbrasq(1)/qpbprod
+        fmi(4) = -1*nsf*fmass*qbrasq(2)/qpbprod  
+      
+      endif
+      
+      return
+      end
+      
+
+
+      subroutine omxxxx(p, fmass, nspin, nsf, q, pb, fmo)
+c
+c This subroutine computes a massive fermion wavefunction for 
+c an outflowing fermion under the chirality-flow formalism.
+c
+c input:
+c       real    p(0:3)          : four-momentum  of fermion
+c       real    fmass           : mass           of fermion
+c       integer nspin = -1 or 1 : spin direction of fermion
+c       integer nsf   = -1 or 1 : +1 for particle, -1 for anti-particle
+c       real    q(0:3)          : arbitrary light-like momenta in p = pb + a*q
+c
+c output:
+c       real    pb(0:3)         : light-like momenta in p=pb + a*q
+c       complex fmo(6)          : fermion wavefunction   
+c
+      implicit none
+      double complex fmo(6), pbbrasq(2), qketan(2), pbketan(2), qbrasq(2)
+      double precision p(0:3), fmass, q(0:3), pb(0:3), a, sqpb0pb3,
+     & sqq0q3, pbqprod, qpbprod, lfor, lback, ph(1:3), pabs
+      integer nspin, nsf
+      double precision rZero, rHalf, rTwo
+      parameter( rZero = 0.0d0, rHalf = 0.5d0, rTwo = 2.0d0 )
+      
+c     EB: Calc. a and pb      
+c      a = ((fmass**2)*rHalf)/(p(0)*q(0) - p(1)*q(1) - p(2)*q(2) - p(3)*q(3))
+c      pb(0) = p(0) - a*q(0)
+c      pb(1) = p(1) - a*q(1)
+c      pb(2) = p(2) - a*q(2)
+c      pb(3) = p(3) - a*q(3)
+      
+C     EB: change pb to p-forward and q to p-backward for now
+      
+      pabs = sqrt(p(1)**2+p(2)**2+p(3)**2)
+      
+      lfor = p(0) + pabs
+      lback = p(0) - pabs
+      
+      ph(1) = p(1)/pabs
+      ph(2) = p(2)/pabs
+      ph(3) = p(3)/pabs
+      
+      pb(0) = lfor*rHalf
+      pb(1) = lfor*rHalf*ph(1)
+      pb(2) = lfor*rHalf*ph(2)
+      pb(3) = lfor*rHalf*ph(3)
+      
+      q(0) = lback*rHalf
+      q(1) = -1*lback*rHalf*ph(1)
+      q(2) = -1*lback*rHalf*ph(2)
+      q(3) = -1*lback*rHalf*ph(3)
+      
+      fmo(1) = dcmplx(p(0),p(3))*nsf
+      fmo(2) = dcmplx(p(1),p(2))*nsf
+
+c     EB: anti-fermion with positive spin or fermion with negative spin.
+c
+c     fmo = (  nsf*fmass[q|/[q pb], |pb> )
+c      
+      if ((nsf.eq.(-1).and.nspin.eq.(1)).or.
+     &(nsf.eq.(1).and.nspin.eq.(-1))) then 
+
+c       pbketan = |pb> = (sqrt(pb^0+pb^3)            ) = (if pb^0 = -pb^3) (0            ) 
+c                       ((pb^1+i*pb^2)/sqrt(pb^0+pb^3))                    (sqrt(pb^0-pb^3))      
+      
+        if(pb(1).eq.0d0.and.pb(2).eq.0d0.and.pb(3).lt.0d0) then
+           sqpb0pb3 = 0d0
+        else
+           sqpb0pb3 = dsqrt(max(pb(0)+pb(3),rZero))
+        endif
+        pbketan(1) = dcmplx( sqpb0pb3 )
+      
+        if ( sqpb0pb3.eq.rZero ) then
+           pbketan(2) = dcmplx( dsqrt(rTwo*pb(0)) )
+        else
+           pbketan(2) = dcmplx( pb(1), pb(2) )/sqpb0pb3
+        endif
+      
+        fmo(5) = pbketan(1)
+        fmo(6) = pbketan(2)
+      
+c       qbrasq = [q| = (sqrt(q^0+q^3), (q^1-i*q^2)/sqrt(q^0+q^3))
+c                    = (0,sqrt(q^0-q^3)) if q^3=-q^0
+
+        if(q(1).eq.0d0.and.q(2).eq.0d0.and.q(3).lt.0d0) then
+           sqq0q3 = 0d0
+        else
+           sqq0q3 = dsqrt(max(q(0)+q(3),rZero))
+        end if
+        qbrasq(1) = dcmplx( sqq0q3 )
+      
+        if ( sqq0q3.eq.rZero ) then
+           qbrasq(2) = dcmplx( dsqrt(rTwo*q(0)) )
+        else
+           qbrasq(2) = dcmplx( q(1), -q(2) )/sqq0q3
+        endif
+
+c       qpbprod = [q pb]
+c       pbketsq = |pb] = <pb|^dagger = (epsilon*|pb>^dagger = ( ( 0 1 )*|pb> )^dagger = (pbketan(2)^*)
+c                                                               (-1 0 )                 (-pbketan(1)^*)
+
+        qpbprod = qbrasq(1)*conjg(pbketan(2))-qbrasq(2)*conjg(pbketan(1))
+      
+        fmo(3) = nsf*fmass*qbrasq(1)/qpbprod
+        fmo(4) = nsf*fmass*qbrasq(2)/qpbprod
+                
+      endif
+      
+c     EB: anti-fermion with negative spin or fermion with positive spin.
+c
+c     fmo = ( [pb| , -nsf*fmass|q>/<pb q> )
+c
+      if ((nsf.eq.(-1).and.nspin.eq.(-1)).or.
+     &(nsf.eq.(1).and.nspin.eq.(1))) then
+     
+c       pbbrasq = [pb| = (sqrt(pb^0+pb^3), (pb^1-i*pb^2)/sqrt(pb^0+pb^3))
+c                      = (0,sqrt(pb^0-pb^3)) if pb^3=-pb^0
+
+
+        if(pb(1).eq.0d0.and.pb(2).eq.0d0.and.pb(3).lt.0d0) then
+           sqpb0pb3 = 0d0
+        else
+           sqpb0pb3 = dsqrt(max(pb(0)+pb(3),rZero))
+        end if
+        pbbrasq(1) = dcmplx( sqpb0pb3 )
+      
+        if ( sqpb0pb3.eq.rZero ) then
+           pbbrasq(2) = dcmplx( dsqrt(rTwo*pb(0)) )
+        else
+           pbbrasq(2) = dcmplx( pb(1), -pb(2) )/sqpb0pb3
+        endif
+      
+        fmo(3) = pbbrasq(1)
+        fmo(4) = pbbrasq(2)
+
+c       qketan = |q> = (sqrt(q^0+q^3)            ) = (if q^0 = -q^3) (0            ) 
+c                      ((q^1+i*q^2)/sqrt(q^0+q^3))                   (sqrt(q^0-q^3)) 
+
+        if(q(1).eq.0d0.and.q(2).eq.0d0.and.q(3).lt.0d0) then
+           sqq0q3 = 0d0
+        else
+           sqq0q3 = dsqrt(max(q(0)+q(3),rZero))
+        endif
+        qketan(1) = dcmplx( sqq0q3 )
+      
+        if ( sqq0q3.eq.rZero ) then
+           qketan(2) = dcmplx( dsqrt(rTwo*q(0)) )
+        else
+           qketan(2) = dcmplx( q(1), q(2) )/sqq0q3
+        endif
+
+c       pbqprod = <pb q>
+c       pbbraan = <pb| = |pb]^dagger = (epsilon*[pb|)^dagger =( ( 0 1 )*[pb|)^dagger = (pbbrasq(2)^*, -pbbrasq(1)^*)
+c                                                             (-1 0 )
+c                    
+
+        pbqprod = conjg(pbbrasq(2))*qketan(1)-conjg(pbbrasq(1))*qketan(2)
+      
+        fmo(5) = -1*nsf*fmass*qketan(1)/pbqprod
+        fmo(6) = -1*nsf*fmass*qketan(2)/pbqprod  
+   
+      endif
+      
+      return
+      end
+      
       subroutine ixxxxx(p, fmass, nhel, nsf ,fi)
 c
 c This subroutine computes a fermion wavefunction with the flowing-IN
