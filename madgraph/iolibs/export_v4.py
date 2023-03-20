@@ -2858,7 +2858,7 @@ CF2PY integer, intent(in) :: new_value
         if not matrix_element.get('processes') or \
                not matrix_element.get('diagrams'):
             return 0
-        
+
         if writer:
             if not isinstance(writer, writers.FortranWriter):
                 raise writers.FortranWriter.FortranWriterError(\
@@ -2907,7 +2907,8 @@ CF2PY integer, intent(in) :: new_value
         replace_dict['helicity_lines'] = helicity_lines
         # ZW: replaces helicity_lines and ncomb to remove sums
         # that are necessarily zero based on helicity configurations
-        helicity_lines_2 = self.helicity_lines_replacer(helicity_lines, helas_calls, ncomb, nexternal)
+        # EB: For massive fermions matrix-element is needed for the line replacement
+        helicity_lines_2 = self.helicity_lines_replacer(helicity_lines, helas_calls, ncomb, nexternal, matrix_element)
         replace_dict['ncomb'] = helicity_lines_2[1]
         replace_dict['helicity_lines'] = helicity_lines_2[0]
 
@@ -3065,15 +3066,18 @@ CF2PY integer, intent(in) :: new_value
     #===========================================================================
     """ ZW: Function which takes as input the helicity_lines of a process
             and removes any which are directly zero in the explicitly chiral case"""
-    def helicity_lines_replacer(self, helicity_lines, helas_calls, ncomb, nexternal):
+    def helicity_lines_replacer(self, helicity_lines, helas_calls, ncomb, nexternal, matrix_element):
         # ZW: Find external particles in the process
         plushel_list = []
         minushel_list = []
+        legs = matrix_element.get('processes')[0].get('legs')
+        
         # ZW: Based on naming convention of external particles in the UFO file,
         # where the second to last character of the name is assumed to denote chirality,
         # finds which helicities will contribute non-zero terms to the helicity sum
         # I.e. for a final-state left-handed particle, only terms where the particle
         # has helicity +1 will contribute
+        # EB: Added conditions for massive fermions.
         for k in range(nexternal):
             if (helas_calls[k][5:11] == 'LXXXXX') or (helas_calls[k][5:11] == 'VLXXXX'):
                 icpos = helas_calls[k].find('*IC(')
@@ -3089,6 +3093,12 @@ CF2PY integer, intent(in) :: new_value
                     minushel_list.append(k)
                 elif (state_status == '-1'):
                     plushel_list.append(k)
+            elif (helas_calls[k][5:11] in ['IMXXXX','OMXXXX']):
+                if abs(legs[k].get('id')) in [80011,80013,80015]:
+                    minushel_list.append(k)
+                elif abs(legs[k].get('id')) in [70011,70013,70015]:
+                    plushel_list.append(k)
+        
         # ZW: If no chiral particles are found, returns the original helicity_lines
         if (len(plushel_list) == 0) and (len(minushel_list) == 0):
             return (helicity_lines, ncomb)
