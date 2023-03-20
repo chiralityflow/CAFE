@@ -3036,8 +3036,8 @@ class MadGraphCmd(HelpToCmd, CheckValidForCmd, CompleteForCmd, CmdExtended):
             self.do_install('update --mode=mg5_start')
 
         # By default, load the UFO Standard Model
-        logger.info("Loading default model: cf")
-        self.exec_cmd('import model cf', printcmd=False, precmd=True)
+        logger.info("Loading default model: massive_cf")
+        self.exec_cmd('import model massive_cf', printcmd=False, precmd=True)
 
         # preloop mother
         CmdExtended.preloop(self)
