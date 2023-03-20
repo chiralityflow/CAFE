@@ -582,6 +582,7 @@ class Amplitude(base_objects.PhysicsObject):
         process = self.get('process')
         model = process.get('model')
         legs = process.get('legs')
+        
         # Make sure orders is the minimum of orders and overall_orders
         for key in process.get('overall_orders').keys():
             try:
@@ -662,7 +663,7 @@ class Amplitude(base_objects.PhysicsObject):
         # Copy leglist from process, so we can flip leg identities
         # without affecting the original process
         leglist = self.copy_leglist(process.get('legs'))
-
+        
         for leg in leglist:
             # For the first step, ensure the tag from_group 
             # is true for all legs
@@ -714,6 +715,8 @@ class Amplitude(base_objects.PhysicsObject):
             # AL: change the final fermion propagator from left/left or right/right
             # to left/right or right/left
             ref_dict_to0 = model.get('ref_dict_to0')
+            #misc.sprint(ref_dict_to0)
+
             # AL: delete old left/left or right/right fermions from dict
             # AL: TODO: Update this to write a function which automatically finds 
             # all chiral particles and changes the ref_dict_to0 for them
@@ -754,6 +757,7 @@ class Amplitude(base_objects.PhysicsObject):
             ref_dict_to0[(-80002,70002)] = [0]
 
 
+
             reduced_leglist = self.reduce_leglist(leglist,
                                                   max_multi_to1,
                                                 #   model.get('ref_dict_to0'),
@@ -763,187 +767,6 @@ class Amplitude(base_objects.PhysicsObject):
                                                   is_decay_proc,
                                                   process.get('orders'))
         
-        def find_left_and_right_number(leglist):
-            first_left_number = 100
-            first_right_number = 100 
-            for legs in leglist:
-                for boson in legs['legs']:
-                    if boson['id'] == 70021:
-                        first_left_number = min(boson['number'],first_left_number)
-                    if boson['id'] == 80021:
-                        first_right_number = min(boson['number'],first_right_number)
-            return first_left_number,first_right_number
-                
-        def number_in_vertex(vertex,number):
-            in_vertex = False
-            for boson in vertex['legs']:
-                if boson['number'] == number and boson['from_group'] == False:
-                    in_vertex = True
-            return in_vertex
-
-        def find_vertex_with_prop(vertex_list,number):
-            for vertex in vertex_list:
-                N_matches = 0
-                for boson in vertex['legs']:
-                    if boson['number'] == number:
-                        N_matches += 1
-                if N_matches == 2:
-                    return vertex
-            return None
-                        
-        def find_number_from_id(vertex,pdg_code):
-            for boson in vertex['legs']:
-                if boson['id'] == pdg_code:
-                    return boson['number']
-            return None
-                
-        def find_chiral_from_number(vertex,number):
-            for boson in vertex['legs']:
-                #misc.sprint(vertex,number)
-                if boson['number'] == number and boson['id'] != 21:
-                    return True
-            return False
-        # AW: we can remove diagrams here that vanish. We want to do this for vanishing diagrams that are not already removed in reduce leglist
-        # TODO: add LLLR, LRRR and other vanishing combs to this
-
-        diag_index_to_remove = []
-        if reduced_leglist:
-            for i, diag in enumerate(reduced_leglist):
-            # We remove diagrams which have a LLRR gluon vertex and one of the gluons are the first left or right gluon in the diagram
-                if reduced_leglist[i][-1]['id'] == 55:
-                    first_L, first_R = find_left_and_right_number(reduced_leglist[i])
-                    if number_in_vertex(reduced_leglist[i][-1],first_L):
-                        diag_index_to_remove.append(i)
-                    elif number_in_vertex(reduced_leglist[i][-1],first_R):
-                        diag_index_to_remove.append(i)
-
-                    """ for boson in reduced_leglist[i][-1]['legs']:
-                        if boson['id'] == 70021 and not found_left:
-                            found_left = True
-                            if not boson['from_group']:
-                                can_remove = True
-                                if len(diag_index_to_remove) == 0 or diag_index_to_remove[-1] != i:
-                                    diag_index_to_remove.append(i)
-                        if boson['id'] == 80021 and not found_right:
-                            found_right = True
-                            if not boson['from_group']:
-                                can_remove = True
-                                if len(diag_index_to_remove) == 0 or  diag_index_to_remove[-1] != i:
-                                    diag_index_to_remove.append(i)
-                        if can_remove:
-                            break """
-                # AW: If id == 0 we must check earlier parts of the leglist to figure out which vertices we have
-                # AW: TODO: For 7-g amp we need to check LLRR vertices here too
-                if reduced_leglist[i][-1]['id'] == 0:
-                    # if the last two vertices both would be vanishing as an amplitude the diagram must vanish
-                    vanish_ids = [49,52,53,54,56,57]
-                    if reduced_leglist[i][-2]['id'] in vanish_ids and reduced_leglist[i][-3]['id'] in vanish_ids:
-                        diag_index_to_remove.append(i)
-                # If the last vertex is a gLLR or gLRR vertex we need to check the other vertices to find out if the diagram can be removed
-
-                # Remove vertices with a final gLLR or gLRR vertex under certain conditions
-                if reduced_leglist[i][-1]['id'] in [50,51]:
-                    can_remove = False
-                    first_L, first_R = find_left_and_right_number(reduced_leglist[i])
-                    # find if first right or first left boson is in last vertex
-                    L_in_first = number_in_vertex(reduced_leglist[i][-1],first_L)
-                    R_in_first = number_in_vertex(reduced_leglist[i][-1],first_R)
-
-                    if L_in_first and R_in_first:
-                        diag_index_to_remove.append(i)
-                    elif reduced_leglist[i][-1]['id'] == 50 and R_in_first:
-                        diag_index_to_remove.append(i)
-                    elif reduced_leglist[i][-1]['id'] == 51 and L_in_first:
-                        diag_index_to_remove.append(i)
-                        
-                    # if yes, then find the vertex where the g propagator comes from
-                    if L_in_first or R_in_first:
-                        g_number = find_number_from_id(reduced_leglist[i][-1],21)
-                        vertex = find_vertex_with_prop(reduced_leglist[i],g_number)
-                        # if that vertex has the other first boson we can remove the diagram <
-                        if L_in_first and not R_in_first:
-                            can_remove = find_chiral_from_number(vertex,first_R)
-                        if R_in_first and not L_in_first:
-                            can_remove = find_chiral_from_number(vertex,first_L)
-                        #if g_number == first_L or g_number == first_R:
-                        #    can_remove = find_chiral_from_number(vertex,g_number)
-                    
-                    if can_remove:
-                        #misc.sprint(i,reduced_leglist[i])
-                        diag_index_to_remove.append(i)
-
-                # Remove final LLLR and LRRR vertices
-                if reduced_leglist[i][-1]['id'] in [54,56]:
-                    diag_index_to_remove.append(i)
-
-                # Remove if final vertex is LLR and R is initial
-                if reduced_leglist[i][-1]['id'] == 45:
-                    first_L, first_R = find_left_and_right_number(reduced_leglist[i])
-                    for boson in reduced_leglist[i][-1]['legs']:
-                        if boson['number'] == first_R and boson['id'] == 80021 and boson['from_group'] == False:
-                            diag_index_to_remove.append(i)
-                # Remove if final vertex is LRR and L is initial
-                if reduced_leglist[i][-1]['id'] == 46:
-                    first_L, first_R = find_left_and_right_number(reduced_leglist[i])
-                    for boson in reduced_leglist[i][-1]['legs']:
-                        if boson['number'] == first_L and boson['id'] == 70021 and boson['from_group'] == False:
-                            diag_index_to_remove.append(i)
-
-                # Remove if final vertex has RR and a propagator is coming from the first L
-                if reduced_leglist[i][-1]['id'] in [40,48,51]:
-                    first_L, first_R = find_left_and_right_number(reduced_leglist[i])
-                    for boson in reduced_leglist[i][-2]['legs']:
-                        if boson['id'] == 70021 and boson['number'] == first_L and boson['from_group'] == True and reduced_leglist[i][-2]['id'] in [42,54]:
-                            diag_index_to_remove.append(i)
-        
-                    for boson in reduced_leglist[i][-3]['legs']:
-                        if boson['id'] == 70021 and boson['number'] == first_L and boson['from_group'] == True and reduced_leglist[i][-3]['id'] in [42,54]:
-                            diag_index_to_remove.append(i)
-        
-                 
-                # Remove if final vertex has LL and a g propagator is coming from the first R
-                # TODO fix bug where this removes non-zero diagrams for 7-g amplitude
-                if reduced_leglist[i][-1]['id'] in [41,47,50]:
-                    first_L, first_R = find_left_and_right_number(reduced_leglist[i])
-                    for boson in reduced_leglist[i][-2]['legs']:
-                        if boson['id'] == 80021 and boson['number'] == first_R and boson['from_group'] == True and reduced_leglist[i][-2]['id'] in [42,56]:
-                            diag_index_to_remove.append(i)
-                    for boson in reduced_leglist[i][-3]['legs']:
-                        if boson['id'] == 80021 and boson['number'] == first_R and boson['from_group'] == True and reduced_leglist[i][-3]['id'] in [42,56]:
-                            diag_index_to_remove.append(i)   
-
-                # Remove if final vertex has RR and a gL is coming from a 4g vertex containing the first L
-                # TODO fix bug where this removes non-zero diagrams for 7-g amplitude
-                if reduced_leglist[i][-1]['id'] == 46:
-                    first_L, first_R = find_left_and_right_number(reduced_leglist[i])
-                    for boson in reduced_leglist[i][-2]['legs']:
-                        if boson['id'] == 70021 and boson['number'] == first_L and reduced_leglist[i][-2]['id'] == 54:
-                            diag_index_to_remove.append(i)
-                    for boson in reduced_leglist[i][-3]['legs']:
-                        if boson['id'] == 70021 and boson['number'] == first_L and reduced_leglist[i][-3]['id'] == 54:
-                            diag_index_to_remove.append(i)
-                
-                # Remove if final vertex has LL and a gR is coming from a 4g vertex containing the first R
-                if reduced_leglist[i][-1]['id'] == 45:
-                    first_L, first_R = find_left_and_right_number(reduced_leglist[i])
-                    for boson in reduced_leglist[i][-2]['legs']:
-                        if boson['id'] == 80021 and boson['number'] == first_R and reduced_leglist[i][-2]['id'] == 56:
-                            diag_index_to_remove.append(i)
-                    for boson in reduced_leglist[i][-3]['legs']:
-                        if boson['id'] == 80021 and boson['number'] == first_R and reduced_leglist[i][-3]['id'] == 56:
-                            diag_index_to_remove.append(i) 
-                
-        # AW: check for and remove duplicates in the list
-        checked_list = []
-        last_index = -1
-        for index in diag_index_to_remove:
-            if index != last_index:
-                checked_list.append(index)
-            last_index = index
-        checked_list.reverse()    
-        for index in checked_list:
-            reduced_leglist.pop(index)
-
         #In LoopAmplitude the function below is overloaded such that it
         #converts back all DGLoopLegs to Legs. In the default tree-level
         #diagram generation, this does nothing.
@@ -1222,10 +1045,22 @@ class Amplitude(base_objects.PhysicsObject):
         # find first left (anti)fermion and first right (anti)fermion
         # TODO: update this when updating pdg conventions!
         # AW: Added quarks
+        # EB: Added conditions for finding first massive (anti)fermion with positive 
+        #     spin direction and first massive (anti)fermion with negative spin direction.
+        # EB: Added conditions for finding first left and first right photon.
+        #     TODO: Update to work with the other bosons.
+        #     TODO: Add additional massive fermions to list when they are implemented.
         found_left_ferm = False
         found_right_ferm = False
+        found_pos_ferm = False
+        found_neg_ferm = False
+        found_left_photon = False
+        found_right_photon = False
+        massive = False
+        numb_left_photons = 0
+        numb_right_photons = 0
+        #misc.sprint(ext_legs)
         for leg in ext_legs:
-            #misc.sprint(leg)
             if abs(leg.get('id')) in [90001, 90005, 70001, 70002] and not found_left_ferm:
                 left_ferm = copy.copy(leg)
                 # if incoming particle, flip to outgoing id
@@ -1239,6 +1074,30 @@ class Amplitude(base_objects.PhysicsObject):
                 if right_ferm.get('state') == False:
                     right_ferm['id'] = -right_ferm['id']
                 found_right_ferm = True
+            elif abs(leg.get('id')) in [70011,70013,70015] and not found_pos_ferm:
+                pos_ferm=copy.copy(leg)
+                # if incoming particle, flip to outgoing id
+                if pos_ferm.get('state') == False:
+                    pos_ferm['id'] = -pos_ferm['id']
+                found_pos_ferm = True
+                massive = True
+            elif abs(leg.get('id')) in [80011,80013,80015] and not found_neg_ferm:
+                neg_ferm=copy.copy(leg)
+                # if incoming particle, flip to outgoing id
+                if neg_ferm.get('state') == False:
+                    neg_ferm['id'] = -neg_ferm['id']
+                found_neg_ferm = True
+                massive = True
+            elif leg.get('id') in [90023]:
+                if not found_left_photon:
+                    left_photon = copy.copy(leg)
+                    found_left_photon = True
+                numb_left_photons += 1
+            elif leg.get('id') in [90024]:
+                if not found_right_photon:
+                    right_photon = copy.copy(leg)
+                    found_right_photon = True
+                numb_right_photons += 1
             elif found_right_ferm and found_left_ferm:
                 break
         
@@ -1271,6 +1130,21 @@ class Amplitude(base_objects.PhysicsObject):
                 else: 
                     ref_mom.append(-1)
             self.set('ref_momenta', ref_mom)
+        # EB: Add the vanishing combinations if there are massive fermions.
+        elif massive:
+            if found_pos_ferm and found_right_photon:
+                if not found_neg_ferm or numb_left_photons > numb_right_photons:
+                    if pos_ferm.get('number') < right_photon.get('number'):
+                        vanishing_combs.append((pos_ferm, right_photon))
+                    else:
+                        vanishing_combs.append((right_photon, pos_ferm))
+                
+            if found_neg_ferm and found_left_photon:
+                if not found_pos_ferm or numb_left_photons <= numb_right_photons:
+                    if neg_ferm.get('number') < left_photon.get('number'):
+                        vanishing_combs.append((neg_ferm, left_photon))
+                    else:
+                        vanishing_combs.append((left_photon, neg_ferm))
         else:
             #AW: here we find vanishing combos for diagrams with no fermions
             found_left_boson = False
@@ -1286,11 +1160,9 @@ class Amplitude(base_objects.PhysicsObject):
 
                 if leg.get('id') == 70021 and not found_left_boson:
                     left_boson = leg
-                    left_bosons.append(leg)
                     found_left_boson = True
                 elif leg.get('id') == 80021 and not found_right_boson:
                     right_boson = leg
-                    right_bosons.append(leg)
                     found_right_boson = True
             
             if found_left_boson and found_right_boson:
@@ -1351,7 +1223,7 @@ class Amplitude(base_objects.PhysicsObject):
                             vanishing_combs.append((right_boson,right_bosons[i],right_bosons[j]))
                 
                 if len(left_bosons) > 1:
-                    #AW: add combinations of first right with two left bosons
+                    #AW: add combinations of right left with two left bosons
                     for i in range(len(left_bosons)-1):
                         for j in range(i+1,len(left_bosons)):
                             if left_bosons[j].get('number') < right_boson.get('number'):
@@ -1365,19 +1237,10 @@ class Amplitude(base_objects.PhysicsObject):
                     for i in range(len(left_bosons)-1):
                         for j in range(i+1,len(left_bosons)):
                             vanishing_combs.append((left_boson,left_bosons[i],left_bosons[j]))
-                
-                # AW: add combinations with first boson together with two other bosons of opposite chirality
-                for i in range(len(left_bosons)):
-                    for j in range(len(right_bosons)):
-                        if left_bosons[i].get('number') < right_boson.get('number'):
-                            pass
-                            #vanishing_combs.append((left_bosons[i],right_bosons[j],right_boson))
-                
-
-
-                #AW: for small diagrams check the limit (this is checked up to < 6 but we use 2 as a placeholder for debug now)
+            
+                #AW: for small diagrams check the limit
                 if len(ext_legs) < 6:
-                    #AW: add combinations with one initial boson and two bosons with opposite chirality to eachother
+                    #AW: add combinations with one initial boson and two bosons with opposite chirality
                     if len(left_bosons) > 0 and len(right_bosons) > 0:
                         for not_first_left_boson in left_bosons:
                             for not_first_right_boson in right_bosons:
@@ -1393,7 +1256,7 @@ class Amplitude(base_objects.PhysicsObject):
                                     vanishing_combs.append((right_boson,not_first_left_boson,not_first_right_boson))
                                 else:
                                     vanishing_combs.append((right_boson,not_first_right_boson,not_first_left_boson))
-        #misc.sprint(vanishing_combs)
+
         return vanishing_combs
 
     def reduce_leglist(self, curr_leglist, max_multi_to1, ref_dict_to0,
@@ -1416,46 +1279,68 @@ class Amplitude(base_objects.PhysicsObject):
         model = self.get('process').get('model')
         ref_dict_to1 = self.get('process').get('model').get('ref_dict_to1')
 
-
         ext_legs = self.get('process').get('legs')
 
         
         if (is_first_it):
             #AW: check for forbidden chiralities
-            left_particles = [70021,70001,70002,90001,90005,90023]
-            right_particles = [80021,80001,80002,90003,90007,90024]
+            #EB: Updated to work with massive fermions
+            #     To do: Add additional massive fermions to list when they are implemented
+            left_particles = [70021,70001,-70001,70002,-70002,90001,-90001,90005,-90005,90023]
+            right_particles = [80021,80001,-80001,80002,-80001,90003,-90003,90007,-90007,90024]
+            massive_pos_ferm = [70011,70013,70015]
+            massive_neg_ferm = [80011,80013,80015]
+            N_left_init = 0
+            N_right_init = 0
+            N_left_final = 0
+            N_right_final = 0
             N_left = 0
             N_right = 0
+            N_pos = 0
+            N_neg = 0
             for leg in ext_legs:
                 if leg.get('id') in left_particles:
                     N_left += 1
+                    if leg.get('state') == False:
+                        N_left_init += 1
+                    if leg.get('state') == True:
+                        N_left_final += 1
                 if leg.get('id') in right_particles:
                     N_right += 1
-            if N_left < 2 or N_right < 2:
-                return None
-    
-
+                    if leg.get('state') == False:
+                        N_right_init += 1
+                    if leg.get('state') == True:
+                        N_right_final += 1
+                if abs(leg.get('id')) in massive_pos_ferm:
+                    N_pos += 1
+                    if leg.get('state') == False:
+                        N_right_init += 1
+                        N_left_init += 1
+                    if leg.get('state') == True:
+                        N_right_final += 1
+                        N_left_final += 1
+                if abs(leg.get('id')) in massive_neg_ferm:
+                    N_neg += 1
+                    if leg.get('state') == False:
+                        N_right_init += 1
+                        N_left_init += 1
+                    if leg.get('state') == True:
+                        N_right_final += 1
+                        N_left_final += 1
+           # if N_left_init < 1 or N_right_init < 1 or N_left_final < 1 or N_right_final< 1:
+             #   return None
+            #if N_left+N_pos < 2 or N_right+N_neg < 2:
+             #   return None
 
         # If all legs can be combined in one single vertex, add this
         # vertex to res and continue.
         # Special treatment for decay chain legs
 
-
-        #AW: need to add missing interactions
-        """ if model.get('name') == 'gauge_cf':
-            ref_dict_to0[(70021, 80021)] = [0] """
-
-        # AL: temporary switch to turn off removal of vanishing combinations
-        remove_combs = True
-        #remove_combs = False
         # AL: TODO: put is_first_it here in case of e.g. 4-gluon amplitude
-        # AW: removes the vanishing 4g vertex of the 4g amplitude assuming smart gauge choice
-        remove_4g = False
-        if is_first_it and len(curr_leglist) == 4 and remove_combs:
-            remove_4g = True 
-        if curr_leglist.can_combine_to_0(ref_dict_to0, is_decay_proc) and not remove_4g:
+        
+        if curr_leglist.can_combine_to_0(ref_dict_to0, is_decay_proc):
             # Extract the interaction id associated to the vertex 
-            #misc.sprint('+1 diagrams')
+            
             vertex_ids = self.get_combined_vertices(curr_leglist,
                        copy.copy(ref_dict_to0[tuple(sorted([leg.get('id') for \
                                                        leg in curr_leglist]))]))
@@ -1463,7 +1348,6 @@ class Amplitude(base_objects.PhysicsObject):
             final_vertices = [base_objects.Vertex({'legs':curr_leglist,
                                                    'id':vertex_id}) for \
                               vertex_id in vertex_ids]
-
             # Check for coupling orders. If orders < 0, skip vertex
             for final_vertex in final_vertices:
                 if self.reduce_orders(coupling_orders, model,
@@ -1484,7 +1368,11 @@ class Amplitude(base_objects.PhysicsObject):
 
         if (is_first_it): 
 
-
+            # AL: temporary switch to turn off removal of vanishing combinations
+            # AW: Look here later, switch to false to test
+            #remove_combs = True
+            remove_combs = False
+            
             # AL: now remove from comb_lists those processes which vanish due to ref momentum
             vanishing_combs = self.get_vanishing_combs(ext_legs)
             # AL: remove combinations which vanish
@@ -1521,6 +1409,8 @@ class Amplitude(base_objects.PhysicsObject):
 
         # Create a list of leglists/vertices by merging combinations
         leg_vertex_list = self.merge_comb_legs(comb_lists, ref_dict_to1)
+
+        #misc.sprint(leg_vertex_list)
 
         res_length = len(res)
         # Consider all the pairs
@@ -1727,12 +1617,18 @@ class Amplitude(base_objects.PhysicsObject):
                     #misc.sprint(leg_vert_ids)
                     leg_ids = [leg[0] for leg in leg_vert_ids]
                     
-                    #misc.sprint(leg_vert_ids)
-                    #misc.sprint(leg_ids)
-                    
-                    
                     if leg_ids == [90022, 90023, 90024]:
                         leg_vert_ids = [leg_vert_ids[0]]
+
+                    #EB: Remove spin plus and minus fermion propagators.
+                    #   To do: Add other fermions to list when implementing the rest of the UFO.
+                    pre_prop_rem_ids = [[70011, 80011, 11], [-70011, -80011, -11], \
+                                        [70013, 80013, 13], [-70013, -80013, -13], \
+                                        [70015, 80015, 15], [-70015, -80015, -15]]
+                    if leg_ids in pre_prop_rem_ids:
+                        leg_vert_ids = [leg_vert_ids[2]]
+        
+
                     # AW: Keep only non chiral gluon and photon propagator. Had some problems here check if nessesary
                     """ if leg_ids == [21, 70021, 80021, 90022, 90023, 90024]:
                         leg_vert_ids = [leg_vert_ids[0], leg_vert_ids[3]]   
@@ -2294,7 +2190,9 @@ class MultiProcess(base_objects.PhysicsObject):
 
         # AL: check if chiral processes (we only have chiral particles in cf model.
         # This can be updated if we add masses/have different needs for different particles)
-        is_chiral = model.get('name') == 'cf' or model.get('name') == 'colorless_cf' or model.get('name') == 'gauge_cf'
+        #EB: Updated to also get right chiral boson before left chiral boson if there are massive fermions.
+        is_chiral = model.get('name') == 'cf' or model.get('name') == 'colorless_cf' or model.get('name') == 'gauge_cf'\
+            or model.get('name') in ['massive_cf', 'massive_cf-lepton_masses'] 
         
         islegs_orig = [leg for leg in process_definition['legs'] \
                  if leg['state'] == False]
@@ -2449,12 +2347,14 @@ class MultiProcess(base_objects.PhysicsObject):
                 
                 # AL: for now turn off crossing to get ref momenta correct 
                 # (done using if not process.get('model').get('name') == 'cf').
+                # EB: Added massive case as well.
                 # TODO: For future would be good to make crossing work properly instead
 
                 if not process.get('required_s_channels') and \
                    not process.get('forbidden_onsh_s_channels') and \
                    not process.get('forbidden_s_channels') and \
                    not process.get('model').get('name') == 'cf' and not process.get('model').get('name') == 'gauge_cf' and \
+                   not process.get('model').get('name') in ['massive_cf', 'massive_cf-lepton_masses'] and\
                    not process.get('is_decay_chain') and not diagram_filter:
                     try:
                         crossed_index = success_procs.index(sorted_legs)
