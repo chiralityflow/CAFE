@@ -683,7 +683,9 @@ class HelasWavefunction(base_objects.PhysicsObject):
                     # AL: if gauge boson, set reference momentum
                     # AL: TODO: update when we update pid conventions
                     # AW: added gluons
-                    if leg.get('id') in [90023, 90024, 70021, 80021]:
+                    # EB: added massive fermions.
+                    # EB: TODO: add additional fermions when they are implemented.
+                    if abs(leg.get('id')) in [90023,90024,70021,80021,70011,80011,70013,80013,70015,80015]:
                         self.set('ref_mom', ref_momenta[leg.get('number')-1])
                 
                 # decay_ids is the pdg codes for particles with decay
@@ -1673,9 +1675,6 @@ class HelasWavefunction(base_objects.PhysicsObject):
         state_number = {'incoming':-1 if not flip else 1,
                         'outgoing': 1 if not flip else -1,
                         'intermediate': 1, 'initial': 1, 'final': 1}
-        #misc.sprint(self.get('state'))
-        #misc.sprint(self.get('spin'))
-        #misc.sprint(self.get('pdg_codes'))
         return self.get('fermionflow') * \
                   state_number[self.get('state')] * \
                   self.get('spin')
@@ -1747,7 +1746,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
             
 
         
-        #misc.sprint(res)
+
         return (tuple(res), tuple(self.get('lorentz')))
 
     def get_base_vertices(self, wf_dict, vx_list = [], optimization = 1):
@@ -2437,13 +2436,9 @@ class HelasWavefunctionList(base_objects.PhysicsObjectList):
         if pdg_codes == mother_codes:
             # Already sorted - skip sort below
             return mothers, my_index
-        
-        # AW: debug
-        #misc.sprint(mother_codes, pdg_codes)
+
         sorted_mothers = []
-        #misc.sprint(mother_codes, pdg_codes)
         for i, code in enumerate(pdg_codes):
-            #misc.sprint(mother_codes)
             index = mother_codes.index(code)
             mother_codes.pop(index)
             mother = mothers.pop(index)
@@ -3625,13 +3620,10 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 fermions.append(codes)
 
         # AW: To think about: do we want to sort bosons in a ggg vertex?
-        #misc.sprint(bosons)
         bosons.sort()
-        #misc.sprint(bosons)
         fermions.sort()
         pdg_codes = fermions + bosons
 
-        #misc.sprint(vert_id_to_pdgs_dict)
         #misc.sprint(pdg_codes)
         # pdg_codes.sort()
         #print(pdg_codes, 'sorted')
@@ -3822,7 +3814,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 
                 """ if new_int_mp['particles'][0]['color'] == 3:
                     new_int_mp['particles'][0]['chiral_color'] = -3
-                    new_int_mp['particles'][1]['chiral_color'] = 3
+                    new_int_mp['particles'][1]['chiral_color'] = 3fff
                     new_int_pm['particles'][0]['chiral_color'] = -3
                     new_int_pm['particles'][1]['chiral_color'] = 3 """
 
@@ -3836,7 +3828,9 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 model.get('interactions').append(new_int_mp)
                 model.get('interaction_dict')[n_ints_in_model + 2] = new_int_pm
                 model.get('interactions').append(new_int_pm)
-  
+
+       
+        #misc.sprint(vert_ids_to_pdg)
         return model, vert_ids_to_pdg
 
     # AL: New function to get reference momenta for each gauge boson
@@ -3853,8 +3847,15 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # find first left (anti)fermion and first right (anti)fermion
         # TODO: update this when updating pdg conventions!
         # AW: Added quarks
+        # EB: Added conditions for finding first massive (anti)fermion with positive 
+        #     spin direction and first massive (anti)fermion with negative spin direction.
+        # EB: Added conditions for finding first left and first right photon.
+        #     TODO: Update to work with the other bosons.
+        #     TODO: Add additional massive fermions to list when they are implemented.
         found_left_ferm = False
         found_right_ferm = False
+        found_mass_ferm = False
+        found_first_photon = False
         for leg in legs:
             if abs(leg.get('id')) in [90001, 90005, 70001, 70002] and not found_left_ferm:
                 left_ferm = leg
@@ -3863,54 +3864,79 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             elif abs(leg.get('id')) in [90003, 90007, 80001, 80002] and not found_right_ferm:
                 right_ferm = leg
                 found_right_ferm = True
+            elif abs(leg.get('id')) in [70011,70013,70015,80011,80013,80015] and not found_mass_ferm:
+                mass_ferm = leg
+                found_mass_ferm = True
+            elif abs(leg.get('id')) in [90023,90024] and not found_first_photon:
+                first_photon = leg
+                found_first_photon = True
             elif found_right_ferm and found_left_ferm:
                 break
         
+        # EB: Setting photon reference momenta and fermion q momenta.
+        # TODO: Update this to proper one once working.
+        if found_mass_ferm:
+            
+            for leg in legs:
+                # if massive fermion
+                if abs(leg.get('id')) in [70011,70013,70015,80011,80013,80015]:
+                    if leg.get('number') == mass_ferm.get('number'):
+                        ref_moms.append(first_photon.get('number'))
+                    else:
+                        ref_moms.append(mass_ferm.get('number'))
+                
+                # if photon
+                if leg.get('id') in [90023,90024]:
+                    # if first photon
+                    if leg.get('number') == first_photon.get('number'):
+                        #ref_moms.append(mass_ferm.get('number'))
+                        ref_moms.append(first_photon.get('number')+1)
+
+                    else:
+                        ref_moms.append(first_photon.get('number'))
+
+        else:
         # find photons and update its reference momenta
         # AW: same but for gluons
         # AW: Some QCD processes have no fermions so we check for that
-        if not found_left_ferm and not found_right_ferm:
-            found_left_boson = False
-            found_right_boson = False
-            for leg in legs:
-                if leg.get('id') == 70021 and not found_left_boson:
-                    left_boson = leg
-                    found_left_boson = True
-                elif leg.get('id') == 80021 and not found_right_boson:
-                    right_boson = leg
-                    found_right_boson = True
-                elif found_left_boson and found_right_boson:
-                    break
-            if found_left_boson and found_right_boson:
+            if not found_left_ferm and not found_right_ferm:
+                found_left_boson = False
+                found_right_boson = False
                 for leg in legs:
-                    if leg.get('id') == 70021:
-                        ref_moms.append(right_boson.get('number'))
-                    elif leg.get('id') == 80021:
-                        ref_moms.append(left_boson.get('number'))
-                    else:
-                        misc.sprint('ERROR')
-            else:
-                for i in range(len(legs)-1):
-                    ref_moms.append(i+2)
-                ref_moms.append(1)
-                misc.sprint('Forbidden chiralities')
-            return ref_moms
+                    if leg.get('id') == 70021 and not found_left_boson:
+                        left_boson = leg
+                        found_left_boson = True
+                    elif leg.get('id') == 80021 and not found_right_boson:
+                        right_boson = leg
+                        found_right_boson = True
+                    elif found_left_boson and found_right_boson:
+                        break
+                if found_left_boson and found_right_boson:
+                    for leg in legs:
+                        if leg.get('id') == 70021:
+                            ref_moms.append(right_boson.get('number'))
+                        elif leg.get('id') == 80021:
+                            ref_moms.append(left_boson.get('number'))
+                        else:
+                            misc.sprint('ERROR')
+                else:
+                    for i in range(len(legs)-1):
+                        ref_moms.append(i+2)
+                    ref_moms.append(1)
+                    misc.sprint('Forbidden chiralities')
+                return ref_moms
             
-            
-            
-    
-        for leg in legs:
-            # if left photon (AW: or gluon), append right (anti)fermion
-            if leg.get('id') == 90023 or leg.get('id') == 70021:
-                ref_moms.append(right_ferm.get('number'))
-                # ref_moms.append(left_ferm.get('number'))
-            # if right photon (AW: or gluon), append left (anti)fermion
-            elif leg.get('id') == 90024 or leg.get('id') == 80021:
-                ref_moms.append(left_ferm.get('number'))
-                # ref_moms.append(right_ferm.get('number'))
-            # else append -1
-            else: ref_moms.append(-1)
-            
+            for leg in legs:
+                # if left photon (AW: or gluon), append right (anti)fermion
+                if leg.get('id') == 90023 or leg.get('id') == 70021:
+                    ref_moms.append(right_ferm.get('number'))
+                    # ref_moms.append(left_ferm.get('number'))
+                # if right photon (AW: or gluon), append left (anti)fermion
+                elif leg.get('id') == 90024 or leg.get('id') == 80021:
+                    ref_moms.append(left_ferm.get('number'))
+                    # ref_moms.append(right_ferm.get('number'))
+                # else append -1
+                else: ref_moms.append(-1)
         return ref_moms
         
     def generate_helas_diagrams(self, amplitude, optimization=1,decay_ids=[]):
@@ -3963,7 +3989,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                                         HelasWavefunction(leg, 0, model,
                                                           ref_momenta, decay_ids)) \
                                        for leg in process.get('legs')])
-
+        
         # Initially, have one wavefunction for each external leg.
         wf_number = len(process.get('legs'))
 
@@ -3974,7 +4000,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             if wf.is_boson() and wf.get('state') == 'initial' and \
                not wf.get('self_antipart'):
                 wf.set('is_part', not wf.get('is_part'))
-
+            
         # For initial state particles, need to flip PDG code (if has
         # antipart)
         for key in external_wavefunctions.keys():
@@ -3993,7 +4019,10 @@ class HelasMatrixElement(base_objects.PhysicsObject):
 
         # AL: Add LL and RR interactions to model, 
         # and get dictionary of vertex names to vertex ids
-        model, vert_id_to_pdgs_dict = self.add_LL_RR_vertices(\
+        #EB: Don't do this for massive case
+
+        if not model.get('name') in ['massive_cf','massive_cf-lepton_masses']:
+            model, vert_id_to_pdgs_dict = self.add_LL_RR_vertices(\
                                  amplitude, external_wavefunctions)
 
         for diagram in diagram_list:
@@ -4010,13 +4039,10 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             diagram_wavefunctions = HelasWavefunctionList()
 
             vertices = copy.copy(diagram.get('vertices'))
-            
-            #misc.sprint(diagram_number+1,vertices)
 
             # Single out last vertex, since this will give amplitude
             lastvx = vertices.pop()
-            #misc.sprint(diagram_number+1)
-            #misc.sprint(lastvx['legs'])
+
             # Go through all vertices except the last and create
             # wavefunctions
             for vertex in vertices:
@@ -4039,7 +4065,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 is_chiral = self.is_chiral_particles(external_wavefunctions)
 
                 # if chiral and LL or RR, get the new vertex id
-                if is_chiral:
+                # EB: Update to not do this for massive case
+                if is_chiral and not model.get('name') in ['massive_cf','massive_cf-lepton_masses']:
                     # First get ids in vertex.
                     vids = []
                     for part in vertex['legs']:
@@ -4047,27 +4074,25 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     
                     updated_vertex = self.set_new_vertex_id(vertex, vids, vert_id_to_pdgs_dict)
                     vertex.set('id', updated_vertex.get('id'))
-                    #misc.sprint(vertex.get('id'), vids)
-                    
+
+
                 for number_wf_dict, color_list in zip(number_to_wavefunctions,
                                                      color_lists):
                     legs = copy.copy(vertex.get('legs'))
                     last_leg = legs.pop()
-                    #misc.sprint(last_leg.get('id'))
                     # Generate list of mothers from legs
                     mothers = self.getmothers(legs, number_wf_dict,
                                               external_wavefunctions,
                                               wavefunctions,
                                               diagram_wavefunctions)
                     inter = model.get('interaction_dict')[vertex.get('id')]
-                    #misc.sprint(vertex.get('id'),inter)
+
                     # Now generate new wavefunction for the last leg
 
                     # Need one amplitude for each color structure,
                     done_color = {} # store link to color
                     for coupl_key in sorted(inter.get('couplings').keys()):
                         color = coupl_key[0]
-                        #misc.sprint(coupl_key)
                         if color in done_color:
                             wf = done_color[color]
                             wf.get('coupling').append(inter.get('couplings')[coupl_key])
@@ -4075,7 +4100,6 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                             continue
                         wf = HelasWavefunction(last_leg, vertex.get('id'), model)
                         wf.set('coupling', [inter.get('couplings')[coupl_key]])
-                        #misc.sprint(wf.get('coupling'))
                         if inter.get('color'):
                             wf.set('inter_color', inter.get('color')[coupl_key[0]])
                         done_color[color] = wf
@@ -4138,93 +4162,26 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                                                   color_lists):
                 # Now generate HelasAmplitudes from the last vertex.
                 if lastvx.get('id'):
-                    #misc.sprint(lastvx.get('id'))
                     # AL: Change vertex ids as in wavefunction case
                     # Check if the process involves chiral fermions
                     is_chiral = self.is_chiral_particles(external_wavefunctions)
                     
-                    """ not_ggg = False
-                    for part in lastvx['legs']:
-                        if part['id'] not in [21,70021,80021]:
-                            not_ggg = True 
                     # if chiral and LL or RR, get the new vertex id
-                    misc.sprint(not_ggg) """
-
-                    if is_chiral:
+                    # EB: don't do this in massive case
+                    if is_chiral and not model.get('name') in ['massive_cf','massive_cf-lepton_masses']:
                     # First get ids in vertex.
                         vids = []
                         for part in lastvx['legs']:
                             vids.append(part['id'])
-                        
-                        #misc.sprint(vids, vert_id_to_pdgs_dict)
-                        #misc.sprint(lastvx.get('id'), lastvx)
-                        updated_lastvx = self.set_new_vertex_id(lastvx, vids, vert_id_to_pdgs_dict)
-                        lastvx.set('id', updated_lastvx.get('id'))
-                        
-                        #misc.sprint(lastvx.get('id'), vids)
-                    
-                    #misc.sprint(diagram_number)
-                    #misc.sprint(lastvx.get('id'))
 
-                    # AW: we should only change the ref dict in gauge_cf
-                    if model.get('name') == 'gauge_cf':
-                        is_ggg = True
-                        for part in lastvx['legs']:
-                            if part['id'] not in [21,70021,80021]:
-                                is_ggg = False 
+                        updated_lastvx = self.set_new_vertex_id(lastvx, vids, vert_id_to_pdgs_dict)
+
+                        lastvx.set('id', updated_lastvx.get('id'))
                     
-                        # AW: we need to set the correct vertex ids for the last vertex since we have modified the ref dicts
-                        # TODO: automate this in a nicer way
-                        if is_ggg:
-                            N_g = 0
-                            N_gl = 0
-                            N_gr = 0
-                            for part in lastvx['legs']:
-                                if part['id'] == 21:
-                                    N_g += 1
-                                if part['id'] == 70021:
-                                    N_gl += 1
-                                if part['id'] == 80021:
-                                    N_gr += 1
-                            if N_gl == 0 and N_gr == 0 and N_g == 3:
-                                lastvx.set('id', 37)
-                            if N_gl == 1 and N_gr == 0 and N_g == 2:
-                                lastvx.set('id', 38)
-                            if N_gl == 0 and N_gr == 1 and N_g == 2:
-                                lastvx.set('id', 39)
-                            if N_gl == 0 and N_gr == 2 and N_g == 1:
-                                lastvx.set('id', 40)
-                            if N_gl == 2 and N_gr == 0 and N_g == 1:
-                                lastvx.set('id', 41)
-                            if N_gl == 1 and N_gr == 1 and N_g == 1:
-                                lastvx.set('id', 42)
-                            if N_gl == 3 and N_gr == 0 and N_g == 0:
-                                lastvx.set('id', 43)
-                            if N_gl == 0 and N_gr == 3 and N_g == 0:
-                                lastvx.set('id', 44)
-                            if N_gl == 2 and N_gr == 1 and N_g == 0:
-                                lastvx.set('id', 45)
-                            if N_gl == 1 and N_gr == 2 and N_g == 0:
-                                lastvx.set('id', 46)
-                            if N_gl == 1 and N_gr == 2 and N_g == 1:
-                                lastvx.set('id', 51)
-                            if N_gl == 2 and N_gr == 1 and N_g == 1:
-                                lastvx.set('id', 50)
-                            if N_gl == 2 and N_gr == 2 and N_g == 0:
-                                lastvx.set('id', 55)
-                            if N_gl == 2 and N_gr == 0 and N_g == 2:
-                                lastvx.set('id', 47)
-                            if N_gl == 0 and N_gr == 2 and N_g == 2:
-                                lastvx.set('id', 48)
-                            
-                    #misc.sprint(lastvx.get('id'))
                     inter = model.get_interaction(lastvx.get('id'))
-                    #misc.sprint(inter)
-                    #misc.sprint(lastvx.get('id'))
                     keys = sorted(inter.get('couplings').keys())
                     pdg_codes = [p.get_pdg_code() for p in \
                                  inter.get('particles')]
-                    #misc.sprint(pdg_codes, lastvx.get('id'))
                 else:
                     # Special case for decay chain - amplitude is just a
                     # placeholder for replaced wavefunction
@@ -4233,8 +4190,6 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     pdg_codes = None
 
                 # Find mothers for the amplitude
-                # AW: crashes here since we added (21,70021), etc.
-                #misc.sprint(diagram_number)
                 legs = lastvx.get('legs')
                 mothers = self.getmothers(legs, number_wf_dict,
                                           external_wavefunctions,
@@ -4317,7 +4272,6 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # Sort all mothers according to the order wanted in Helas calls
         for wf in self.get_all_wavefunctions():
             wf.set('mothers', HelasMatrixElement.sorted_mothers(wf))
-            #misc.sprint(wf.get('mothers'))
 
         for amp in self.get_all_amplitudes():
             amp.set('mothers', HelasMatrixElement.sorted_mothers(amp))
@@ -5170,11 +5124,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
 
         mothers = HelasWavefunctionList()
 
-        # AW: debugging here
-        #misc.sprint(legs)
-
         for leg in legs:
-            #misc.sprint(leg.get('number'))
             try:
                 # The mother is an existing wavefunction
                 wf = number_to_wavefunctions[leg.get('number')]
@@ -5184,11 +5134,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 number_to_wavefunctions[leg.get('number')] = wf
                 if not wf in wavefunctions and not wf in diagram_wavefunctions:
                     diagram_wavefunctions.append(wf)
-            
-            #misc.sprint(wf)
             mothers.append(wf)
 
-        #misc.sprint(mothers)
         return mothers
     
 
@@ -5738,7 +5685,6 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             my_pdg_code = arg.get_anti_pdg_code()
             my_spin = arg.get_spin_state_number()
 
-        #misc.sprint(arg.get('pdg_codes'))
         sorted_mothers, my_index = arg.get('mothers').sort_by_pdg_codes(\
             arg.get('pdg_codes'), my_pdg_code)
 
@@ -6294,7 +6240,7 @@ class HelasMultiProcess(base_objects.PhysicsObject):
         combine = combine_matrix_elements
 
         # AL: don't combine matrix elements if chiral
-        if amplitudes[0].get('process').get('model').get('name') == 'cf' or amplitudes[0].get('process').get('model').get('name') == 'gauge_cf':
+        if amplitudes[0].get('process').get('model').get('name') == 'cf':
             combine_matrix_elements = False
 
         if 'mode' in matrix_element_opts and matrix_element_opts['mode']=='MadSpin':
