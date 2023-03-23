@@ -3856,6 +3856,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         found_right_ferm = False
         found_mass_ferm = False
         found_first_photon = False
+        found_second_photon = False
         for leg in legs:
             if abs(leg.get('id')) in [90001, 90005, 70001, 70002] and not found_left_ferm:
                 left_ferm = leg
@@ -3867,9 +3868,13 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             elif abs(leg.get('id')) in [70011,70013,70015,80011,80013,80015] and not found_mass_ferm:
                 mass_ferm = leg
                 found_mass_ferm = True
-            elif abs(leg.get('id')) in [90023,90024] and not found_first_photon:
-                first_photon = leg
-                found_first_photon = True
+            elif abs(leg.get('id')) in [90023,90024]:
+                if not found_first_photon:
+                    first_photon = leg
+                    found_first_photon = True
+                elif found_first_photon and not found_second_photon:
+                    second_photon = leg
+                    found_second_photon = True
             elif found_right_ferm and found_left_ferm:
                 break
         
@@ -3881,7 +3886,11 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 # if massive fermion
                 if abs(leg.get('id')) in [70011,70013,70015,80011,80013,80015]:
                     if leg.get('number') == mass_ferm.get('number'):
-                        ref_moms.append(first_photon.get('number'))
+                        if found_first_photon == True:
+                            ref_moms.append(first_photon.get('number'))
+                        else:
+                            # EB: update this later
+                            ref_moms.append(mass_ferm.get('number'))
                     else:
                         ref_moms.append(mass_ferm.get('number'))
                 
@@ -3890,8 +3899,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     # if first photon
                     if leg.get('number') == first_photon.get('number'):
                         #ref_moms.append(mass_ferm.get('number'))
-                        ref_moms.append(first_photon.get('number')+1)
-
+                        ref_moms.append(second_photon.get('number'))
+                        
                     else:
                         ref_moms.append(first_photon.get('number'))
 
@@ -4021,7 +4030,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # and get dictionary of vertex names to vertex ids
         #EB: Don't do this for massive case
 
-        if not model.get('name') in ['massive_cf','massive_cf-lepton_masses']:
+        if not model.get('name') in ['massive_cf', 'massive_cf-lepton_masses', 'massive_cf-lepton_masses_2', 'massive_cf-lepton_masses_3', 'massive_cf-lepton_masses_4']:
             model, vert_id_to_pdgs_dict = self.add_LL_RR_vertices(\
                                  amplitude, external_wavefunctions)
 
@@ -4066,7 +4075,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
 
                 # if chiral and LL or RR, get the new vertex id
                 # EB: Update to not do this for massive case
-                if is_chiral and not model.get('name') in ['massive_cf','massive_cf-lepton_masses']:
+                if is_chiral and not model.get('name') in ['massive_cf','massive_cf-lepton_masses','massive_cf-lepton_masses_2','massive_cf-lepton_masses_3','massive_cf-lepton_masses_4']:
                     # First get ids in vertex.
                     vids = []
                     for part in vertex['legs']:
@@ -4168,7 +4177,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     
                     # if chiral and LL or RR, get the new vertex id
                     # EB: don't do this in massive case
-                    if is_chiral and not model.get('name') in ['massive_cf','massive_cf-lepton_masses']:
+                    if is_chiral and not model.get('name') in ['massive_cf','massive_cf-lepton_masses','massive_cf-lepton_masses_2','massive_cf-lepton_masses_3','massive_cf-lepton_masses_4']:
                     # First get ids in vertex.
                         vids = []
                         for part in lastvx['legs']:

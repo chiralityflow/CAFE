@@ -94,8 +94,6 @@ c           AW: represent the vector bosons in a matrix (outer product)
             vcl(5) = -pketsq(2)*rbraan(1)*dsqrt(rTwo)/rpprod
             vcl(6) = pketsq(1)*rbraan(1)*dsqrt(rTwo)/rpprod
             
- 
-
 
 c nsvhel = -1, i.e. right-chiral (outgoing - hel or incoming + hel)
          else
@@ -195,8 +193,6 @@ c           AW: represent the vector bosons in a matrix (outer product)
             vcr(4) = -rketsq(1)*pbraan(2)*dsqrt(rTwo)/prprod
             vcr(5) = -rketsq(2)*pbraan(1)*dsqrt(rTwo)/prprod
             vcr(6) = rketsq(1)*pbraan(1)*dsqrt(rTwo)/prprod
-
-
          
 c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
          else
@@ -617,7 +613,7 @@ c
       
         fmi(5) = nsf*fmass*qketan(1)/pbqprod
         fmi(6) = nsf*fmass*qketan(2)/pbqprod       
-       
+        write(*,*) 'im1:  nsf=   ', nsf, 'nspin=   ', nspin
       endif
       
 c     EB: anti-fermion with negative spin or fermion with positive spin.
@@ -670,7 +666,7 @@ c                                                               (-1 0 )         
       
         fmi(3) = -1*nsf*fmass*qbrasq(1)/qpbprod
         fmi(4) = -1*nsf*fmass*qbrasq(2)/qpbprod  
-      
+        write(*,*) 'im2:  nsf=   ', nsf, 'nspin=   ', nspin
       endif
       
       return
@@ -783,7 +779,7 @@ c                                                               (-1 0 )         
       
         fmo(3) = nsf*fmass*qbrasq(1)/qpbprod
         fmo(4) = nsf*fmass*qbrasq(2)/qpbprod
-                
+        write(*,*) 'om1:  nsf=   ', nsf, 'nspin=   ', nspin        
       endif
       
 c     EB: anti-fermion with negative spin or fermion with positive spin.
@@ -831,14 +827,14 @@ c                      ((q^1+i*q^2)/sqrt(q^0+q^3))                   (sqrt(q^0-q
 
 c       pbqprod = <pb q>
 c       pbbraan = <pb| = |pb]^dagger = (epsilon*[pb|)^dagger =( ( 0 1 )*[pb|)^dagger = (pbbrasq(2)^*, -pbbrasq(1)^*)
-c                                                             (-1 0 )
+c                                                               (-1 0 )
 c                    
 
         pbqprod = conjg(pbbrasq(2))*qketan(1)-conjg(pbbrasq(1))*qketan(2)
       
         fmo(5) = -1*nsf*fmass*qketan(1)/pbqprod
         fmo(6) = -1*nsf*fmass*qketan(2)/pbqprod  
-   
+        write(*,*) 'om2:  nsf=   ', nsf, 'nspin=   ', nspin 
       endif
       
       return
