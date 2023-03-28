@@ -1729,7 +1729,7 @@ def vertex_replacer(text, vertex):
         spinor12 = eme_ket('V3','F2')
         spinor21 = ket_eme_pbar('F2','V3','P1')
         spinor22 = eme_bra('F2','V3')
-        # EB: Have swaped the signs for the mass terms (should be other way around).
+        # EB: Have swaped the signs for the mass terms (should be other way around), but needs to be this way to give correct result.
         FFV1_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
             + '      F1(3) = -DENOM*CI*({}-\n     $M1*{})\n'.format(spinor11[0],spinor12[0])\
             + '      F1(4) = -DENOM*CI*({}-\n     $M1*{})\n'.format(spinor11[1],spinor12[1])\
