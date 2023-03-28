@@ -544,26 +544,32 @@ c      pb(3) = p(3) - a*q(3)
 C     EB: change pb to p-forward and q to p-backward for now
 
       pabs = sqrt(p(1)**2+p(2)**2+p(3)**2)
-      
+c     AL: checked
+
       lfor = p(0) + pabs
       lback = p(0) - pabs
-      
+c     AL: checked
+
       ph(1) = p(1)/pabs
       ph(2) = p(2)/pabs
       ph(3) = p(3)/pabs
+c     AL: checked
       
       pb(0) = lfor*rHalf
       pb(1) = lfor*rHalf*ph(1)
       pb(2) = lfor*rHalf*ph(2)
       pb(3) = lfor*rHalf*ph(3)
-      
+c     AL: checked
+
       q(0) = lback*rHalf
       q(1) = -1*lback*rHalf*ph(1)
       q(2) = -1*lback*rHalf*ph(2)
       q(3) = -1*lback*rHalf*ph(3)
-      
+c     AL: checked
+
       fmi(1) = dcmplx(p(0),p(3))*nsf*-1
       fmi(2) = dcmplx(p(1),p(2))*nsf*-1
+c     AL: checked
       
 c     EB: anti-fermion with positive spin or fermion with negative spin.
 c
@@ -582,15 +588,19 @@ c                      = (0,sqrt(pb^0-pb^3)) if pb^3=-pb^0
            sqpb0pb3 = dsqrt(max(pb(0)+pb(3),rZero))
         end if
         pbbrasq(1) = dcmplx( sqpb0pb3 )
-      
+c     AL: checked
+
         if ( sqpb0pb3.eq.rZero ) then
            pbbrasq(2) = dcmplx( dsqrt(rTwo*pb(0)) )
         else
            pbbrasq(2) = dcmplx( pb(1), -pb(2) )/sqpb0pb3
         endif
-      
+c     AL: checked
+
         fmi(3) = pbbrasq(1)
         fmi(4) = pbbrasq(2)
+
+c     AL: checked
 
 c       qketan = |q> = (sqrt(q^0+q^3)            ) = (if q^0 = -q^3) (0            ) 
 c                      ((q^1+i*q^2)/sqrt(q^0+q^3))                   (sqrt(q^0-q^3)) 
@@ -601,12 +611,14 @@ c                      ((q^1+i*q^2)/sqrt(q^0+q^3))                   (sqrt(q^0-q
            sqq0q3 = dsqrt(max(q(0)+q(3),rZero))
         endif
         qketan(1) = dcmplx( sqq0q3 )
+c     AL: checked
       
         if ( sqq0q3.eq.rZero ) then
            qketan(2) = dcmplx( dsqrt(rTwo*q(0)) )
         else
            qketan(2) = dcmplx( q(1), q(2) )/sqq0q3
         endif
+c     AL: checked
 
 c       pbqprod = <pb q>
 c       pbbraan = <pb| = |pb]^dagger = (epsilon*[pb|)^dagger =( ( 0 1 )*[pb|)^dagger = (pbbrasq(2)^*, -pbbrasq(1)^*)
@@ -614,9 +626,11 @@ c                                                               (-1 0 )
 c                    
 
         pbqprod = conjg(pbbrasq(2))*qketan(1)-conjg(pbbrasq(1))*qketan(2)
+c     AL: checked
       
         fmi(5) = nsf*fmass*qketan(1)/pbqprod
-        fmi(6) = nsf*fmass*qketan(2)/pbqprod       
+        fmi(6) = nsf*fmass*qketan(2)/pbqprod
+c     AL: checked       
        
       endif
       
@@ -636,16 +650,19 @@ c                       ((pb^1+i*pb^2)/sqrt(pb^0+pb^3))                    (sqrt
            sqpb0pb3 = dsqrt(max(pb(0)+pb(3),rZero))
         endif
         pbketan(1) = dcmplx( sqpb0pb3 )
+c     AL: checked
       
         if ( sqpb0pb3.eq.rZero ) then
            pbketan(2) = dcmplx( dsqrt(rTwo*pb(0)) )
         else
            pbketan(2) = dcmplx( pb(1), pb(2) )/sqpb0pb3
         endif
+c     AL: checked
       
         fmi(5) = pbketan(1)
         fmi(6) = pbketan(2)
-      
+c     AL: checked
+
 c       qbrasq = [q| = (sqrt(q^0+q^3), (q^1-i*q^2)/sqrt(q^0+q^3))
 c                    = (0,sqrt(q^0-q^3)) if q^3=-q^0
 
@@ -655,27 +672,31 @@ c                    = (0,sqrt(q^0-q^3)) if q^3=-q^0
            sqq0q3 = dsqrt(max(q(0)+q(3),rZero))
         end if
         qbrasq(1) = dcmplx( sqq0q3 )
-      
+c     AL: checked
+
         if ( sqq0q3.eq.rZero ) then
            qbrasq(2) = dcmplx( dsqrt(rTwo*q(0)) )
         else
            qbrasq(2) = dcmplx( q(1), -q(2) )/sqq0q3
         endif
+c     AL: checked
 
 c       qpbprod = [q pb]
 c       pbketsq = |pb] = <pb|^dagger = (epsilon*|pb>^dagger = ( ( 0 1 )*|pb> )^dagger = (pbketan(2)^*)
 c                                                               (-1 0 )                 (-pbketan(1)^*)
 
         qpbprod = qbrasq(1)*conjg(pbketan(2))-qbrasq(2)*conjg(pbketan(1))
-      
+c     AL: checked
+
         fmi(3) = -1*nsf*fmass*qbrasq(1)/qpbprod
         fmi(4) = -1*nsf*fmass*qbrasq(2)/qpbprod  
-      
+c     AL: checked (note -1 compensates for `wrong' order of inner product!)
+
       endif
       
       return
       end
-      
+c     AL: checked
 
 
       subroutine omxxxx(p, fmass, nspin, nsf, q, pb, fmo)
@@ -712,26 +733,32 @@ c      pb(3) = p(3) - a*q(3)
 C     EB: change pb to p-forward and q to p-backward for now
       
       pabs = sqrt(p(1)**2+p(2)**2+p(3)**2)
-      
-      lfor = p(0) + pabs
+c     AL: checked
+
+      lfor  = p(0) + pabs
       lback = p(0) - pabs
-      
+c     AL: checked
+
       ph(1) = p(1)/pabs
       ph(2) = p(2)/pabs
       ph(3) = p(3)/pabs
-      
+c     AL: checked
+
       pb(0) = lfor*rHalf
       pb(1) = lfor*rHalf*ph(1)
       pb(2) = lfor*rHalf*ph(2)
       pb(3) = lfor*rHalf*ph(3)
-      
+c     AL: checked
+
       q(0) = lback*rHalf
       q(1) = -1*lback*rHalf*ph(1)
       q(2) = -1*lback*rHalf*ph(2)
       q(3) = -1*lback*rHalf*ph(3)
-      
+c     AL: checked
+
       fmo(1) = dcmplx(p(0),p(3))*nsf
       fmo(2) = dcmplx(p(1),p(2))*nsf
+c     AL: checked
 
 c     EB: anti-fermion with positive spin or fermion with negative spin.
 c
@@ -742,25 +769,30 @@ c
 
 c       pbketan = |pb> = (sqrt(pb^0+pb^3)            ) = (if pb^0 = -pb^3) (0            ) 
 c                       ((pb^1+i*pb^2)/sqrt(pb^0+pb^3))                    (sqrt(pb^0-pb^3))      
-      
+c     AL: checked
+
         if(pb(1).eq.0d0.and.pb(2).eq.0d0.and.pb(3).lt.0d0) then
            sqpb0pb3 = 0d0
         else
            sqpb0pb3 = dsqrt(max(pb(0)+pb(3),rZero))
         endif
         pbketan(1) = dcmplx( sqpb0pb3 )
-      
+c     AL: checked
+
         if ( sqpb0pb3.eq.rZero ) then
            pbketan(2) = dcmplx( dsqrt(rTwo*pb(0)) )
         else
            pbketan(2) = dcmplx( pb(1), pb(2) )/sqpb0pb3
         endif
-      
+c     AL: checked
+
         fmo(5) = pbketan(1)
         fmo(6) = pbketan(2)
-      
+c     AL: checked
+
 c       qbrasq = [q| = (sqrt(q^0+q^3), (q^1-i*q^2)/sqrt(q^0+q^3))
 c                    = (0,sqrt(q^0-q^3)) if q^3=-q^0
+c     AL: checked
 
         if(q(1).eq.0d0.and.q(2).eq.0d0.and.q(3).lt.0d0) then
            sqq0q3 = 0d0
@@ -768,22 +800,26 @@ c                    = (0,sqrt(q^0-q^3)) if q^3=-q^0
            sqq0q3 = dsqrt(max(q(0)+q(3),rZero))
         end if
         qbrasq(1) = dcmplx( sqq0q3 )
-      
+c     AL: checked
+
         if ( sqq0q3.eq.rZero ) then
            qbrasq(2) = dcmplx( dsqrt(rTwo*q(0)) )
         else
            qbrasq(2) = dcmplx( q(1), -q(2) )/sqq0q3
         endif
+c     AL: checked
 
 c       qpbprod = [q pb]
 c       pbketsq = |pb] = <pb|^dagger = (epsilon*|pb>^dagger = ( ( 0 1 )*|pb> )^dagger = (pbketan(2)^*)
 c                                                               (-1 0 )                 (-pbketan(1)^*)
 
         qpbprod = qbrasq(1)*conjg(pbketan(2))-qbrasq(2)*conjg(pbketan(1))
-      
+c     AL: checked
+
         fmo(3) = nsf*fmass*qbrasq(1)/qpbprod
         fmo(4) = nsf*fmass*qbrasq(2)/qpbprod
-                
+c     AL: checked
+
       endif
       
 c     EB: anti-fermion with negative spin or fermion with positive spin.
@@ -803,15 +839,18 @@ c                      = (0,sqrt(pb^0-pb^3)) if pb^3=-pb^0
            sqpb0pb3 = dsqrt(max(pb(0)+pb(3),rZero))
         end if
         pbbrasq(1) = dcmplx( sqpb0pb3 )
-      
+c     AL: checked
+
         if ( sqpb0pb3.eq.rZero ) then
            pbbrasq(2) = dcmplx( dsqrt(rTwo*pb(0)) )
         else
            pbbrasq(2) = dcmplx( pb(1), -pb(2) )/sqpb0pb3
         endif
-      
+c     AL: checked
+
         fmo(3) = pbbrasq(1)
         fmo(4) = pbbrasq(2)
+c     AL: checked
 
 c       qketan = |q> = (sqrt(q^0+q^3)            ) = (if q^0 = -q^3) (0            ) 
 c                      ((q^1+i*q^2)/sqrt(q^0+q^3))                   (sqrt(q^0-q^3)) 
@@ -822,12 +861,14 @@ c                      ((q^1+i*q^2)/sqrt(q^0+q^3))                   (sqrt(q^0-q
            sqq0q3 = dsqrt(max(q(0)+q(3),rZero))
         endif
         qketan(1) = dcmplx( sqq0q3 )
-      
+c     AL: checked
+
         if ( sqq0q3.eq.rZero ) then
            qketan(2) = dcmplx( dsqrt(rTwo*q(0)) )
         else
            qketan(2) = dcmplx( q(1), q(2) )/sqq0q3
         endif
+c     AL: checked
 
 c       pbqprod = <pb q>
 c       pbbraan = <pb| = |pb]^dagger = (epsilon*[pb|)^dagger =( ( 0 1 )*[pb|)^dagger = (pbbrasq(2)^*, -pbbrasq(1)^*)
@@ -835,9 +876,11 @@ c                                                             (-1 0 )
 c                    
 
         pbqprod = conjg(pbbrasq(2))*qketan(1)-conjg(pbbrasq(1))*qketan(2)
-      
+c     AL: checked
+
         fmo(5) = -1*nsf*fmass*qketan(1)/pbqprod
         fmo(6) = -1*nsf*fmass*qketan(2)/pbqprod  
+c     AL: checked
    
       endif
       
