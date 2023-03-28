@@ -260,23 +260,23 @@ class HelasCallWriter(base_objects.PhysicsObject):
                 res.append(self.get_amplitude_call(amplitude))
         # EB: check if first fermion has q = momentum of other fermion.
         check_call = res[0].split(',')
-        if int(check_call[6][0]) <= numb_mass_ferm:
-            new_res = []
+        #if int(check_call[6][0]) <= numb_mass_ferm:
+            #new_res = []
             # EB: if there is a fermion with q = photon momentum, move it first.
-            for ext in range(numb_mass_ferm):
-                check_call = res[ext].split(',')
-                if int(check_call[6][0]) > numb_mass_ferm:
-                    new_res.extend(res)
-                    new_res[0] = res[ext]
-                    new_res[ext] = res[0]
-                    return new_res
+            #for ext in range(numb_mass_ferm):
+               # check_call = res[ext].split(',')
+               # if int(check_call[6][0]) > numb_mass_ferm:
+                 #   new_res.extend(res)
+                 #   new_res[0] = res[ext]
+                  #  new_res[ext] = res[0]
+                  #  return new_res
             # EB: in the case of no external photons, set q of first fermion to 0.4*momentum.
-            first_call_split = res[0].split(',')
-            first_call_split[5] = '0.4*PB(0'
-            res[0] = 'PB(:,' + first_call_split[6] + '=0.4*P(:,' + first_call_split[6] + '\n' + res[0]
-            return res
-        else:
-            return res
+            #first_call_split = res[0].split(',')
+            #first_call_split[5] = '0.4*PB(0'
+            #res[0] = 'PB(:,' + first_call_split[6] + '=0.4*P(:,' + first_call_split[6] + '\n' + res[0]
+            #return res
+        #else:
+        return res
 
     def get_wavefunction_calls(self, wavefunctions):
         """Return a list of strings, corresponding to the Helas calls

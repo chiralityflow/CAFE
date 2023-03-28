@@ -94,8 +94,6 @@ c           AW: represent the vector bosons in a matrix (outer product)
             vcl(5) = -pketsq(2)*rbraan(1)*dsqrt(rTwo)/rpprod
             vcl(6) = pketsq(1)*rbraan(1)*dsqrt(rTwo)/rpprod
             
- 
-
 
 c nsvhel = -1, i.e. right-chiral (outgoing - hel or incoming + hel)
          else
@@ -195,8 +193,6 @@ c           AW: represent the vector bosons in a matrix (outer product)
             vcr(4) = -rketsq(1)*pbraan(2)*dsqrt(rTwo)/prprod
             vcr(5) = -rketsq(2)*pbraan(1)*dsqrt(rTwo)/prprod
             vcr(6) = rketsq(1)*pbraan(1)*dsqrt(rTwo)/prprod
-
-
          
 c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
          else
@@ -631,6 +627,7 @@ c     AL: checked
         fmi(5) = nsf*fmass*qketan(1)/pbqprod
         fmi(6) = nsf*fmass*qketan(2)/pbqprod
 c     AL: checked       
+        write(*,*) 'im1:  nsf=   ', nsf, 'nspin=   ', nspin
        
       endif
       
@@ -692,6 +689,7 @@ c     AL: checked
         fmi(4) = -1*nsf*fmass*qbrasq(2)/qpbprod  
 c     AL: checked (note -1 compensates for `wrong' order of inner product!)
 
+        write(*,*) 'im2:  nsf=   ', nsf, 'nspin=   ', nspin
       endif
       
       return
@@ -872,7 +870,7 @@ c     AL: checked
 
 c       pbqprod = <pb q>
 c       pbbraan = <pb| = |pb]^dagger = (epsilon*[pb|)^dagger =( ( 0 1 )*[pb|)^dagger = (pbbrasq(2)^*, -pbbrasq(1)^*)
-c                                                             (-1 0 )
+c                                                               (-1 0 )
 c                    
 
         pbqprod = conjg(pbbrasq(2))*qketan(1)-conjg(pbbrasq(1))*qketan(2)

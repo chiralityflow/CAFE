@@ -222,14 +222,13 @@ C BEGIN CODE
 C ----------
 C EB: Set PB to P. This will be updated for the fermions.
       PB = P
-      MDL_MM = 100.000
+c      MDL_MM = 100.000
 %(helas_calls)s
 %(jamp_lines)s
       WRITE(*,*) 'ZEROAMPS = ' ,ZEROAMPS
       WRITE(*,*) 'TOTAMPS = ' ,TOTAMPS
       WRITE(*,*) 'ZEROWFS = ' ,ZEROWFS
       WRITE(*,*) 'TOTWFS = ' ,TOTWFS
-
       %(proc_prefix)sMATRIX = 0.D0 
       DO I = 1, NCOLOR
           ZTEMP = (0.D0,0.D0)
