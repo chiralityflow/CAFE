@@ -1729,12 +1729,11 @@ def vertex_replacer(text, vertex):
         spinor12 = eme_ket('V3','F2')
         spinor21 = ket_eme_pbar('F2','V3','P1')
         spinor22 = eme_bra('F2','V3')
-        # EB: Have swaped the signs for the mass terms (should be other way around), but needs to be this way to give correct result.
         FFV1_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
-            + '      F1(3) = -DENOM*CI*({}-\n     $M1*{})\n'.format(spinor11[0],spinor12[0])\
-            + '      F1(4) = -DENOM*CI*({}-\n     $M1*{})\n'.format(spinor11[1],spinor12[1])\
-            + '      F1(5) = -DENOM*CI*({}+\n     $M1*{})\n'.format(spinor21[0],spinor22[0])\
-            + '      F1(6) = -DENOM*CI*({}+\n     $M1*{})\n'.format(spinor21[1],spinor22[1])
+            + '      F1(3) = DENOM*CI*((-1)*{}+\n     $M1*{})\n'.format(spinor11[0],spinor12[0])\
+            + '      F1(4) = DENOM*CI*((-1)*{}+\n     $M1*{})\n'.format(spinor11[1],spinor12[1])\
+            + '      F1(5) = DENOM*CI*((-1)*{}-\n     $M1*{})\n'.format(spinor21[0],spinor22[0])\
+            + '      F1(6) = DENOM*CI*((-1)*{}-\n     $M1*{})\n'.format(spinor21[1],spinor22[1])
         text_copy = text_copy[:linebreaks[-18]+1] + FFV1_1_replace + text_copy[linebreaks[-4]+1:]
 
     if vertex in ['FFV1_2', 'FMV1_2', 'MFV1_2', 'PFV1_2', 'FPV1_2']:
