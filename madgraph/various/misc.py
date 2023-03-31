@@ -1644,6 +1644,7 @@ def eme_ket(V3,F2):
     return [comp1,comp2]
 
 def eme_bra(F1,V3):
+    #EB: TODO: Need to check the sign here!
     "EB: Take the bra F1 and the matrix V3, and outputs eps*F1*V3"
     comp1 = '({}(4)*{}(3)-{}(3)*{}(4))'.format(F1,V3,F1,V3)
     comp2 = '({}(4)*{}(5)-{}(3)*{}(6))'.format(F1,V3,F1,V3)
@@ -1719,12 +1720,19 @@ def vertex_replacer(text, vertex):
         text_copy = text_copy[:linebreaks[-18]+1] + RRV1_2_replace + text_copy[linebreaks[-4]+1:]
     # EB: Replacments made for massive subroutines
     # TODO: Split up in multiple in the cases where it is needed.
-    if (vertex in ['FFV1_0', 'FMV1_0', 'MFV1_0', 'PFV1_0', 'FPV1_0','MMV1_0', 'MPV1_0', 'PMV1_0', 'PPV1_0']):
+    """if (vertex in ['FFV1_0', 'FMV1_0', 'MFV1_0', 'PFV1_0', 'FPV1_0','MMV1_0', 'MPV1_0', 'PMV1_0', 'PPV1_0']):
         FFV1_0_replace = '      VERTEX = -COUP*({}+\n     &{})\n'.format(bra_eme_ket('F1','V3','F2'),bra_eme_ket('F2','V3','F1'))
         text_copy = text_copy[:linebreaks[-10]+1] + text_copy[linebreaks[-9]+1:linebreaks[-7]+1]\
+             + FFV1_0_replace + text_copy[linebreaks[-4]+1:]"""
+
+    # Temp version to try new way of writing files
+    if (vertex in ['FFV1_0', 'FMV1_0', 'MFV1_0', 'PFV1_0', 'FPV1_0','MMV1_0', 'MPV1_0', 'PMV1_0', 'PPV1_0']):
+        FFV1_0_replace = '      VERTEX = COUP*(F1(3)*V3(6)*F2(5)-F1(3)*V3(4)*F2(6)-F1(4)*V3(5)*F2(5)+F1(4)*V3(3)*F2(6)\n'\
+            + '     &+F2(3)*V3(6)*F1(5)-F2(3)*V3(4)*F1(6)-F2(4)*V3(5)*F1(5)+F2(4)*V3(3)*F1(6))\n'
+        text_copy = text_copy[:linebreaks[-10]+1] + text_copy[linebreaks[-9]+1:linebreaks[-7]+1]\
              + FFV1_0_replace + text_copy[linebreaks[-4]+1:]
-        
-    if (vertex in ['FFV1_1', 'FMV1_1', 'MFV1_1', 'PFV1_1', 'FPV1_1']):
+            
+    """if (vertex in ['FFV1_1', 'FMV1_1', 'MFV1_1', 'PFV1_1', 'FPV1_1']):
         spinor11 = bra_eme_pbar('F2','V3','P1')
         spinor12 = eme_ket('V3','F2')
         spinor21 = ket_eme_pbar('F2','V3','P1')
@@ -1734,9 +1742,31 @@ def vertex_replacer(text, vertex):
             + '      F1(4) = DENOM*CI*((-1)*{}+\n     $M1*{})\n'.format(spinor11[1],spinor12[1])\
             + '      F1(5) = DENOM*CI*((-1)*{}-\n     $M1*{})\n'.format(spinor21[0],spinor22[0])\
             + '      F1(6) = DENOM*CI*((-1)*{}-\n     $M1*{})\n'.format(spinor21[1],spinor22[1])
-        text_copy = text_copy[:linebreaks[-18]+1] + FFV1_1_replace + text_copy[linebreaks[-4]+1:]
+        text_copy = text_copy[:linebreaks[-18]+1] + FFV1_1_replace + text_copy[linebreaks[-4]+1:]"""
+    
+    # Temp version to try new way of writing files.
+    if (vertex in ['FFV1_1', 'FMV1_1', 'MFV1_1', 'PFV1_1', 'FPV1_1']):
 
-    if vertex in ['FFV1_2', 'FMV1_2', 'MFV1_2', 'PFV1_2', 'FPV1_2']:
+        init_replace = '      COMPLEX*16 TEMP1,TEMP2,TEMP3,TEMP4\n'\
+            + '      COMPLEX*16 P1_11, P1_12, P1_21, P1_22\n'
+
+        FFV1_1_replace = '      P1_11 = (P1(0)+P1(3))\n'\
+            + '      P1_12 = (P1(1)-CI*P1(2))\n'\
+            + '      P1_21 = (P1(1)+CI*P1(2))\n'\
+            + '      P1_22 = (P1(0)-P1(3))\n'\
+            + '      TEMP1 = (F2(4)*V3(5) - F2(3)*V3(6))\n'\
+            + '      TEMP2 = (F2(3)*V3(4) - F2(4)*V3(3))\n'\
+            + '      TEMP3 = (V3(4)*F2(6) - V3(6)*F2(5))\n'\
+            + '      TEMP4 = (V3(5)*F2(5) - V3(3)*F2(6))\n\n'\
+            + '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
+            + '      F1(3) = DENOM*CI*(P1_11*TEMP1 + P1_21*TEMP2 - M1*TEMP4)\n'\
+            + '      F1(4) = DENOM*CI*(P1_12*TEMP1 + P1_22*TEMP2 + M1*TEMP3)\n'\
+            + '      F1(5) = DENOM*CI*(P1_11*TEMP3 + P1_12*TEMP4 + M1*TEMP2)\n'\
+            + '      F1(6) = DENOM*CI*(P1_21*TEMP3 + P1_22*TEMP4 - M1*TEMP1)\n'
+
+        text_copy = text_copy[:linebreaks[-24]+1] + init_replace + text_copy[linebreaks[-24]+1:linebreaks[-18]+1] + FFV1_1_replace + text_copy[linebreaks[-4]+1:]
+
+    """if vertex in ['FFV1_2', 'FMV1_2', 'MFV1_2', 'PFV1_2', 'FPV1_2']:
         spinor11 = bra_eme_pbar('F1','V3','P2')
         spinor12 = eme_ket('V3','F1')
         spinor21 = ket_eme_pbar('F1','V3','P2')
@@ -1746,7 +1776,29 @@ def vertex_replacer(text, vertex):
             + '      F2(4) = DENOM*CI*({}-\n     $M2*{})\n'.format(spinor11[1],spinor12[1])\
             + '      F2(5) = DENOM*CI*({}+\n     $M2*{})\n'.format(spinor21[0],spinor22[0])\
             + '      F2(6) = DENOM*CI*({}+\n     $M2*{})\n'.format(spinor21[1],spinor22[1])
-        text_copy = text_copy[:linebreaks[-18]+1] + FFV1_2_replace + text_copy[linebreaks[-4]+1:]
+        text_copy = text_copy[:linebreaks[-18]+1] + FFV1_2_replace + text_copy[linebreaks[-4]+1:]"""
+
+    #Temp version to try new way of writing files.
+    if vertex in ['FFV1_2', 'FMV1_2', 'MFV1_2', 'PFV1_2', 'FPV1_2']:
+
+        init_replace = '      COMPLEX*16 TEMP1,TEMP2,TEMP3,TEMP4\n'\
+            + '      COMPLEX*16 P2_11, P2_12, P2_21, P2_22\n'
+
+        FFV1_2_replace = '      P2_11 = (P2(0)+P2(3))\n'\
+            + '      P2_12 = (P2(1)-CI*P2(2))\n'\
+            + '      P2_21 = (P2(1)+CI*P2(2))\n'\
+            + '      P2_22 = (P2(0)-P2(3))\n'\
+            + '      TEMP1 = (F1(4)*V3(5) - F1(3)*V3(6))\n'\
+            + '      TEMP2 = (F1(3)*V3(4) - F1(4)*V3(3))\n'\
+            + '      TEMP3 = (V3(4)*F1(6) - V3(6)*F1(5))\n'\
+            + '      TEMP4 = (V3(5)*F1(5) - V3(3)*F1(6))\n\n'\
+            + '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2 - M2 * (M2 -CI * W2))\n'\
+            + '      F2(3) = DENOM*CI*(-P2_11*TEMP1 - P2_21*TEMP2 + M2*TEMP4)\n'\
+            + '      F2(4) = DENOM*CI*(-P2_12*TEMP1 - P2_22*TEMP2 - M2*TEMP3)\n'\
+            + '      F2(5) = DENOM*CI*(-P2_11*TEMP3 - P2_12*TEMP4 - M2*TEMP2)\n'\
+            + '      F2(6) = DENOM*CI*(-P2_21*TEMP3 - P2_22*TEMP4 + M2*TEMP1)\n'
+        
+        text_copy = text_copy[:linebreaks[-24]+1] + init_replace + text_copy[linebreaks[-24]+1:linebreaks[-18]+1] + FFV1_2_replace + text_copy[linebreaks[-4]+1:]
     
     if vertex in ['FFV1P0_3', 'MFV1P0_3', 'FMV1P0_3', 'PFV1P0_3', 'FPV1P0_3','MMV1P0_3', 'MPV1P0_3', 'PMV1P0_3', 'PPV1P0_3']:
         FFV1P0_3_replace = '      V3(3) = 2*DENOM*(F1(5)*F2(3)+F2(5)*F1(3))\n'\
