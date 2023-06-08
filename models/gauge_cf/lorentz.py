@@ -44,6 +44,11 @@ VVV1 = Lorentz(name = 'VVV1',
                 spins = [ 3, 3, 3 ],
                 structure = 'P(3,1)*Metric(1,2) - P(3,2)*Metric(1,2) - P(2,1)*Metric(1,3) + P(2,3)*Metric(1,3) + P(1,2)*Metric(2,3) - P(1,3)*Metric(2,3)')
 
+VIVLVR1 = Lorentz(name = 'VIVLVR1',
+                spins = [ 3, 3, 3 ],
+                structure = 'P(3,1)*Metric(1,2) - P(3,2)*Metric(1,2) - P(2,1)*Metric(1,3) + P(2,3)*Metric(1,3) + P(1,2)*Metric(2,3) - P(1,3)*Metric(2,3)')
+
+
 VVLVL1 = Lorentz(name = 'VVLVL1',
                 spins = [ 3, 3, 3 ],
                 structure = 'P(3,1)*Metric(1,2) - P(3,2)*Metric(1,2) - P(2,1)*Metric(1,3) + P(2,3)*Metric(1,3) + P(1,2)*Metric(2,3) - P(1,3)*Metric(2,3)')
@@ -84,6 +89,18 @@ VVVV3 = Lorentz(name = 'VVVV3',
 VVVV4 = Lorentz(name = 'VVVV4',
                 spins = [ 3, 3, 3, 3 ],
                 structure = 'Metric(1,3)*Metric(2,4) - Metric(1,2)*Metric(3,4)')
+
+VVIVLVL1 = Lorentz(name = 'VVIVLVL1',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,3)*Metric(2,4)')
+
+VVIVLVL3 = Lorentz(name = 'VVIVLVL3',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,3)*Metric(2,4)')
+
+VVIVLVL4 = Lorentz(name = 'VVIVLVL4',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,3)*Metric(2,4)')
 
 VLVLVLVR1 = Lorentz(name = 'VLVLVLVR1',
                 spins = [ 3, 3, 3, 3 ],
@@ -156,6 +173,118 @@ VLVRVRVR3 = Lorentz(name = 'VLVRVRVR3',
                 structure = 'Metric(1,4)*Metric(2,3) - Metric(1,2)*Metric(3,4)')
 
 VLVRVRVR4 = Lorentz(name = 'VLVRVRVR4',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,3)*Metric(2,4) - Metric(1,2)*Metric(3,4)')
+
+VVIVLVR1 = Lorentz(name = 'VVIVLVR1',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,3)*Metric(2,4)')
+
+VVIVLVR3 = Lorentz(name = 'VVIVLVR3',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,2)*Metric(3,4)')
+
+VVIVLVR4 = Lorentz(name = 'VVIVLVR4',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,3)*Metric(2,4) - Metric(1,2)*Metric(3,4)')
+
+
+VVVRVR1 = Lorentz(name = 'VVVRVR1',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,3)*Metric(2,4)')
+
+VVVRVR3 = Lorentz(name = 'VVVRVR3',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,2)*Metric(3,4)')
+
+VVVRVR4 = Lorentz(name = 'VVVRVR4',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,3)*Metric(2,4) - Metric(1,2)*Metric(3,4)')
+
+VVVLVL1 = Lorentz(name = 'VVVLVL1',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,3)*Metric(2,4)')
+
+VVVLVL3 = Lorentz(name = 'VVVLVL3',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,2)*Metric(3,4)')
+
+VVVLVL4 = Lorentz(name = 'VVVLVL4',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,3)*Metric(2,4) - Metric(1,2)*Metric(3,4)')
+
+VVRVRVR1 = Lorentz(name = 'VVRVRVR1',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,3)*Metric(2,4)')
+
+VVRVRVR3 = Lorentz(name = 'VVRVRVR3',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,2)*Metric(3,4)')
+
+VVRVRVR4 = Lorentz(name = 'VVRVRVR4',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,3)*Metric(2,4) - Metric(1,2)*Metric(3,4)')
+
+VVLVLVL1 = Lorentz(name = 'VVLVLVL1',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,3)*Metric(2,4)')
+
+VVLVLVL3 = Lorentz(name = 'VVLVLVL3',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,2)*Metric(3,4)')
+
+VVLVLVL4 = Lorentz(name = 'VVLVLVL4',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,3)*Metric(2,4) - Metric(1,2)*Metric(3,4)')
+
+VVVIVR1 = Lorentz(name = 'VVVIVR1',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,3)*Metric(2,4)')
+
+VVVIVR3 = Lorentz(name = 'VVVIVR3',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,2)*Metric(3,4)')
+
+VVVIVR4 = Lorentz(name = 'VVVIVR4',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,3)*Metric(2,4) - Metric(1,2)*Metric(3,4)')
+
+VVVIVL1 = Lorentz(name = 'VVVIVL1',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,3)*Metric(2,4)')
+
+VVVIVL3 = Lorentz(name = 'VVVIVL3',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,2)*Metric(3,4)')
+
+VVVIVL4 = Lorentz(name = 'VVVIVL4',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,3)*Metric(2,4) - Metric(1,2)*Metric(3,4)')
+
+################################## Add these to misc.py #############################################
+
+VIVLVLVR1 = Lorentz(name = 'VIVLVLVR1',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,3)*Metric(2,4)')
+
+VIVLVLVR3 = Lorentz(name = 'VIVLVLVR3',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,2)*Metric(3,4)')
+
+VIVLVLVR4 = Lorentz(name = 'VIVLVLVR4',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,3)*Metric(2,4) - Metric(1,2)*Metric(3,4)')
+
+
+VIVLVRVR1 = Lorentz(name = 'VIVLVRVR1',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,3)*Metric(2,4)')
+
+VIVLVRVR3 = Lorentz(name = 'VIVLVRVR3',
+                spins = [ 3, 3, 3, 3 ],
+                structure = 'Metric(1,4)*Metric(2,3) - Metric(1,2)*Metric(3,4)')
+
+VIVLVRVR4 = Lorentz(name = 'VIVLVRVR4',
                 spins = [ 3, 3, 3, 3 ],
                 structure = 'Metric(1,3)*Metric(2,4) - Metric(1,2)*Metric(3,4)')
 

@@ -235,18 +235,31 @@ class HelasCallWriter(base_objects.PhysicsObject):
         #AW: commenting this out to count WFs correctly
         #matrix_element.reuse_outdated_wavefunctions(me)
 
+        # AW: open file with vanishing AMPs and make sure those calls are not generated here
+        with open('/home/adam/Special_gluons/MadCAFE/bin/zeroamps.txt') as f: 
+            amps_to_remove = f.readlines()
+        f.close()
+        zero_amps = []
+        for i in range(len(amps_to_remove)):
+            zero_amps.append(int(amps_to_remove[i][-5:-1]))
         res = []
+        with open('/home/adam/Special_gluons/MadCAFE/bin/zerowfs.txt') as f: 
+            wfs_to_remove = f.readlines()
+        f.close()
+        zero_wfs = []
+        for i in range(len(wfs_to_remove)):
+            zero_wfs.append(int(wfs_to_remove[i][-5:-1]))
         for diagram in matrix_element.get('diagrams'):
             
-            
             res.extend([ self.get_wavefunction_call(wf) for \
-                         wf in diagram.get('wavefunctions') ])
+                         wf in diagram.get('wavefunctions') if wf['number'] not in zero_wfs])
             res.append("# Amplitude(s) for diagram number %d" % \
                        diagram.get('number'))
             for amplitude in diagram.get('amplitudes'):
-                res.append(self.get_amplitude_call(amplitude))
-        #misc.sprint(res)
+                if not amplitude['number'] in zero_amps: 
+                    res.append(self.get_amplitude_call(amplitude))
         return res
+
 
     def get_wavefunction_calls(self, wavefunctions):
         """Return a list of strings, corresponding to the Helas calls
@@ -303,7 +316,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
 
     def get_internal_wfs(self, wavefunction, call):
         # AW: to see the number of WFs and how many of those that vanish
-        should_print = True
+        should_print = False
         if not should_print:
             return call
         
@@ -356,7 +369,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
         
         # AL: update LH vector wavefunction
         # AW: hope this works
-        elif pdg_code == 90023 or pdg_code == 70021:
+        elif pdg_code == 90023 or pdg_code == 70021 or pdg_code == 721:
             # update name
             call = call[:6] + 'L' + call[7:]
 
@@ -366,7 +379,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
 
         # AL: update RH vector wavefunction
-        elif pdg_code == 90024 or pdg_code == 80021:
+        elif pdg_code == 90024 or pdg_code == 80021 or pdg_code == 821:
             # update name
             call = call[:6] + 'R' + call[7:]
 
@@ -392,7 +405,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             return call
     #AW
     def get_chiral_amps(self, amplitude, call):
-        should_print = True
+        should_print = False
         if not should_print:
             return call
         call = call + '\n TOTAMPS = TOTAMPS + 1 \n IF (ABS(AMP(' + str(amplitude.get('number')) + ')).le.1E-15) THEN \n ZEROAMPS = ZEROAMPS + 1 \n ENDIF'

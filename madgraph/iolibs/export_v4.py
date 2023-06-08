@@ -3075,6 +3075,7 @@ CF2PY integer, intent(in) :: new_value
         # I.e. for a final-state left-handed particle, only terms where the particle
         # has helicity +1 will contribute
         for k in range(nexternal):
+            misc.sprint(helas_calls[k])
             if (helas_calls[k][5:11] == 'LXXXXX') or (helas_calls[k][5:11] == 'VLXXXX'):
                 icpos = helas_calls[k].find('*IC(')
                 state_status = helas_calls[k][icpos-2:icpos]
@@ -3089,6 +3090,7 @@ CF2PY integer, intent(in) :: new_value
                     minushel_list.append(k)
                 elif (state_status == '-1'):
                     plushel_list.append(k)
+            #misc.sprint(state_status)
         # ZW: If no chiral particles are found, returns the original helicity_lines
         if (len(plushel_list) == 0) and (len(minushel_list) == 0):
             return (helicity_lines, ncomb)

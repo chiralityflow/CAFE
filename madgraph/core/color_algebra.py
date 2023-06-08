@@ -342,6 +342,7 @@ class f(ColorObject):
         col_str1.is_imaginary = True
         col_str2.is_imaginary = True
 
+
         return ColorFactor([col_str1, col_str2])
 
 #===============================================================================

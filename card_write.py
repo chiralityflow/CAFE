@@ -32,7 +32,7 @@ cList='cardListee'
 
 ###################
 
-suffix = 'test_230210'
+suffix = 'test_230428'
 
 
 f = open(cList,'w')
@@ -67,7 +67,7 @@ for proc in procs:
     f = open('cards/'+card_name, 'w')
       
     if proc == 'hel_sample':
-      f.write("import model gauge_cf;\ngenerate ul ur~ > gl gr gl gr gl" + ";\noutput standalone " + proc + "/PROC" + name)
+      f.write("import model gauge_cf;\ngenerate gli gri > gl gr gr gr gr" + ";\noutput standalone " + proc + "/PROC" + name)
       
     if proc == '0lQCD':
       f.write("import model gauge_cf;\ngenerate glr glr > " + numGlue + ";\noutput standalone " + proc + "/PROC" + name)

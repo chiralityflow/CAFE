@@ -683,7 +683,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
                     # AL: if gauge boson, set reference momentum
                     # AL: TODO: update when we update pid conventions
                     # AW: added gluons
-                    if leg.get('id') in [90023, 90024, 70021, 80021]:
+                    if leg.get('id') in [90023, 90024, 70021, 80021, 721, 821]:
                         self.set('ref_mom', ref_momenta[leg.get('number')-1])
                 
                 # decay_ids is the pdg codes for particles with decay
@@ -3560,7 +3560,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             # All chiral particle numbers between 90000 and 90024
             # TODO: Update this after choosing a consistent set of conventions!!
             # AW: Changed pdg_code from 90000 to 70000
-            if pdg_code > 70000 and pdg_code < 90025:
+            if (pdg_code > 70000 and pdg_code < 90025) or pdg_code in [721,821]:
                 return True
         
         # Haven't found a chiral particle, return false
@@ -3578,7 +3578,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             # All chiral fermion numbers between 90000 and 90021
             # TODO: Update this after choosing a consistent set of conventions!!
             # AW: Updated for QCD
-            if pdg_code > 70000 and pdg_code < 90022 and pdg_code != 70021 and pdg_code != 80021:
+            if pdg_code > 70000 and pdg_code < 90022 and not pdg_code in [721,821,70021,80021]:
                 pdg_code = ext_wfs[key]['particle']['pdg_code']
                 if pdg_code not in pdg_codes:
                     pdg_codes.append(pdg_code)
@@ -3615,7 +3615,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # TODO: Update this when we have new pdg_codes convention with e.g. left < right
         # AW: 21, 70021 and 80021 are also bosons in QCD
         # AW: Changed sorting algorithm to seperate bosons and fermions and sort them seperately 
-        boson_ids = [21, 70021, 80021, 90022, 90023, 90024]
+        boson_ids = [21, 721, 821, 70021, 80021, 90022, 90023, 90024]
         bosons = []
         fermions = []
         for codes in pdg_codes:
@@ -3638,7 +3638,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # If not all-outgoing, then we have an LL or RR vertex
         # AW: we must check for tripple gluon vertex 
         # AW: for [-f, -f, V] we get [f, -f, V] while madgraph prefers [-f, f, V]
-        if not pdg_codes[0]*pdg_codes[1] < 0 and pdg_codes[0] != 21 and pdg_codes[0] != 70021 and pdg_codes[0] != 80021:
+        if not pdg_codes[0]*pdg_codes[1] < 0 and pdg_codes[0] != 21 and pdg_codes[0] != 70021 and pdg_codes[0] != 80021 and pdg_codes[0] != 821 and pdg_codes[0] != 721:
             # change to all outgoing particles
             if pdg_codes[0] < 0:
                 pdg_codes[1] = -pdg_codes[1]
@@ -3703,8 +3703,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 bosons = ['a','al','ar']
                 boson_ids = [90022, 90023, 90024]
             else:
-                bosons = ['a','al','ar', 'g', 'gl', 'gr']
-                boson_ids = [90022, 90023, 90024, 21, 70021, 80021]
+                bosons = ['a','al','ar', 'g', 'gl', 'gr', 'gli', 'gri']
+                boson_ids = [90022, 90023, 90024, 21, 70021, 80021, 721, 821]
             for iboson, boson in enumerate(bosons):
                 # AW: quark: 2 characters, antiquark: 3 characters. As quark but ends with ~
                 # leptons: 3 characters +/- particle/antiparticle
@@ -3873,19 +3873,19 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             found_left_boson = False
             found_right_boson = False
             for leg in legs:
-                if leg.get('id') == 70021 and not found_left_boson:
+                if leg.get('id') in [721,70021] and not found_left_boson:
                     left_boson = leg
                     found_left_boson = True
-                elif leg.get('id') == 80021 and not found_right_boson:
+                elif leg.get('id') in [821,80021] and not found_right_boson:
                     right_boson = leg
                     found_right_boson = True
                 elif found_left_boson and found_right_boson:
                     break
             if found_left_boson and found_right_boson:
                 for leg in legs:
-                    if leg.get('id') == 70021:
+                    if leg.get('id') in [721,70021]:
                         ref_moms.append(right_boson.get('number'))
-                    elif leg.get('id') == 80021:
+                    elif leg.get('id') in [821,80021]:
                         ref_moms.append(left_boson.get('number'))
                     else:
                         misc.sprint('ERROR')
@@ -3901,11 +3901,11 @@ class HelasMatrixElement(base_objects.PhysicsObject):
     
         for leg in legs:
             # if left photon (AW: or gluon), append right (anti)fermion
-            if leg.get('id') == 90023 or leg.get('id') == 70021:
+            if leg.get('id') == 90023 or leg.get('id') == 70021 or leg.get('id') == 721:
                 ref_moms.append(right_ferm.get('number'))
                 # ref_moms.append(left_ferm.get('number'))
             # if right photon (AW: or gluon), append left (anti)fermion
-            elif leg.get('id') == 90024 or leg.get('id') == 80021:
+            elif leg.get('id') == 90024 or leg.get('id') == 80021 or leg.get('id') == 821:
                 ref_moms.append(left_ferm.get('number'))
                 # ref_moms.append(right_ferm.get('number'))
             # else append -1
@@ -4011,7 +4011,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
 
             vertices = copy.copy(diagram.get('vertices'))
             
-            #misc.sprint(diagram_number+1,vertices)
+            #misc.sprint(diagram_number+1)
 
             # Single out last vertex, since this will give amplitude
             lastvx = vertices.pop()
@@ -4044,7 +4044,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     vids = []
                     for part in vertex['legs']:
                         vids.append(part['id'])
-                    
+                    misc.sprint(vids, vert_id_to_pdgs_dict)
                     updated_vertex = self.set_new_vertex_id(vertex, vids, vert_id_to_pdgs_dict)
                     vertex.set('id', updated_vertex.get('id'))
                     #misc.sprint(vertex.get('id'), vids)
@@ -4156,8 +4156,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                         for part in lastvx['legs']:
                             vids.append(part['id'])
                         
-                        #misc.sprint(vids, vert_id_to_pdgs_dict)
-                        #misc.sprint(lastvx.get('id'), lastvx)
+                        misc.sprint(vids, vert_id_to_pdgs_dict)
+                        misc.sprint(lastvx.get('id'), lastvx)
                         updated_lastvx = self.set_new_vertex_id(lastvx, vids, vert_id_to_pdgs_dict)
                         lastvx.set('id', updated_lastvx.get('id'))
                         
@@ -4165,9 +4165,6 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     
                     #misc.sprint(diagram_number)
                     #misc.sprint(lastvx.get('id'))
-
-                    # AW: we should only change the ref dict in gauge_cf
-
                     
 
                     if model.get('name') == 'gauge_cf':
@@ -4178,6 +4175,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                         N_g = 0
                         N_gl = 0
                         N_gr = 0
+                        N_gli = 0
+                        N_gri = 0
                         N_ul = 0
                         N_ur = 0
                         N_ul_bar = 0
@@ -4189,6 +4188,10 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                                 N_gl += 1
                             if part['id'] == 80021:
                                 N_gr += 1
+                            if part['id'] == 721:
+                                N_gli += 1
+                            if part['id'] == 821:
+                                N_gri += 1
                             if part['id'] == 70002:
                                 N_ul += 1
                             if part['id'] == 80002:
@@ -4209,10 +4212,18 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                                 lastvx.set('id', 19)
                         if N_ur_bar == 1 and N_ul == 1 and N_gr == 1:
                                 lastvx.set('id', 20)
+                        if N_ul_bar == 1 and N_ur == 1 and N_gli == 1:
+                                lastvx.set('id', 95)
+                        if N_ul_bar == 1 and N_ur == 1 and N_gri == 1:
+                                lastvx.set('id', 96)
+                        if N_ur_bar == 1 and N_ul == 1 and N_gli == 1:
+                                lastvx.set('id', 97)
+                        if N_ur_bar == 1 and N_ul == 1 and N_gri == 1:
+                                lastvx.set('id', 98)
 
                         is_ggg = True
                         for part in lastvx['legs']:
-                            if part['id'] not in [21,70021,80021]:
+                            if part['id'] not in [21,721,821,70021,80021]:
                                 is_ggg = False 
                     
                         # AW: here we do it for vertices with only gluons
@@ -4222,6 +4233,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                             N_g = 0
                             N_gl = 0
                             N_gr = 0
+                            N_gli = 0
+                            N_gri = 0
                             for part in lastvx['legs']:
                                 if part['id'] == 21:
                                     N_g += 1
@@ -4229,41 +4242,125 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                                     N_gl += 1
                                 if part['id'] == 80021:
                                     N_gr += 1
-                            if N_gl == 0 and N_gr == 0 and N_g == 3:
+                                if part['id'] == 721:
+                                    N_gli += 1
+                                if part['id'] == 821:
+                                    N_gri += 1
+                            
+                            if N_gl == 0 and N_gr == 0 and N_g == 3 and N_gli == 0 and N_gri == 0:
                                 lastvx.set('id', 37)
-                            if N_gl == 1 and N_gr == 0 and N_g == 2:
+                            if N_gl == 0 and N_gr == 0 and N_g == 2 and N_gli == 1 and N_gri == 0:
                                 lastvx.set('id', 38)
-                            if N_gl == 0 and N_gr == 1 and N_g == 2:
+                            if N_gl == 0 and N_gr == 0 and N_g == 2 and N_gli == 0 and N_gri == 1:
                                 lastvx.set('id', 39)
-                            if N_gl == 0 and N_gr == 2 and N_g == 1:
+                            if N_gl == 1 and N_gr == 0 and N_g == 2 and N_gli == 0 and N_gri == 0:
                                 lastvx.set('id', 40)
-                            if N_gl == 2 and N_gr == 0 and N_g == 1:
+                            if N_gl == 0 and N_gr == 1 and N_g == 2 and N_gli == 0 and N_gri == 0:
                                 lastvx.set('id', 41)
-                            if N_gl == 1 and N_gr == 1 and N_g == 1:
+                            if N_gl == 0 and N_gr == 0 and N_g == 1 and N_gli == 1 and N_gri == 1:
                                 lastvx.set('id', 42)
-                            if N_gl == 3 and N_gr == 0 and N_g == 0:
+                            if N_gl == 1 and N_gr == 0 and N_g == 1 and N_gli == 1 and N_gri == 0:
                                 lastvx.set('id', 43)
-                            if N_gl == 0 and N_gr == 3 and N_g == 0:
+                            if N_gl == 0 and N_gr == 1 and N_g == 1 and N_gli == 1 and N_gri == 0:
                                 lastvx.set('id', 44)
-                            if N_gl == 2 and N_gr == 1 and N_g == 0:
+                            if N_gl == 1 and N_gr == 0 and N_g == 1 and N_gli == 0 and N_gri == 1:
                                 lastvx.set('id', 45)
-                            if N_gl == 1 and N_gr == 2 and N_g == 0:
+                            if N_gl == 0 and N_gr == 1 and N_g == 1 and N_gli == 0 and N_gri == 1:
                                 lastvx.set('id', 46)
-                            if N_gl == 1 and N_gr == 2 and N_g == 1:
-                                lastvx.set('id', 51)
-                            if N_gl == 2 and N_gr == 1 and N_g == 1:
-                                lastvx.set('id', 50)
-                            if N_gl == 2 and N_gr == 2 and N_g == 0:
-                                lastvx.set('id', 55)
-                            if N_gl == 2 and N_gr == 0 and N_g == 2:
+                            if N_gl == 2 and N_gr == 0 and N_g == 1 and N_gli == 0 and N_gri == 0:
                                 lastvx.set('id', 47)
-                            if N_gl == 0 and N_gr == 2 and N_g == 2:
+                            if N_gl == 1 and N_gr == 1 and N_g == 1 and N_gli == 0 and N_gri == 0:
                                 lastvx.set('id', 48)
+                            if N_gl == 0 and N_gr == 2 and N_g == 1 and N_gli == 0 and N_gri == 0:
+                                lastvx.set('id', 49)
+                            if N_gl == 1 and N_gr == 0 and N_g == 0 and N_gli == 1 and N_gri == 1:
+                                lastvx.set('id', 50)
+                            if N_gl == 0 and N_gr == 1 and N_g == 0 and N_gli == 1 and N_gri == 1:
+                                lastvx.set('id', 51)
+                            if N_gl == 2 and N_gr == 0 and N_g == 0 and N_gli == 1 and N_gri == 0:
+                                lastvx.set('id', 52)
+                            if N_gl == 1 and N_gr == 1 and N_g == 0 and N_gli == 1 and N_gri == 0:
+                                lastvx.set('id', 53)
+                            if N_gl == 0 and N_gr == 2 and N_g == 0 and N_gli == 1 and N_gri == 0:
+                                lastvx.set('id', 54)
+                            if N_gl == 2 and N_gr == 0 and N_g == 0 and N_gli == 0 and N_gri == 1:
+                                lastvx.set('id', 55)
+                            if N_gl == 1 and N_gr == 1 and N_g == 0 and N_gli == 0 and N_gri == 1:
+                                lastvx.set('id', 56)
+                            if N_gl == 0 and N_gr == 2 and N_g == 0 and N_gli == 0 and N_gri == 1:
+                                lastvx.set('id', 57)
+                            if N_gl == 3 and N_gr == 0 and N_g == 0 and N_gli == 0 and N_gri == 0:
+                                lastvx.set('id', 58)
+                            if N_gl == 2 and N_gr == 1 and N_g == 0 and N_gli == 0 and N_gri == 0:
+                                lastvx.set('id', 59)
+                            if N_gl == 1 and N_gr == 2 and N_g == 0 and N_gli == 0 and N_gri == 0:
+                                lastvx.set('id', 60)
+                            if N_gl == 0 and N_gr == 3 and N_g == 0 and N_gli == 0 and N_gri == 0:
+                                lastvx.set('id', 61)
+                            if N_gl == 0 and N_gr == 0 and N_g == 4 and N_gli == 0 and N_gri == 0:
+                                lastvx.set('id', 62)
+                            if N_gl == 0 and N_gr == 0 and N_g == 3 and N_gli == 1 and N_gri == 0:
+                                lastvx.set('id', 63)
+                            if N_gl == 0 and N_gr == 0 and N_g == 3 and N_gli == 0 and N_gri == 1:
+                                lastvx.set('id', 64)
+                            if N_gl == 1 and N_gr == 0 and N_g == 3 and N_gli == 0 and N_gri == 0:
+                                lastvx.set('id', 65)
+                            if N_gl == 0 and N_gr == 1 and N_g == 3 and N_gli == 0 and N_gri == 0:
+                                lastvx.set('id', 66)
+                            if N_gl == 0 and N_gr == 0 and N_g == 2 and N_gli == 1 and N_gri == 1:
+                                lastvx.set('id', 67)
+                            if N_gl == 1 and N_gr == 0 and N_g == 2 and N_gli == 1 and N_gri == 0:
+                                lastvx.set('id', 68)
+                            if N_gl == 0 and N_gr == 1 and N_g == 2 and N_gli == 1 and N_gri == 0:
+                                lastvx.set('id', 69)
+                            if N_gl == 1 and N_gr == 0 and N_g == 2 and N_gli == 0 and N_gri == 1:
+                                lastvx.set('id', 70)
+                            if N_gl == 0 and N_gr == 1 and N_g == 2 and N_gli == 0 and N_gri == 1:
+                                lastvx.set('id', 71)
+                            if N_gl == 2 and N_gr == 0 and N_g == 2 and N_gli == 0 and N_gri == 0:
+                                lastvx.set('id', 72)
+                            if N_gl == 1 and N_gr == 1 and N_g == 2 and N_gli == 0 and N_gri == 0:
+                                lastvx.set('id', 73)
+                            if N_gl == 0 and N_gr == 2 and N_g == 2 and N_gli == 0 and N_gri == 0:
+                                lastvx.set('id', 74)
+                            if N_gl == 1 and N_gr == 1 and N_g == 1 and N_gli == 1 and N_gri == 0:
+                                lastvx.set('id', 75)
+                            if N_gl == 1 and N_gr == 1 and N_g == 1 and N_gli == 0 and N_gri == 1:
+                                lastvx.set('id', 76)
+                            if N_gl == 3 and N_gr == 0 and N_g == 1 and N_gli == 0 and N_gri == 0:
+                                lastvx.set('id', 77)
+                            if N_gl == 2 and N_gr == 1 and N_g == 1 and N_gli == 0 and N_gri == 0:
+                                lastvx.set('id', 78)
+                            if N_gl == 1 and N_gr == 2 and N_g == 1 and N_gli == 0 and N_gri == 0:
+                                lastvx.set('id', 79)
+                            if N_gl == 0 and N_gr == 3 and N_g == 1 and N_gli == 0 and N_gri == 0:
+                                lastvx.set('id', 80)
+                            if N_gl == 3 and N_gr == 1 and N_g == 0 and N_gli == 0 and N_gri == 0:
+                                lastvx.set('id', 81)
+                            if N_gl == 2 and N_gr == 2 and N_g == 0 and N_gli == 0 and N_gri == 0:
+                                lastvx.set('id', 82)
+                            if N_gl == 1 and N_gr == 3 and N_g == 0 and N_gli == 0 and N_gri == 0:
+                                lastvx.set('id', 83)
+
+                            # Manually added
+                            if N_gl == 2 and N_gr == 1 and N_g == 0 and N_gli == 1 and N_gri == 0:
+                                lastvx.set('id', 84)
+                            if N_gl == 1 and N_gr == 2 and N_g == 0 and N_gli == 1 and N_gri == 0:
+                                lastvx.set('id', 85)
+                            if N_gl == 1 and N_gr == 0 and N_g == 1 and N_gli == 1 and N_gri == 1:
+                                lastvx.set('id', 86)
+                            if N_gl == 0 and N_gr == 1 and N_g == 1 and N_gli == 1 and N_gri == 1:
+                                lastvx.set('id', 87)
+                            if N_gl == 2 and N_gr == 1 and N_g == 0 and N_gli == 0 and N_gri == 1:
+                                lastvx.set('id', 88)
+                            if N_gl == 1 and N_gr == 2 and N_g == 0 and N_gli == 0 and N_gri == 1:
+                                lastvx.set('id', 89)
+
+
                             
                     #misc.sprint(lastvx.get('id'))
                     inter = model.get_interaction(lastvx.get('id'))
-                    #misc.sprint(inter)
-                    #misc.sprint(lastvx.get('id'))
+                    #misc.sprint(lastvx.get('id'),lastvx['legs'])
                     keys = sorted(inter.get('couplings').keys())
                     pdg_codes = [p.get_pdg_code() for p in \
                                  inter.get('particles')]
@@ -4277,7 +4374,6 @@ class HelasMatrixElement(base_objects.PhysicsObject):
 
                 # Find mothers for the amplitude
                 # AW: crashes here since we added (21,70021), etc.
-                #misc.sprint(diagram_number)
                 legs = lastvx.get('legs')
                 mothers = self.getmothers(legs, number_wf_dict,
                                           external_wavefunctions,

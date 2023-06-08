@@ -823,8 +823,8 @@ class Amplitude(base_objects.PhysicsObject):
 
         diag_index_to_remove = []
         # AW: Set to false if diagram removal is not wanted. TODO: do this in a nicer 
-        #remove_after = False
-        remove_after = True
+        remove_after = False
+        #remove_after = True
         if reduced_leglist and remove_after:       
             for i, diag in enumerate(reduced_leglist):
             # We remove diagrams which have a LLRR gluon vertex and one of the gluons are the first left or right gluon in the diagram
@@ -1011,7 +1011,17 @@ class Amplitude(base_objects.PhysicsObject):
                                 diag_index_to_remove.append(i) 
                                 #misc.sprint(reduced_leglist[i],i+1)
                         
-
+        # AW: speical gluon diagram removal
+        forbidden_verts = [52,54,55,57,58,61,77,80,81,83,84,85,86,87,88,89]
+        if reduced_leglist:       
+            for i, diag in enumerate(reduced_leglist):
+                if reduced_leglist[i][-1]['id'] in forbidden_verts:
+                    diag_index_to_remove.append(i) 
+                if reduced_leglist[i][-1]['id'] == 0 and (reduced_leglist[i][-2]['id'] in forbidden_verts or reduced_leglist[i][-3]['id'] in forbidden_verts):
+                    if len(initial_leglist) == 5:    
+                        diag_index_to_remove.append(i)
+        
+        
         # AW: check for and remove duplicates in the list
         checked_list = []
         last_index = -1
@@ -1328,7 +1338,7 @@ class Amplitude(base_objects.PhysicsObject):
             for leg in ext_legs:
                 # if left photon, append right (anti)fermion
                 # AW: Look more here
-                if leg.get('id') == 90023 or leg.get('id') == 70021:
+                if leg.get('id') == 90023 or leg.get('id') == 70021 or leg.get('id') == 721:
                     # ensure order is order of particle number
                     if leg.get('number') < right_ferm.get('number'):
                         vanishing_combs.append((leg, right_ferm))
@@ -1338,7 +1348,7 @@ class Amplitude(base_objects.PhysicsObject):
                     ref_mom.append(right_ferm.get('number'))
 
                 # if right photon, append left (anti)fermion
-                elif leg.get('id') == 90024 or leg.get('id') == 80021:
+                elif leg.get('id') == 90024 or leg.get('id') == 80021 or leg.get('id') == 821:
                     if leg.get('number') < left_ferm.get('number'):
                         vanishing_combs.append((leg, left_ferm))
                     else:
@@ -1363,20 +1373,20 @@ class Amplitude(base_objects.PhysicsObject):
                 if leg.get('id') == 80021 and found_right_boson:
                     right_bosons.append(leg)
 
-                if leg.get('id') == 70021 and not found_left_boson:
+                if leg.get('id') == 721 and not found_left_boson:
                     left_boson = leg
                     left_bosons.append(leg)
                     found_left_boson = True
-                elif leg.get('id') == 80021 and not found_right_boson:
+                elif leg.get('id') == 821 and not found_right_boson:
                     right_boson = leg
                     right_bosons.append(leg)
                     found_right_boson = True
             
             if found_left_boson and found_right_boson:
                 for leg in ext_legs:
-                    if leg.get('id') == 70021:
+                    if leg.get('id') in [721,70021]:
                         ref_mom.append(right_boson.get('number'))
-                    elif leg.get('id') == 80021:
+                    elif leg.get('id') in [821,80021]:
                         ref_mom.append(left_boson.get('number'))
                     else:
                         misc.sprint('ERROR')
@@ -1501,8 +1511,8 @@ class Amplitude(base_objects.PhysicsObject):
         
         if (is_first_it):
             #AW: check for forbidden chiralities
-            left_particles = [70021,70001,-70001,70002,-70002,90001,-90001,90005,-90005,90023]
-            right_particles = [80021,80001,-80001,80002,-80002,90003,-90003,90007,-90007,90024]
+            left_particles = [721,70021,70001,-70001,70002,-70002,90001,-90001,90005,-90005,90023]
+            right_particles = [821,80021,80001,-80001,80002,-80002,90003,-90003,90007,-90007,90024]
             left_fermions = [70001,-70001,70002,-70002,90001,-90001,90005,-90005]
             right_fermions = [80001,-80001,80002,-80002,90003,-90003,90007,-90007]
             N_left = 0
@@ -1535,8 +1545,8 @@ class Amplitude(base_objects.PhysicsObject):
             ref_dict_to0[(70021, 80021)] = [0] """
 
         # AL: temporary switch to turn off removal of vanishing combinations
-        remove_combs = True
-        #remove_combs = False
+        #remove_combs = True
+        remove_combs = False
         # AL: TODO: put is_first_it here in case of e.g. 4-gluon amplitude
         # AW: removes the vanishing 4g vertex of the 4g amplitude assuming smart gauge choice
         remove_4g = False
@@ -1570,6 +1580,8 @@ class Amplitude(base_objects.PhysicsObject):
         comb_lists = self.combine_legs(curr_leglist, ref_dict_to1, 
                                     max_multi_to1)
 
+        
+            
         if (is_first_it): 
 
 
