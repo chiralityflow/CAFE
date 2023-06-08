@@ -3868,38 +3868,34 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         
         # find photons and update its reference momenta
         # AW: same but for gluons
-        # AW: Some QCD processes have no fermions so we check for that
-        if not found_left_ferm and not found_right_ferm:
-            found_left_boson = False
-            found_right_boson = False
-            for leg in legs:
-                if leg.get('id') in [721,70021] and not found_left_boson:
-                    left_boson = leg
-                    found_left_boson = True
-                elif leg.get('id') in [821,80021] and not found_right_boson:
-                    right_boson = leg
-                    found_right_boson = True
-                elif found_left_boson and found_right_boson:
-                    break
-            if found_left_boson and found_right_boson:
-                for leg in legs:
-                    if leg.get('id') in [721,70021]:
-                        ref_moms.append(right_boson.get('number'))
-                    elif leg.get('id') in [821,80021]:
-                        ref_moms.append(left_boson.get('number'))
-                    else:
-                        misc.sprint('ERROR')
-            else:
-                for i in range(len(legs)-1):
-                    ref_moms.append(i+2)
-                ref_moms.append(1)
-                misc.sprint('Forbidden chiralities')
-            return ref_moms
-            
-            
-            
-    
+        found_left_boson = False
+        found_right_boson = False
         for leg in legs:
+            if leg.get('id') in [721,70021] and not found_left_boson:
+                left_boson = leg
+                found_left_boson = True
+            elif leg.get('id') in [821,80021] and not found_right_boson:
+                right_boson = leg
+                found_right_boson = True
+            elif found_left_boson and found_right_boson:
+                break
+        if found_left_boson and found_right_boson:
+            for leg in legs:
+                if leg.get('id') in [721,70021]:
+                    ref_moms.append(right_boson.get('number'))
+                elif leg.get('id') in [821,80021]:
+                    ref_moms.append(left_boson.get('number'))
+                else:
+                    ref_moms.append(-1)
+        else:
+            for i in range(len(legs)-1):
+                ref_moms.append(i+2)
+            ref_moms.append(1)
+            misc.sprint('Forbidden chiralities')
+        return ref_moms
+            
+            
+        """ for leg in legs:
             # if left photon (AW: or gluon), append right (anti)fermion
             if leg.get('id') == 90023 or leg.get('id') == 70021 or leg.get('id') == 721:
                 ref_moms.append(right_ferm.get('number'))
@@ -3911,7 +3907,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             # else append -1
             else: ref_moms.append(-1)
             
-        return ref_moms
+        return ref_moms """
         
     def generate_helas_diagrams(self, amplitude, optimization=1,decay_ids=[]):
         """Starting from a list of Diagrams from the diagram
