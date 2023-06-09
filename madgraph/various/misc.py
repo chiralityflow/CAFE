@@ -1617,7 +1617,7 @@ def vec_p(V,p):
 
 def bra_eme_ket(F1,V3,F2):
     "AW: Takes a bra F1, matrix V3, and ket F2 and outputs F1*eps*V3*eps^T*F2"
-    inprod = '(({}(4)*{}(3) - {}(3)*{}(4))*{}(6) - ({}(4)*{}(5) + {}(3)*{}(6))*{}(5))' \
+    inprod = '(({}(4)*{}(3) - {}(3)*{}(4))*{}(6) - ({}(4)*{}(5) - {}(3)*{}(6))*{}(5))' \
         .format(F1,V3,F1,V3,F2,F1,V3,F1,V3,F2)
     return inprod
 

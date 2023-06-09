@@ -3809,8 +3809,10 @@ class Process(PhysicsObject):
             # AW: Added quarks and gluons
             if (key[0] == 80021):
                 key = (70021,key[1])
+            if (key[0] == 721):
+                key = (70021,key[1])
             if (key[0] == 821):
-                key = (721,key[1])
+                key = (70021,key[1])
             if (key[0] == 80001):
                 key = (70001,key[1])
             if (key[0] == -80001):
