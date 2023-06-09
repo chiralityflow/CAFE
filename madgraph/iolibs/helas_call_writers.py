@@ -17,6 +17,7 @@ from __future__ import absolute_import
 
 
 import re
+import os
 import madgraph
 import madgraph.core.base_objects as base_objects
 import madgraph.core.helas_objects as helas_objects
@@ -24,11 +25,13 @@ import madgraph.loop.loop_helas_objects as loop_helas_objects
 import models.check_param_card as check_param_card
 import aloha.aloha_writers as aloha_writers
 import aloha
-from madgraph import MadGraph5Error
+from madgraph import MadGraph5Error, MG5DIR
 import madgraph.various.misc as misc
 from six.moves import range
 if madgraph.ordering:
     set	= misc.OrderedSet
+
+pjoin = os.path.join
 
 class HelasWriterError(Exception):
     """Class for the error of this module """
@@ -236,14 +239,15 @@ class HelasCallWriter(base_objects.PhysicsObject):
         #matrix_element.reuse_outdated_wavefunctions(me)
 
         # AW: open file with vanishing AMPs and make sure those calls are not generated here
-        with open('/home/adam/Special_gluons/MadCAFE/bin/zeroamps.txt') as f: 
+        # EB: updated to use MG5DIR for file paths.
+        with open(pjoin(MG5DIR,'bin/zeroamps.txt')) as f: 
             amps_to_remove = f.readlines()
         f.close()
         zero_amps = []
         for i in range(len(amps_to_remove)):
             zero_amps.append(int(amps_to_remove[i][-5:-1]))
         res = []
-        with open('/home/adam/Special_gluons/MadCAFE/bin/zerowfs.txt') as f: 
+        with open(pjoin(MG5DIR,'bin/zerowfs.txt')) as f: 
             wfs_to_remove = f.readlines()
         f.close()
         zero_wfs = []
