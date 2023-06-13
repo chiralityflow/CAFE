@@ -2037,7 +2037,7 @@ def vertex_replacer(text, vertex):
 
         text_copy = text_copy[:linebreaks[8]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[17]+1] + VLVLVRVR4_0_replace + text_copy[linebreaks[22]+1:]
     
-    if (vertex == 'VVLVRVR1_0'):
+    if (vertex == 'VVLVRVR1_0' or vertex == 'VVVIVR1_0'):
         # AW:
         TMP_replace = '      COMPLEX*16 TMP1\n' \
         + '      COMPLEX*16 TMP2\n' \
@@ -2052,7 +2052,7 @@ def vertex_replacer(text, vertex):
 
         text_copy = text_copy[:linebreaks[8]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[17]+1] + VVLVRVR1_0_replace + text_copy[linebreaks[22]+1:]
         
-    if (vertex == 'VVLVRVR3_0'):
+    if (vertex == 'VVLVRVR3_0' or vertex == 'VVVIVR3_0'):
         # AW:
         TMP_replace = '      COMPLEX*16 TMP1\n' \
         + '      COMPLEX*16 TMP2\n' \
@@ -2063,7 +2063,7 @@ def vertex_replacer(text, vertex):
 
         text_copy = text_copy[:linebreaks[8]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[17]+1] + VVLVRVR3_0_replace + text_copy[linebreaks[22]+1:]
         
-    if (vertex == 'VVLVRVR4_0'):
+    if (vertex == 'VVLVRVR4_0' or vertex == 'VVVIVR4_0'):
         # AW:
         TMP_replace = '      COMPLEX*16 TMP1\n' \
         + '      COMPLEX*16 TMP2\n' \
@@ -2499,7 +2499,7 @@ def postex_vertex_replacer(working_dir):
         'VVRVRVR3_0.f', 'VVRVRVR4_0.f', 'VVIVLVL1P0_3.f', 'VVIVLVL3P0_3.f', 'VVIVLVL4P0_3.f', 'VVIVLVL1_0.f', 'VVIVLVL3_0.f', 'VVIVLVL4_0.f', \
         'VIVLVLVR1P0_2.f', 'VIVLVLVR3P0_2.f', 'VIVLVLVR4P0_2.f', 'VIVLVRVR1P0_3.f' , ' VIVLVRVR3P0_3.f', 'VIVLVRVR4P0_3.f', 'VIVLVLVR1_0.f', \
         'VIVLVLVR3_0.f', 'VIVLVLVR4_0.f', 'VIVLVRVR1_0.f', 'VIVLVRVR3_0.f', 'VIVLVRVR4_0.f', 'VVLVLVL1P0_2.f', \
-        'VVLVLVL3P0_2.f', 'VVLVLVL4P0_2.f'                      ]
+        'VVLVLVL3P0_2.f', 'VVLVLVL4P0_2.f', 'VVVIVR1_0.f', 'VVVIVR3_0.f', 'VVVIVR4_0.f'                      ]
     onlyfiles = [f for f in os.listdir(write_dir) if os.path.isfile(os.path.join(write_dir, f))]
     konlyfiles = [f[:4] + f[-4:] for f in onlyfiles]
     for vertex in vertex_list:
