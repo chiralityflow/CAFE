@@ -600,7 +600,107 @@ V_98 = Vertex(name = 'V_98',
                lorentz = [ L.RLV1 ],
                couplings = {(0,0):C.GC_11})
 
-######################################################################
+############################################################
 
 # Massive QCD vertices
 
+V_99 = Vertex(name = 'V_99', 
+			 particles = [ P.tM__tilde__, P.tM, P.g ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_100 = Vertex(name = 'V_100', 
+			 particles = [ P.tM__tilde__, P.tM, P.gLI ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_101 = Vertex(name = 'V_101', 
+			 particles = [ P.tM__tilde__, P.tM, P.gRI ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_102 = Vertex(name = 'V_102', 
+			 particles = [ P.tM__tilde__, P.tM, P.gL ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_103 = Vertex(name = 'V_103', 
+			 particles = [ P.tM__tilde__, P.tM, P.gR ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_104 = Vertex(name = 'V_104', 
+			 particles = [ P.tM__tilde__, P.tP, P.g ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_105 = Vertex(name = 'V_105', 
+			 particles = [ P.tM__tilde__, P.tP, P.gLI ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_106 = Vertex(name = 'V_106', 
+			 particles = [ P.tM__tilde__, P.tP, P.gRI ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_107 = Vertex(name = 'V_107', 
+			 particles = [ P.tM__tilde__, P.tP, P.gL ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_108 = Vertex(name = 'V_108', 
+			 particles = [ P.tM__tilde__, P.tP, P.gR ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_109 = Vertex(name = 'V_109', 
+			 particles = [ P.tP__tilde__, P.tM, P.g ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_110 = Vertex(name = 'V_110', 
+			 particles = [ P.tP__tilde__, P.tM, P.gLI ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_111 = Vertex(name = 'V_111', 
+			 particles = [ P.tP__tilde__, P.tM, P.gRI ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_112 = Vertex(name = 'V_112', 
+			 particles = [ P.tP__tilde__, P.tM, P.gL ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_113 = Vertex(name = 'V_113', 
+			 particles = [ P.tP__tilde__, P.tM, P.gR ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_114 = Vertex(name = 'V_114', 
+			 particles = [ P.tP__tilde__, P.tP, P.g ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_115 = Vertex(name = 'V_115', 
+			 particles = [ P.tP__tilde__, P.tP, P.gLI ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_116 = Vertex(name = 'V_116', 
+			 particles = [ P.tP__tilde__, P.tP, P.gRI ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_117 = Vertex(name = 'V_117', 
+			 particles = [ P.tP__tilde__, P.tP, P.gL ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
+V_118 = Vertex(name = 'V_118', 
+			 particles = [ P.tP__tilde__, P.tP, P.gR ],
+			 color = [ 'T(3,2,1)' ], 
+			 lorentz = [ L.FFV1 ], 
+			 couplings = {(0,0):C.GC_11})
