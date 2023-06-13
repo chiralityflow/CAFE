@@ -2389,7 +2389,7 @@ def vertex_replacer(text, vertex):
         text_copy = text_copy[:linebreaks[10]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[24]+1] + text_copy[linebreaks[26]+1:linebreaks[28]+1] + VVVV4P0_2_replace + text_copy[linebreaks[32]+1:]
 
 
-    if (vertex == 'VLVRVRVR1P0_2'):
+    if (vertex == 'VLVRVRVR1P0_2' or vertex == 'VVLVLVL1P0_2'):
         # AW: Hacking the VVVV_2 files for now
         TMP_replace = '      COMPLEX*16 TMP1\n' \
         + '      COMPLEX*16 TMP2\n'
@@ -2403,7 +2403,7 @@ def vertex_replacer(text, vertex):
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[10]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[24]+1] + text_copy[linebreaks[26]+1:linebreaks[28]+1] + VLVRVRVR1P0_2_replace + text_copy[linebreaks[32]+1:]
 
-    if (vertex == 'VLVRVRVR3P0_2'):
+    if (vertex == 'VLVRVRVR3P0_2' or vertex == 'VVLVLVL3P0_2'):
         # AW:
         TMP_replace = '      COMPLEX*16 TMP1\n' \
 
@@ -2415,7 +2415,7 @@ def vertex_replacer(text, vertex):
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[10]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[24]+1] + text_copy[linebreaks[26]+1:linebreaks[28]+1] + VLVRVRVR3P0_2_replace + text_copy[linebreaks[32]+1:]
 
-    if (vertex == 'VLVRVRVR4P0_2'):
+    if (vertex == 'VLVRVRVR4P0_2' or vertex == 'VVLVLVL4P0_2'):
         # AW:
         TMP_replace = '      COMPLEX*16 TMP1\n'
 
@@ -2498,7 +2498,8 @@ def postex_vertex_replacer(working_dir):
         'VVVV1P0_4.f', 'VVVV3P0_4.f', 'VVVV4P0_4.f','VVVV1P0_3.f', 'VVVV3P0_3.f', 'VVVV4P0_3.f','VVRVRVR1_0.f', \
         'VVRVRVR3_0.f', 'VVRVRVR4_0.f', 'VVIVLVL1P0_3.f', 'VVIVLVL3P0_3.f', 'VVIVLVL4P0_3.f', 'VVIVLVL1_0.f', 'VVIVLVL3_0.f', 'VVIVLVL4_0.f', \
         'VIVLVLVR1P0_2.f', 'VIVLVLVR3P0_2.f', 'VIVLVLVR4P0_2.f', 'VIVLVRVR1P0_3.f' , ' VIVLVRVR3P0_3.f', 'VIVLVRVR4P0_3.f', 'VIVLVLVR1_0.f', \
-        'VIVLVLVR3_0.f', 'VIVLVLVR4_0.f', 'VIVLVRVR1_0.f', 'VIVLVRVR3_0.f', 'VIVLVRVR4_0.f'                      ]
+        'VIVLVLVR3_0.f', 'VIVLVLVR4_0.f', 'VIVLVRVR1_0.f', 'VIVLVRVR3_0.f', 'VIVLVRVR4_0.f', 'VVLVLVL1P0_2.f', \
+        'VVLVLVL3P0_2.f', 'VVLVLVL4P0_2.f'                      ]
     onlyfiles = [f for f in os.listdir(write_dir) if os.path.isfile(os.path.join(write_dir, f))]
     konlyfiles = [f[:4] + f[-4:] for f in onlyfiles]
     for vertex in vertex_list:

@@ -4040,7 +4040,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     vids = []
                     for part in vertex['legs']:
                         vids.append(part['id'])
-                    misc.sprint(vids, vert_id_to_pdgs_dict)
+                    #misc.sprint(vids, vert_id_to_pdgs_dict)
                     updated_vertex = self.set_new_vertex_id(vertex, vids, vert_id_to_pdgs_dict)
                     vertex.set('id', updated_vertex.get('id'))
                     #misc.sprint(vertex.get('id'), vids)
@@ -4152,8 +4152,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                         for part in lastvx['legs']:
                             vids.append(part['id'])
                         
-                        misc.sprint(vids, vert_id_to_pdgs_dict)
-                        misc.sprint(lastvx.get('id'), lastvx)
+                        #misc.sprint(vids, vert_id_to_pdgs_dict)
+                        #misc.sprint(lastvx.get('id'), lastvx)
                         updated_lastvx = self.set_new_vertex_id(lastvx, vids, vert_id_to_pdgs_dict)
                         lastvx.set('id', updated_lastvx.get('id'))
                         
