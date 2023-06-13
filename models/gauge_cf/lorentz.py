@@ -33,6 +33,11 @@ RRV1 = Lorentz(name = 'RRV1',
                structure = 'Gamma(3,2,-1)*ProjP(-1,1)' )
 
 
+# AW: massive QCD
+FFV1 = Lorentz(name = 'FFV1',
+               spins = [ 2, 2, 3 ],
+               structure = 'Gamma(3,2,-1)*ProjM(-1,1)' )
+
 
 
 # AL: I have commented out all other lorentz structures that we don't yet use in building

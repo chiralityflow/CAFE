@@ -273,6 +273,41 @@ dR = Particle(pdg_code = 80001,
 
 dR__tilde__ = dR.anti()
 
+# AW: massive quarks
+
+tP = Particle(pdg_code = 70106,
+             name = 'tP',
+             antiname = 'tP~',
+             spin = 2,
+             color = 3,
+             mass = Param.MT,
+             width = Param.ZERO,
+             texname = 'tL',
+             antitexname = 'tP~',
+             charge = 2/3,
+             GhostNumber = 0,
+             LeptonNumber = 0,
+             Y = 0)
+             
+
+tP__tilde__ = tP.anti()
+
+tM = Particle(pdg_code = 80106,
+             name = 'tM',
+             antiname = 'tM~',
+             spin = 2,
+             color = 3,
+             mass = Param.MT,
+             width = Param.ZERO,
+             texname = 'tM',
+             antitexname = 'tM~',
+             charge = 2/3,
+             GhostNumber = 0,
+             LeptonNumber = 0,
+             Y = 0)
+
+tM__tilde__ = tM.anti()
+
 
 # W boson included since MadEvent relies on its mass to determine couplings
 
@@ -289,4 +324,5 @@ W__plus__ = Particle(pdg_code = 24,
                      GhostNumber = 0,
                      LeptonNumber = 0,
                      Y = 0)
+
 
