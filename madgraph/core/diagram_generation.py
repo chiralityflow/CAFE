@@ -1333,6 +1333,10 @@ class Amplitude(base_objects.PhysicsObject):
         
         # find photons and update its reference momenta
         # place ref momenta in array ref_mom and store as property of amplitude
+        all_gluon_proc = True
+        for leg in ext_legs:
+            if not leg.get('id') in [721,821,70021,80021]:
+                all_gluon_proc = False
         ref_mom = []
         if found_left_ferm and found_right_ferm:
             for leg in ext_legs:
@@ -1360,7 +1364,7 @@ class Amplitude(base_objects.PhysicsObject):
                 else: 
                     ref_mom.append(-1)
             self.set('ref_momenta', ref_mom)
-        else:
+        if all_gluon_proc:
             #AW: here we find vanishing combos for diagrams with no fermions
             found_left_boson = False
             found_right_boson = False
@@ -1511,10 +1515,10 @@ class Amplitude(base_objects.PhysicsObject):
         
         if (is_first_it):
             #AW: check for forbidden chiralities, added massive particles 14/06/2023
-            left_particles = [721,70021,70001,-70001,70002,-70002,90001,-90001,90005,-90005,90023,70106,80106]
-            right_particles = [821,80021,80001,-80001,80002,-80002,90003,-90003,90007,-90007,90024,70106,80106]
-            left_fermions = [70001,-70001,70002,-70002,90001,-90001,90005,-90005,70106,80106]
-            right_fermions = [80001,-80001,80002,-80002,90003,-90003,90007,-90007,70106,80106]
+            left_particles = [721,70021,70001,-70001,70002,-70002,90001,-90001,90005,-90005,90023,70106,80106,-70106,-80106]
+            right_particles = [821,80021,80001,-80001,80002,-80002,90003,-90003,90007,-90007,90024,70106,80106,-70106,-80106]
+            left_fermions = [70001,-70001,70002,-70002,90001,-90001,90005,-90005,70106,80106,-70106,-80106]
+            right_fermions = [80001,-80001,80002,-80002,90003,-90003,90007,-90007,70106,80106,-70106,-80106]
             N_left = 0
             N_right = 0
             left_fermion = False

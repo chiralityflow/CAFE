@@ -3870,38 +3870,45 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # AW: same but for gluons
         found_left_boson = False
         found_right_boson = False
+        found_first_boson = False
         for leg in legs:
             if leg.get('id') in [721,70021] and not found_left_boson:
                 left_boson = leg
                 found_left_boson = True
+                if not found_first_boson:
+                    first_boson = leg
+                    found_first_boson = True
+            
             elif leg.get('id') in [821,80021] and not found_right_boson:
                 right_boson = leg
                 found_right_boson = True
+                if not found_first_boson:
+                    first_boson = leg
+                    found_first_boson = True
             elif found_left_boson and found_right_boson:
                 break
+        if not found_first_boson:
+            misc.sprint('PROCESS HAS NO BOSONS')
         if found_left_boson and found_right_boson:
             for leg in legs:
                 if leg.get('id') in [721,70021]:
                     ref_moms.append(right_boson.get('number'))
                 elif leg.get('id') in [821,80021]:
                     ref_moms.append(left_boson.get('number'))
-                elif leg.get('id') in [70106, -70106]:
-                    if leg.get('state'):
-                        ref_moms.append(right_boson.get('number'))
-                    else:
-                        ref_moms.append(left_boson.get('number'))
-                elif leg.get('id') in [80106, -80106]:
-                    if leg.get('state'):
-                        ref_moms.append(left_boson.get('number'))
-                    else:
-                        ref_moms.append(right_boson.get('number'))
+                elif leg.get('id') in [70106, -70106, 80106, -80106]:
+                    ref_moms.append(first_boson.get('number'))
                 else:
                     ref_moms.append(-1)
         else:
-            for i in range(len(legs)-1):
-                ref_moms.append(i+2)
-            ref_moms.append(1)
-            misc.sprint('Forbidden chiralities')
+            for leg in legs:
+                if leg.get('id') in [70106, -70106, 80106, -80106]:
+                    ref_moms.append(first_boson.get('number'))
+                elif leg.get('id') in [721,70021,821,80021]:
+                    for ref_leg in legs:
+                        if not ref_leg.get('id') in [70106, -70106, 80106, -80106] and ref_leg.get('number') != leg.get('number'):
+                            ref_moms.append(ref_leg.get('number'))
+                            break
+        misc.sprint(ref_moms)
         return ref_moms
             
             
