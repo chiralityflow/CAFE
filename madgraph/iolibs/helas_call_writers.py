@@ -318,6 +318,9 @@ class HelasCallWriter(base_objects.PhysicsObject):
             if not wavefunction.get('mothers'):
                 call = self.get_chiral_wavefunction_call(wavefunction, call)
             else:
+                # EB: for checking if reduced version should be used in massive case
+                if abs(wavefunction.get('particle').get('pdg_code')) in [11, 13, 15]:
+                    call = self.get_reduced_wfs_call(wavefunction, call)
                 #AW: for getting wavefunctions 
                 call = self.get_internal_wfs(wavefunction, call)
         except KeyError as error:
@@ -331,9 +334,27 @@ class HelasCallWriter(base_objects.PhysicsObject):
 
     def get_internal_wfs(self, wavefunction, call):
         
-        call = call + '\n TOTWFS = TOTWFS + 1 \n' + 'IF (ABS(W(3,' + str(wavefunction.get('number')) + ')).LE.1E-18.AND.(ABS(W(4,' + str(wavefunction.get('number')) + '))).LE.1E-18.AND.(ABS(W(5,' + str(wavefunction.get('number')) + '))).LE.1E-18.AND.(ABS(W(6,' + str(wavefunction.get('number')) + ')).LE.1E-18)) THEN \n ZEROWFS = ZEROWFS + 1 \n ENDIF'
+        call = "WRITE(2,*) '" + call[5:12] + "'\n" + call #+ '\n TOTWFS = TOTWFS + 1 \n' + 'IF (ABS(W(3,' + str(wavefunction.get('number')) + ')).LE.1E-18.AND.(ABS(W(4,' + str(wavefunction.get('number')) + '))).LE.1E-18.AND.(ABS(W(5,' + str(wavefunction.get('number')) + '))).LE.1E-18.AND.(ABS(W(6,' + str(wavefunction.get('number')) + ')).LE.1E-18)) THEN \n ZEROWFS = ZEROWFS + 1 \n ENDIF'
 
         return call
+
+    # EB: Function for updating call if reduced version of massive
+    #     subroutine should be used.
+    def get_reduced_wfs_call(self,wavefunction,call):
+        mother1 = wavefunction.get('mothers')[0]
+        mother2 = wavefunction.get('mothers')[1]
+        if call[5:7] in ['FM', 'MF']:
+            if mother2.get('pdg_code') == 90024 and mother1.get('number')==mother2.get('ref_mom'):
+                call = call[:9] + 'R' + call[9:]
+            elif mother2.get('pdg_code') == 90023 and mother2.get('ref_mom')==mother1.get('ref_mom'):
+                call = call[:9] + 'L' + call[9:]
+        elif call[5:7] in ['FP', 'PF']:
+            if mother2.get('pdg_code') == 90023 and mother1.get('number')==mother2.get('ref_mom'):
+                call = call[:9] + 'L' + call[9:]
+            elif mother2.get('pdg_code') == 90024 and mother2.get('ref_mom')==mother1.get('ref_mom'):
+                call = call[:9] + 'R' + call[9:]
+        return call
+
     # AL: Added a function to change the chiral external wavefunctions
     # MS: we likely want to similary create a line for calling the
     # vertex functions (LLV_1 (rather LLV1_1) etc), as we need more
@@ -442,7 +463,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             return call
     #AW
     def get_chiral_amps(self, amplitude, call):
-        call = call + '\n TOTAMPS = TOTAMPS + 1 \n IF (ABS(AMP(' + str(amplitude.get('number')) + ')).le.1E-15) THEN \n ZEROAMPS = ZEROAMPS + 1 \n ENDIF'
+        call = call + '\n TOTAMPS = TOTAMPS + 1 \n IF (ABS(AMP(' + str(amplitude.get('number')) + ")).le.1E-15) THEN \n ZEROAMPS = ZEROAMPS + 1 \n ENDIF \n WRITE(2,*) 'AMP=', AMP(" + str(amplitude.get('number')) + ')'
 
         return call
 
