@@ -1056,6 +1056,8 @@ class Amplitude(base_objects.PhysicsObject):
         found_neg_ferm = False
         found_left_photon = False
         found_right_photon = False
+        found_first_photon = False
+        found_second_photon = False
         massive = False
         numb_left_photons = 0
         numb_right_photons = 0
@@ -1075,29 +1077,36 @@ class Amplitude(base_objects.PhysicsObject):
                     right_ferm['id'] = -right_ferm['id']
                 found_right_ferm = True
             elif abs(leg.get('id')) in [70011,70013,70015] and not found_pos_ferm:
-                pos_ferm=copy.copy(leg)
+                #pos_ferm=copy.copy(leg)
                 # if incoming particle, flip to outgoing id
-                if pos_ferm.get('state') == False:
-                    pos_ferm['id'] = -pos_ferm['id']
+                #if pos_ferm.get('state') == False:
+                #    pos_ferm['id'] = -pos_ferm['id']
                 found_pos_ferm = True
                 massive = True
             elif abs(leg.get('id')) in [80011,80013,80015] and not found_neg_ferm:
-                neg_ferm=copy.copy(leg)
+                #neg_ferm=copy.copy(leg)
                 # if incoming particle, flip to outgoing id
-                if neg_ferm.get('state') == False:
-                    neg_ferm['id'] = -neg_ferm['id']
+                #if neg_ferm.get('state') == False:
+                 #   neg_ferm['id'] = -neg_ferm['id']
                 found_neg_ferm = True
                 massive = True
-            elif leg.get('id') in [90023]:
-                if not found_left_photon:
-                    left_photon = copy.copy(leg)
-                    found_left_photon = True
-                numb_left_photons += 1
-            elif leg.get('id') in [90024]:
-                if not found_right_photon:
-                    right_photon = copy.copy(leg)
-                    found_right_photon = True
-                numb_right_photons += 1
+            elif leg.get('id') in  [90023, 90024]:
+                if not found_first_photon:
+                    first_photon = copy.copy(leg)
+                    found_first_photon = True
+                elif not found_second_photon:
+                    second_photon = copy.copy(leg)
+                    found_second_photon = True
+            #elif leg.get('id') in [90023]:
+                #if not found_left_photon:
+                   # left_photon = copy.copy(leg)
+                  #  found_left_photon = True
+              #  numb_left_photons += 1
+           # elif leg.get('id') in [90024]:
+               # if not found_right_photon:
+                  #  right_photon = copy.copy(leg)
+                  #  found_right_photon = True
+              #  numb_right_photons += 1
             elif found_right_ferm and found_left_ferm:
                 break
         
@@ -1132,19 +1141,49 @@ class Amplitude(base_objects.PhysicsObject):
             self.set('ref_momenta', ref_mom)
         # EB: Add the vanishing combinations if there are massive fermions.
         elif massive:
-            if found_pos_ferm and found_right_photon:
-                if not found_neg_ferm or numb_left_photons > numb_right_photons:
-                    if pos_ferm.get('number') < right_photon.get('number'):
-                        vanishing_combs.append((pos_ferm, right_photon))
-                    else:
-                        vanishing_combs.append((right_photon, pos_ferm))
+            for leg in ext_legs:
+                if found_first_photon:
+                    if abs(leg.get('id')) in [70011,70013,70015]:
+                        pos_ferm = copy.copy(leg)
+                        if pos_ferm.get('state') == False:
+                            pos_ferm['id'] = -pos_ferm['id']
+                        if pos_ferm.get('number')%2 == 1 and first_photon.get('id') == 90023:
+                            if pos_ferm.get('number') < first_photon.get('number'):
+                                vanishing_combs.append((pos_ferm, first_photon))
+                            else:
+                               vanishing_combs.append((first_photon, pos_ferm))
+                        elif pos_ferm.get('number')%2 == 0 and found_second_photon and second_photon.get('id') == 90023:
+                            if pos_ferm.get('number') < second_photon.get('number'):
+                               vanishing_combs.append((pos_ferm, second_photon))
+                            else:
+                               vanishing_combs.append((second_photon, pos_ferm))
+                    elif abs(leg.get('id')) in [80011,80013,80015]:
+                        neg_ferm = copy.copy(leg)
+                        if neg_ferm.get('state') == False:
+                            neg_ferm['id'] = -neg_ferm['id']
+                        if neg_ferm.get('number')%2 == 1 and first_photon.get('id') == 90024:
+                            if neg_ferm.get('number') < first_photon.get('number'):
+                               vanishing_combs.append((neg_ferm, first_photon))
+                            else:
+                               vanishing_combs.append((first_photon, neg_ferm))
+                        elif neg_ferm.get('number')%2 == 0 and found_second_photon and second_photon.get('id') == 90024:
+                            if neg_ferm.get('number') < second_photon.get('number'):
+                               vanishing_combs.append((neg_ferm, second_photon))
+                            else:
+                              vanishing_combs.append((second_photon, neg_ferm))
+            #if found_pos_ferm and found_right_photon:
+               # if not found_neg_ferm or numb_left_photons > numb_right_photons:
+                  #  if pos_ferm.get('number') < right_photon.get('number'):
+                    #    vanishing_combs.append((pos_ferm, right_photon))
+                   # else:
+                     #   vanishing_combs.append((right_photon, pos_ferm))
                 
-            if found_neg_ferm and found_left_photon:
-                if not found_pos_ferm or numb_left_photons <= numb_right_photons:
-                    if neg_ferm.get('number') < left_photon.get('number'):
-                        vanishing_combs.append((neg_ferm, left_photon))
-                    else:
-                        vanishing_combs.append((left_photon, neg_ferm))
+           # if found_neg_ferm and found_left_photon:
+                #if not found_pos_ferm or numb_left_photons <= numb_right_photons:
+                 #   if neg_ferm.get('number') < left_photon.get('number'):
+                   #     vanishing_combs.append((neg_ferm, left_photon))
+                  #  else:
+                    #    vanishing_combs.append((left_photon, neg_ferm))
         else:
             #AW: here we find vanishing combos for diagrams with no fermions
             found_left_boson = False
@@ -1256,7 +1295,7 @@ class Amplitude(base_objects.PhysicsObject):
                                     vanishing_combs.append((right_boson,not_first_left_boson,not_first_right_boson))
                                 else:
                                     vanishing_combs.append((right_boson,not_first_right_boson,not_first_left_boson))
-
+        
         return vanishing_combs
 
     def reduce_leglist(self, curr_leglist, max_multi_to1, ref_dict_to0,
@@ -1285,7 +1324,7 @@ class Amplitude(base_objects.PhysicsObject):
         if (is_first_it):
             #AW: check for forbidden chiralities
             #EB: Updated to work with massive fermions
-            #     To do: Add additional massive fermions to list when they are implemented
+            #     To do: In the massive case this can not be used, so remove the outdated code.
             left_particles = [70021,70001,-70001,70002,-70002,90001,-90001,90005,-90005,90023]
             right_particles = [80021,80001,-80001,80002,-80001,90003,-90003,90007,-90007,90024]
             massive_pos_ferm = [70011,70013,70015]
@@ -1389,6 +1428,7 @@ class Amplitude(base_objects.PhysicsObject):
                     
                     for van_comb in vanishing_combs:
                         for comb in comb_list:
+                            #misc.sprint(van_comb)
                             #misc.sprint(comb)
                             if van_comb == comb:
                                 to_remove.append(comb_lists[icomb])
@@ -1396,7 +1436,7 @@ class Amplitude(base_objects.PhysicsObject):
                                 break
                         if is_removed: 
                             break
-                
+                #misc.sprint(to_remove)
                 # now delete the combinations which are not allowed
                 comb_lists = [c_list for c_list in comb_lists if \
                               c_list not in to_remove]
@@ -2192,7 +2232,8 @@ class MultiProcess(base_objects.PhysicsObject):
         # This can be updated if we add masses/have different needs for different particles)
         #EB: Updated to also get right chiral boson before left chiral boson if there are massive fermions.
         is_chiral = model.get('name') == 'cf' or model.get('name') == 'colorless_cf' or model.get('name') == 'gauge_cf'\
-            or model.get('name') in ['massive_cf', 'massive_cf-lepton_masses'] 
+            or model.get('name') in ['massive_cf','massive_cf-lepton_masses','massive_cf-lepton_masses_mu5','massive_cf-lepton_masses_mu10',\
+                'massive_cf-lepton_masses_mu20','massive_cf-lepton_masses_mu100','massive_cf-lepton_masses_mu500','massive_cf_copy-lepton_masses'] 
         
         islegs_orig = [leg for leg in process_definition['legs'] \
                  if leg['state'] == False]
@@ -2354,7 +2395,8 @@ class MultiProcess(base_objects.PhysicsObject):
                    not process.get('forbidden_onsh_s_channels') and \
                    not process.get('forbidden_s_channels') and \
                    not process.get('model').get('name') == 'cf' and not process.get('model').get('name') == 'gauge_cf' and \
-                   not process.get('model').get('name') in ['massive_cf', 'massive_cf-lepton_masses'] and\
+                   not process.get('model').get('name') in ['massive_cf','massive_cf-lepton_masses','massive_cf-lepton_masses_mu5',\
+                    'massive_cf-lepton_masses_mu10','massive_cf-lepton_masses_mu20','massive_cf-lepton_masses_mu100','massive_cf-lepton_masses_mu500','massive_cf_copy-lepton_masses'] and\
                    not process.get('is_decay_chain') and not diagram_filter:
                     try:
                         crossed_index = success_procs.index(sorted_legs)
