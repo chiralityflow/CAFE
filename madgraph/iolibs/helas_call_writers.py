@@ -392,6 +392,16 @@ class HelasCallWriter(base_objects.PhysicsObject):
             call_rhs = ','.join(call.split(',')[-2:])
             call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
 
+        elif pdg_code in [70106,80106]:
+            # update name
+            call = call[:6] + 'M' + call[7:]
+
+            # insert reference momentum as argument
+            call_lhs = ','.join(call.split(',')[:-2])
+            call_rhs = ','.join(call.split(',')[-2:])
+            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
+            misc.sprint(call)
+
         return call
 
     def get_amplitude_call(self, amplitude):

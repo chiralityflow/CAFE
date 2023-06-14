@@ -340,6 +340,473 @@ c                    ((p^1+i*p^2)/sqrt(p^0+p^3))                   (sqrt(p^0-p^3
       return
       end
 
+      subroutine imxxxx(p, fmass, nspin, nsf, q, fmi)
+c
+c This subroutine computes a massive fermion wavefunction for 
+c an inflowing fermion under the chirality-flow formalism.
+c
+c input:
+c       real    p(0:3)          : four-momentum  of fermion
+c       real    fmass           : mass           of fermion
+c       integer nspin = -1 or 1 : spin direction of fermion
+c       integer nsf   = -1 or 1 : +1 for particle, -1 for anti-particle
+c       real    q(0:3)          : arbitrary light-like momenta in p = pbt + a*q
+c
+c output:
+c       real    pbt(0:3)         : light-like momenta in p=pbt + a*q
+c       complex fmi(6)          : fermion wavefunction   
+c
+      implicit none
+      double complex fmi(6), pbbrasq(2), qketan(2), pbketan(2), qbrasq(2),
+     & pbqprod, qpbprod
+      double precision p(0:3), fmass, q(0:3), pb(0:3), a, sqpb0pb3,
+     & sqq0q3, lfor, lback, ph(1:3), pabs, pbt(0:3)
+      integer nspin, nsf
+      double precision rZero, rHalf, rTwo, rTest, rSqrtTwo
+      parameter(rZero=0.0d0,rHalf=0.5d0,rTwo=2.0d0,rTest=0.0001d0,rSqrtTwo=dsqrt(2.0d0))
+      double complex IC
+      parameter(IC=dcmplx(0.0d0,1.0d0))
+       
+c     EB: a = fmass^2/ (2 p*q) 
+c     pbt = p - a*q
+      a = ((fmass**2)*rHalf)/(p(0)*q(0) - p(1)*q(1) - p(2)*q(2) - p(3)*q(3))
+      pbt(0) = p(0) - a*q(0)
+      pbt(1) = p(1) - a*q(1)
+      pbt(2) = p(2) - a*q(2)
+      pbt(3) = p(3) - a*q(3)
+
+c     EB: Rotate pbt around the x-axis. This is done in order to
+c         Remove numerical instabilities in pbt^+=pbt(0)+pbt(3),
+c         which occure if pbt(0) is close to -pbt(3).
+      pb(0) = pbt(0)
+      pb(1) = pbt(1)
+      pb(2) = dsqrt(rHalf)*pbt(2)-dsqrt(rHalf)*pbt(3)
+      pb(3) = dsqrt(rHalf)*pbt(2)+dsqrt(rHalf)*pbt(3)
+
+      
+C     EB: version to use helicity decomposition
+c      pabs = dsqrt(p(1)**2+p(2)**2+p(3)**2)
+c     AL: checked
+
+c      lfor = p(0) + pabs
+c      lback = (fmass**2)/lfor
+c      lback = p(0) - pabs
+c     AL: checked
+
+c      ph(1) = p(1)/pabs
+c      ph(2) = p(2)/pabs
+c      ph(3) = p(3)/pabs
+c     AL: checked
+      
+c      pb(0) = lfor*rHalf
+c      pb(1) = lfor*rHalf*ph(1)
+c      pb(2) = lfor*rHalf*ph(2)
+c      pb(3) = lfor*rHalf*ph(3)
+c     AL: checked
+
+c      q(0) = lback*rHalf
+c      q(1) = -1*lback*rHalf*ph(1)
+c      q(2) = -1*lback*rHalf*ph(2)
+c      q(3) = -1*lback*rHalf*ph(3)
+c     AL: checked
+c     EB: end of version for helicity decomposition
+
+      fmi(1) = dcmplx(p(0),p(3))*nsf*-1
+      fmi(2) = dcmplx(p(1),p(2))*nsf*-1
+c     AL: checked
+      
+c     EB: anti-fermion with positive spin or fermion with negative spin.
+c
+c     fmi = ( [pb| , nsf*fmass|q>/<pb q> )
+c     
+
+      if ((nsf.eq.(-1).and.nspin.eq.(1)).or.
+     &(nsf.eq.(1).and.nspin.eq.(-1))) then
+      
+c       pbbrasq = [pb| = (sqrt(pb^0+pb^3), (pb^1-i*pb^2)/sqrt(pb^0+pb^3))
+c                      = (0,sqrt(pb^0-pb^3)) if pb^3=-pb^0
+
+c     EB: check which representation to use for [pb|
+        if(pb(1).eq.0d0.and.pb(2).eq.0d0.and.pb(3).lt.0d0) then
+           sqpb0pb3 = 0d0  
+        else
+          sqpb0pb3 = dsqrt(max(pb(0)+pb(3),rZero))
+        end if
+              
+        pbbrasq(1) = dcmplx( sqpb0pb3 )
+c     AL: checked
+
+c     EB: check which representation to use for [pb|
+        if ( sqpb0pb3.eq.rZero ) then
+           pbbrasq(2) = dcmplx( dsqrt(rTwo*pb(0)) )
+        else
+           pbbrasq(2) = dcmplx( pb(1), -pb(2) )/sqpb0pb3
+        endif
+c     AL: checked
+
+c     EB: Old version of fmi(3) and fmi(4)
+c        TODO: remove these
+c        fmi(3) = (pbbrasq(1))
+c        fmi(4) = (pbbrasq(2))
+c     AL: checked
+
+c     EB: Rotation around the x-axis to counter rotation of pbt
+        fmi(3) = dsqrt(rTwo+rSqrtTwo)*rHalf*pbbrasq(1)-
+     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*pbbrasq(2)
+     
+        fmi(4) = dsqrt(rTwo+rSqrtTwo)*rHalf*pbbrasq(2)-
+     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*pbbrasq(1)
+ 
+        
+c       qketan = |q> = (sqrt(q^0+q^3)            ) = (if q^0 = -q^3) (0            ) 
+c                      ((q^1+i*q^2)/sqrt(q^0+q^3))                   (sqrt(q^0-q^3)) 
+
+c       EB: check which representation to use for |q>
+        if(q(1).eq.0d0.and.q(2).eq.0d0.and.q(3).lt.0d0) then
+           sqq0q3 = 0d0
+        else
+           sqq0q3 = dsqrt(max(q(0)+q(3),rZero))
+        endif
+        qketan(1) = dcmplx( sqq0q3 )
+c     AL: checked
+ 
+c     EB: check which representation to use for |q>     
+        if ( sqq0q3.eq.rZero ) then
+           qketan(2) = dcmplx( dsqrt(rTwo*q(0)) )
+        else
+           qketan(2) = dcmplx( q(1), q(2) )/sqq0q3
+        endif
+c     AL: checked
+
+c       pbqprod = <pb q>
+c       pbbraan = <pb| = |pb]^dagger = (epsilon*[pb|)^dagger =( ( 0 1 )*[pb|)^dagger = (pbbrasq(2)^*, -pbbrasq(1)^*)
+c                                                               (-1 0 )
+c 
+c     EB: Old version 
+c        TODO: remove this                   
+c        pbqprod = conjg(pbbrasq(2))*qketan(1)-conjg(pbbrasq(1))*qketan(2)
+c     AL: checked 
+
+        pbqprod = conjg(fmi(4))*qketan(1)-conjg(fmi(3))*qketan(2)
+      
+        fmi(5) = (nsf*fmass*qketan(1)/pbqprod)
+        fmi(6) = (nsf*fmass*qketan(2)/pbqprod)
+c     AL: checked 
+      	
+      endif
+      
+c     EB: anti-fermion with negative spin or fermion with positive spin.
+c
+c     fmi = (  -nsf*fmass[q|/[q pb], |pb> )
+c
+      if ((nsf.eq.(-1).and.nspin.eq.(-1)).or.
+     &(nsf.eq.(1).and.nspin.eq.(1))) then
+       
+c       pbketan = |pb> = (sqrt(pb^0+pb^3)            ) = (if pb^0 = -pb^3) (0            ) 
+c                       ((pb^1+i*pb^2)/sqrt(pb^0+pb^3))                    (sqrt(pb^0-pb^3))      
+        
+c     EB: check which representation to use for |pb>
+        if(pb(1).eq.0d0.and.pb(2).eq.0d0.and.pb(3).lt.0d0) then
+           sqpb0pb3 = 0d0   
+        else
+           sqpb0pb3 = dsqrt(max(pb(0)+pb(3),rZero))
+        end if
+        
+        pbketan(1) = dcmplx( sqpb0pb3 )
+c     AL: checked
+      
+c     EB: check which representation to use for |pb>
+        if ( sqpb0pb3.eq.rZero ) then
+           pbketan(2) = dcmplx( dsqrt(rTwo*pb(0)) )
+        else
+           pbketan(2) = dcmplx( pb(1), pb(2) )/sqpb0pb3
+        endif
+c     AL: checked
+c     EB: Old version of fmi(5) and fmi(6)
+c        TODO: remove these      
+c        fmi(5) = (pbketan(1))
+c        fmi(6) = (pbketan(2))
+c     AL: checked
+
+c     EB: Rotation around the x-axis to counter rotation of pbt        
+        fmi(5) = dsqrt(rTwo+rSqrtTwo)*rHalf*(pbketan(1))+
+     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*(pbketan(2))
+     
+        fmi(6) = dsqrt(rTwo+rSqrtTwo)*rHalf*(pbketan(2))+
+     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*(pbketan(1))
+
+c       qbrasq = [q| = (sqrt(q^0+q^3), (q^1-i*q^2)/sqrt(q^0+q^3))
+c                    = (0,sqrt(q^0-q^3)) if q^3=-q^0
+
+c     EB: check which represenation to use for [q|
+        if(q(1).eq.0d0.and.q(2).eq.0d0.and.q(3).lt.0d0) then
+           sqq0q3 = 0d0
+        else
+           sqq0q3 = dsqrt(max(q(0)+q(3),rZero))
+        end if
+        qbrasq(1) = dcmplx( sqq0q3 )
+c     AL: checked
+
+c     EB: check which represenation to use for [q|
+        if ( sqq0q3.eq.rZero ) then
+           qbrasq(2) = dcmplx( dsqrt(rTwo*q(0)) )
+        else
+           qbrasq(2) = dcmplx( q(1), -q(2) )/sqq0q3
+        endif
+c     AL: checked
+
+c       qpbprod = [q pb]
+c       pbketsq = |pb] = <pb|^dagger = (epsilon*|pb>^dagger = ( ( 0 1 )*|pb> )^dagger = (pbketan(2)^*)
+c                                                               (-1 0 )                 (-pbketan(1)^*)
+c     EB: Old version 
+c        TODO: remove this
+c        qpbprod = qbrasq(1)*conjg(pbketan(2))-qbrasq(2)*conjg(pbketan(1))
+c     AL: checked 
+
+        qpbprod = qbrasq(1)*conjg(fmi(6))-qbrasq(2)*conjg(fmi(5))
+
+        fmi(3) = (-1*nsf*fmass*qbrasq(1)/qpbprod)
+        fmi(4) = (-1*nsf*fmass*qbrasq(2)/qpbprod)  
+c     AL: checked (note -1 compensates for `wrong' order of inner product!)
+
+      endif
+      
+      return
+      end
+
+
+      subroutine omxxxx(p, fmass, nspin, nsf, q, fmo)
+c
+c This subroutine computes a massive fermion wavefunction for 
+c an outflowing fermion under the chirality-flow formalism.
+c
+c input:
+c       real    p(0:3)          : four-momentum  of fermion
+c       real    fmass           : mass           of fermion
+c       integer nspin = -1 or 1 : spin direction of fermion
+c       integer nsf   = -1 or 1 : +1 for particle, -1 for anti-particle
+c       real    q(0:3)          : arbitrary light-like momenta in p = pbt + a*q
+c
+c output:
+c       real    pbt(0:3)         : light-like momenta in p=pbt + a*q
+c       complex fmo(6)          : fermion wavefunction   
+c
+      implicit none
+      double complex fmo(6), pbbrasq(2), qketan(2), pbketan(2), qbrasq(2),
+     & pbqprod, qpbprod
+      double precision p(0:3), fmass, q(0:3), pb(0:3), a, sqpb0pb3,
+     & sqq0q3, lfor, lback, ph(1:3), pabs, pbt(0:3)
+      integer nspin, nsf
+      double precision rZero, rHalf, rTwo, rTest, rSqrtTwo
+      parameter(rZero=0.0d0,rHalf=0.5d0,rTwo=2.0d0,rTest=0.0001d0,rSqrtTwo=dsqrt(2.0d0))
+      double complex IC
+      parameter(IC=dcmplx(0.0d0,1.0d0))
+      
+c     EB: Calc. a and pbt      
+      a = ((fmass**2)*rHalf)/(p(0)*q(0) - p(1)*q(1) - p(2)*q(2) - p(3)*q(3))
+      pbt(0) = p(0) - a*q(0)
+      pbt(1) = p(1) - a*q(1)
+      pbt(2) = p(2) - a*q(2)
+      pbt(3) = p(3) - a*q(3)
+      
+c     EB: Rotate pbt around the x-axis. This is done in order to
+c         Remove numerical instabilities in pbt^+=pbt(0)+pbt(3),
+c         which occure if pbt(0) is close to -pbt(3).
+      pb(0) = pbt(0)
+      pb(1) = pbt(1)
+      pb(2) = dsqrt(rHalf)*pbt(2)-dsqrt(rHalf)*pbt(3)
+      pb(3) = dsqrt(rHalf)*pbt(2)+dsqrt(rHalf)*pbt(3)
+      
+C     EB: version to use helicity decomposition
+      
+c      pabs = dsqrt(p(1)**2+p(2)**2+p(3)**2)
+c     AL: checked
+
+c      lfor  = p(0) + pabs
+c      lback = p(0) - pabs
+c     AL: checked
+
+c      ph(1) = p(1)/pabs
+c      ph(2) = p(2)/pabs
+c      ph(3) = p(3)/pabs
+c     AL: checked
+
+c      pb(0) = lfor*rHalf
+c      pb(1) = lfor*rHalf*ph(1)
+c      pb(2) = lfor*rHalf*ph(2)
+c      pb(3) = lfor*rHalf*ph(3)
+c     AL: checked
+
+c      q(0) = lback*rHalf
+c      q(1) = -1*lback*rHalf*ph(1)
+c      q(2) = -1*lback*rHalf*ph(2)
+c      q(3) = -1*lback*rHalf*ph(3)
+c     AL: checked
+
+      fmo(1) = dcmplx(p(0),p(3))*nsf
+      fmo(2) = dcmplx(p(1),p(2))*nsf
+c     AL: checked
+c     EB: End of version for helicity decomposition
+
+c
+c     EB: anti-fermion with positive spin or fermion with negative spin.
+c
+c     fmo = (  nsf*fmass[q|/[q pb], |pb> )
+c      
+      if ((nsf.eq.(-1).and.nspin.eq.(1)).or.
+     &(nsf.eq.(1).and.nspin.eq.(-1))) then 
+c       pbketan = |pb> = (sqrt(pb^0+pb^3)            ) = (if pb^0 = -pb^3) (0            ) 
+c                       ((pb^1+i*pb^2)/sqrt(pb^0+pb^3))                    (sqrt(pb^0-pb^3))      
+c     AL: checked
+
+c     EB: check which representation to use for |pb>
+        if(pb(1).eq.0d0.and.pb(2).eq.0d0.and.pb(3).lt.0d0) then
+           sqpb0pb3 = 0d0
+        else
+           sqpb0pb3 = dsqrt(max(pb(0)+pb(3),rZero))
+        endif
+        pbketan(1) = dcmplx( sqpb0pb3 )
+c     AL: checked
+
+c     EB: check which representation to use for |pb>
+        if ( sqpb0pb3.eq.rZero ) then
+           pbketan(2) = dcmplx( dsqrt(rTwo*pb(0)) )
+        else
+           pbketan(2) = dcmplx( pb(1), pb(2) )/sqpb0pb3
+        endif
+c     AL: checked
+
+c     EB: Old version of fmi(5) and fmi(6)
+c        TODO: remove these 
+c        fmo(5) = pbketan(1)
+c        fmo(6) = pbketan(2)
+c     AL: checked
+
+c     EB: Rotation around the x-axis to counter rotation of pbt        
+        fmo(5) = dsqrt(rTwo+rSqrtTwo)*rHalf*(pbketan(1))+
+     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*(pbketan(2))
+     
+        fmo(6) = dsqrt(rTwo+rSqrtTwo)*rHalf*(pbketan(2))+
+     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*(pbketan(1))
+	
+c       qbrasq = [q| = (sqrt(q^0+q^3), (q^1-i*q^2)/sqrt(q^0+q^3))
+c                    = (0,sqrt(q^0-q^3)) if q^3=-q^0
+c     AL: checked
+
+c     EB: check which representation to use for [q|
+        if(q(1).eq.0d0.and.q(2).eq.0d0.and.q(3).lt.0d0) then
+           sqq0q3 = 0d0
+        else
+           sqq0q3 = dsqrt(max(q(0)+q(3),rZero))
+        end if
+        qbrasq(1) = dcmplx( sqq0q3 )
+c     AL: checked
+
+c     EB: check which representation to use for [q|
+        if ( sqq0q3.eq.rZero ) then
+           qbrasq(2) = dcmplx( dsqrt(rTwo*q(0)) )
+        else
+           qbrasq(2) = dcmplx( q(1), -q(2) )/sqq0q3
+        endif
+c     AL: checked
+
+c       qpbprod = [q pb]
+c       pbketsq = |pb] = <pb|^dagger = (epsilon*|pb>^dagger = ( ( 0 1 )*|pb> )^dagger = (pbketan(2)^*)
+c                                                               (-1 0 )                 (-pbketan(1)^*)
+	
+c     EB: Old version 
+c        TODO: remove this
+c        qpbprod = qbrasq(1)*conjg(pbketan(2))-qbrasq(2)*conjg(pbketan(1))
+c     AL: checked (EB: check made for pbqprod in else statment only)
+
+        qpbprod = qbrasq(1)*conjg(fmo(6))-qbrasq(2)*conjg(fmo(5))
+             
+        fmo(3) = nsf*fmass*qbrasq(1)/qpbprod
+        fmo(4) = nsf*fmass*qbrasq(2)/qpbprod
+c     AL: checked
+
+      endif
+ 
+c      
+c     EB: anti-fermion with negative spin or fermion with positive spin.
+c
+c     fmo = ( [pb| , -nsf*fmass|q>/<pb q> )
+c
+      if ((nsf.eq.(-1).and.nspin.eq.(-1)).or.
+     &(nsf.eq.(1).and.nspin.eq.(1))) then
+     
+c       pbbrasq = [pb| = (sqrt(pb^0+pb^3), (pb^1-i*pb^2)/sqrt(pb^0+pb^3))
+c                      = (0,sqrt(pb^0-pb^3)) if pb^3=-pb^0
+
+c     EB: check which represenation to use for [pb|
+        if(pb(1).eq.0d0.and.pb(2).eq.0d0.and.pb(3).lt.0d0) then
+           sqpb0pb3 = 0d0
+        else
+           sqpb0pb3 = dsqrt(max(pb(0)+pb(3),rZero))
+        end if
+        pbbrasq(1) = dcmplx( sqpb0pb3 )
+c     AL: checked
+
+c     EB: check which represenation to use for [pb|
+        if ( sqpb0pb3.eq.rZero ) then
+           pbbrasq(2) = dcmplx( dsqrt(rTwo*pb(0)) )
+        else
+           pbbrasq(2) = dcmplx( pb(1), -pb(2) )/sqpb0pb3
+        endif
+c     AL: checked
+
+c     EB: Old version of fmi(3) and fmi(4)
+c        TODO: remove these
+c        fmo(3) = pbbrasq(1)
+c        fmo(4) = pbbrasq(2)
+c     AL: checked
+
+c     EB: Rotation around the x-axis to counter rotation of pbt
+        fmo(3) = dsqrt(rTwo+rSqrtTwo)*rHalf*pbbrasq(1)-
+     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*pbbrasq(2)
+     
+        fmo(4) = dsqrt(rTwo+rSqrtTwo)*rHalf*pbbrasq(2)-
+     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*pbbrasq(1)
+
+c       qketan = |q> = (sqrt(q^0+q^3)            ) = (if q^0 = -q^3) (0            ) 
+c                      ((q^1+i*q^2)/sqrt(q^0+q^3))                   (sqrt(q^0-q^3)) 
+
+c     EB: check which representation to use for |q>
+        if(q(1).eq.0d0.and.q(2).eq.0d0.and.q(3).lt.0d0) then
+           sqq0q3 = 0d0
+        else
+           sqq0q3 = dsqrt(max(q(0)+q(3),rZero))
+        endif
+        qketan(1) = dcmplx( sqq0q3 )
+c     AL: checked
+
+c     EB: check which representation to use for |q>
+        if ( sqq0q3.eq.rZero ) then
+           qketan(2) = dcmplx( dsqrt(rTwo*q(0)) )
+        else
+           qketan(2) = dcmplx( q(1), q(2) )/sqq0q3
+        endif
+c     AL: checked
+
+c       pbqprod = <pb q>
+c       pbbraan = <pb| = |pb]^dagger = (epsilon*[pb|)^dagger =( ( 0 1 )*[pb|)^dagger = (pbbrasq(2)^*, -pbbrasq(1)^*)
+c                                                               (-1 0 )
+c                    
+c     EB: Old version 
+c        TODO: remove this
+c        pbqprod = conjg(pbbrasq(2))*qketan(1)-conjg(pbbrasq(1))*qketan(2)     
+c     AL: checked (EB: check made for pbqprod in else statment only)
+        
+        pbqprod = conjg(fmo(4))*qketan(1)-conjg(fmo(3))*qketan(2)
+
+        fmo(5) = -1*nsf*fmass*qketan(1)/pbqprod
+        fmo(6) = -1*nsf*fmass*qketan(2)/pbqprod  
+c     AL: checked
+  
+      endif
+      
+      return
+      end
 
 
       subroutine ixxxxx(p, fmass, nhel, nsf ,fi)

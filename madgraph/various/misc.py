@@ -1666,6 +1666,63 @@ def vertex_replacer(text, vertex):
             + '      V3(5) = 2*DENOM*F1(6)*F2(3)\n'\
             + '      V3(6) = 2*DENOM*F1(6)*F2(4)\n'
         text_copy = text_copy[:linebreaks[-8]+1] + RLV1P0_3_replace + text_copy[linebreaks[-4]+1:]
+    if vertex == 'FFV1_0':
+        FFV1_0_replace = '      VERTEX = COUP*(F1(3)*(V3(6)*F2(5)-V3(4)*F2(6))-F1(4)*(V3(5)*F2(5)-V3(3)*F2(6))\n'\
+            + '     &+F2(3)*(V3(6)*F1(5)-V3(4)*F1(6))-F2(4)*(V3(5)*F1(5)-V3(3)*F1(6)))\n'
+        text_copy = text_copy[:linebreaks[-10]+1] + text_copy[linebreaks[-9]+1:linebreaks[-7]+1]\
+             + FFV1_0_replace + text_copy[linebreaks[-4]+1:]
+    if vertex == 'FFV1_1':
+        init_replace = '      COMPLEX*16 TEMP1,TEMP2,TEMP3,TEMP4\n'\
+            + '      COMPLEX*16 P1_11, P1_12, P1_21, P1_22\n'
+
+        FFV1_1_replace = '      P1_11 = (P1(0)+P1(3))\n'\
+            + '      P1_12 = (P1(1)-CI*P1(2))\n'\
+            + '      P1_21 = (P1(1)+CI*P1(2))\n'\
+            + '      P1_22 = (P1(0)-P1(3))\n'\
+            + '      TEMP1 = (F2(4)*V3(5) - F2(3)*V3(6))\n'\
+            + '      TEMP2 = (F2(3)*V3(4) - F2(4)*V3(3))\n'\
+            + '      TEMP3 = (V3(4)*F2(6) - V3(6)*F2(5))\n'\
+            + '      TEMP4 = (V3(5)*F2(5) - V3(3)*F2(6))\n\n'\
+            + '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
+            + '      F1(3) = DENOM*CI*(P1_11*TEMP1 + P1_21*TEMP2 - M1*TEMP4)\n'\
+            + '      F1(4) = DENOM*CI*(P1_12*TEMP1 + P1_22*TEMP2 + M1*TEMP3)\n'\
+            + '      F1(5) = DENOM*CI*(P1_11*TEMP3 + P1_12*TEMP4 + M1*TEMP2)\n'\
+            + '      F1(6) = DENOM*CI*(P1_21*TEMP3 + P1_22*TEMP4 - M1*TEMP1)\n'
+
+        text_copy = text_copy[:linebreaks[-25]+1] + init_replace + text_copy[linebreaks[-25]+1:linebreaks[-18]+1] + FFV1_1_replace + text_copy[linebreaks[-4]+1:]
+    
+    if vertex == 'FFV1_2':
+        init_replace = '      COMPLEX*16 TEMP1,TEMP2,TEMP3,TEMP4\n'\
+            + '      COMPLEX*16 P2_11, P2_12, P2_21, P2_22\n'
+
+        FFV1_2_replace = '      P2_11 = (P2(0)+P2(3))\n'\
+            + '      P2_12 = (P2(1)-CI*P2(2))\n'\
+            + '      P2_21 = (P2(1)+CI*P2(2))\n'\
+            + '      P2_22 = (P2(0)-P2(3))\n'\
+            + '      TEMP1 = (F1(4)*V3(5) - F1(3)*V3(6))\n'\
+            + '      TEMP2 = (F1(3)*V3(4) - F1(4)*V3(3))\n'\
+            + '      TEMP3 = (V3(4)*F1(6) - V3(6)*F1(5))\n'\
+            + '      TEMP4 = (V3(5)*F1(5) - V3(3)*F1(6))\n\n'\
+            + "c      IF (ABS(TEMP1).le.1E-10.or.ABS(TEMP2).le.1E-10.or.ABS(TEMP3).le.1E-10.or.ABS(TEMP4).le.1E-10) THEN\n"\
+            + "c        open(2, FILE = '/home/emil/Desktop/MadCAFE-Massive/MadCAFE/bin/testzeros.txt', STATUS = 'old', POSITION= 'append',\n"\
+            + "c     &ACTION= 'write')\n"\
+            + 'c        WRITE(2,*) TEMP1, TEMP2, TEMP3, TEMP4\n'\
+            + 'c      ENDIF\n\n'\
+            + '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2 - M2 * (M2 -CI * W2))\n'\
+            + '      F2(3) = DENOM*CI*(-P2_11*TEMP1 - P2_21*TEMP2 + M2*TEMP4)\n'\
+            + '      F2(4) = DENOM*CI*(-P2_12*TEMP1 - P2_22*TEMP2 - M2*TEMP3)\n'\
+            + '      F2(5) = DENOM*CI*(-P2_11*TEMP3 - P2_12*TEMP4 - M2*TEMP2)\n'\
+            + '      F2(6) = DENOM*CI*(-P2_21*TEMP3 - P2_22*TEMP4 + M2*TEMP1)\n'
+        
+        text_copy = text_copy[:linebreaks[-25]+1] + init_replace + text_copy[linebreaks[-25]+1:linebreaks[-19]+1] + FFV1_2_replace + text_copy[linebreaks[-4]+1:]
+
+    if vertex == 'FFV1P0_3':
+        FFV1P0_3_replace = '      V3(3) = 2*DENOM*(F1(5)*F2(3)+F2(5)*F1(3))\n'\
+            + '      V3(4) = 2*DENOM*(F1(5)*F2(4)+F2(5)*F1(4))\n'\
+            + '      V3(5) = 2*DENOM*(F1(6)*F2(3)+F2(6)*F1(3))\n'\
+            + '      V3(6) = 2*DENOM*(F1(6)*F2(4)+F2(6)*F1(4))\n'
+        text_copy = text_copy[:linebreaks[-8]+1] + FFV1P0_3_replace + text_copy[linebreaks[-4]+1:]
+
     if (vertex == 'LLV1_1'): 
         # AW: check sign on P1 here
         spinor = bra_eme_pbar('F2','V3','P1')
@@ -2499,7 +2556,7 @@ def postex_vertex_replacer(working_dir):
         'VVRVRVR3_0.f', 'VVRVRVR4_0.f', 'VVIVLVL1P0_3.f', 'VVIVLVL3P0_3.f', 'VVIVLVL4P0_3.f', 'VVIVLVL1_0.f', 'VVIVLVL3_0.f', 'VVIVLVL4_0.f', \
         'VIVLVLVR1P0_2.f', 'VIVLVLVR3P0_2.f', 'VIVLVLVR4P0_2.f', 'VIVLVRVR1P0_3.f' , ' VIVLVRVR3P0_3.f', 'VIVLVRVR4P0_3.f', 'VIVLVLVR1_0.f', \
         'VIVLVLVR3_0.f', 'VIVLVLVR4_0.f', 'VIVLVRVR1_0.f', 'VIVLVRVR3_0.f', 'VIVLVRVR4_0.f', 'VVLVLVL1P0_2.f', \
-        'VVLVLVL3P0_2.f', 'VVLVLVL4P0_2.f', 'VVVIVR1_0.f', 'VVVIVR3_0.f', 'VVVIVR4_0.f'                      ]
+        'VVLVLVL3P0_2.f', 'VVLVLVL4P0_2.f', 'VVVIVR1_0.f', 'VVVIVR3_0.f', 'VVVIVR4_0.f', 'FFV1_0.f', 'FFV1_1.f', 'FFV1_2.f', 'FFV1P0_3.f'   ]
     onlyfiles = [f for f in os.listdir(write_dir) if os.path.isfile(os.path.join(write_dir, f))]
     konlyfiles = [f[:4] + f[-4:] for f in onlyfiles]
     for vertex in vertex_list:

@@ -159,8 +159,8 @@ C     For this reason, we simply remove the filterin when there is only three ex
 		ENDDO
 	  ENDIF
 c AW: remove this later
-c      OPEN(1, FILE = '/home/adam/Master_project/MadCAFE/bin/testdata.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append') 
-c      WRITE(1,*) ANS
+      OPEN(1, FILE = '/home/adam/Special_gluons/MadCAFE/bin/testdata.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append') 
+      WRITE(1,*) ANS
 	  END
        
        
@@ -223,6 +223,11 @@ C ----------
        DO HELASLOOP = 1,1    
 %(helas_calls)s
        ENDDO
+       
+C      OPEN(1, FILE = '/home/adam/Special_gluons/MadCAFE/bin/amps.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append')
+C       DO AMPLOOP = 1,NGRAPHS
+C         WRITE(1,*) AMPLOOP, ABS(AMP(AMPLOOP))   
+C       ENDDO       
       
 C       OPEN(1, FILE = '/home/adam/Special_gluons/MadCAFE/bin/zeroamps.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append')
 C       DO AMPLOOP = 1,NGRAPHS

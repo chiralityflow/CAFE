@@ -2907,7 +2907,8 @@ CF2PY integer, intent(in) :: new_value
         replace_dict['helicity_lines'] = helicity_lines
         # ZW: replaces helicity_lines and ncomb to remove sums
         # that are necessarily zero based on helicity configurations
-        helicity_lines_2 = self.helicity_lines_replacer(helicity_lines, helas_calls, ncomb, nexternal)
+        # AW: added matrix element as it is nessesary for massive case 14/06/2023
+        helicity_lines_2 = self.helicity_lines_replacer(helicity_lines, helas_calls, ncomb, nexternal,matrix_element)
         replace_dict['ncomb'] = helicity_lines_2[1]
         replace_dict['helicity_lines'] = helicity_lines_2[0]
 
@@ -3065,10 +3066,11 @@ CF2PY integer, intent(in) :: new_value
     #===========================================================================
     """ ZW: Function which takes as input the helicity_lines of a process
             and removes any which are directly zero in the explicitly chiral case"""
-    def helicity_lines_replacer(self, helicity_lines, helas_calls, ncomb, nexternal):
+    def helicity_lines_replacer(self, helicity_lines, helas_calls, ncomb, nexternal, matrix_element):
         # ZW: Find external particles in the process
         plushel_list = []
         minushel_list = []
+        legs = matrix_element.get('processes')[0].get('legs')
         # ZW: Based on naming convention of external particles in the UFO file,
         # where the second to last character of the name is assumed to denote chirality,
         # finds which helicities will contribute non-zero terms to the helicity sum
@@ -3090,6 +3092,11 @@ CF2PY integer, intent(in) :: new_value
                     minushel_list.append(k)
                 elif (state_status == '-1'):
                     plushel_list.append(k)
+            elif helas_calls[k][5:11] in ['IMXXXX', 'OMXXXX']:
+                if abs(legs[k].get('id')) in [70106]:
+                    plushel_list.append(k)
+                elif abs(legs[k].get('id')) in [80106]:
+                    minushel_list.append(k)
             #misc.sprint(state_status)
         # ZW: If no chiral particles are found, returns the original helicity_lines
         if (len(plushel_list) == 0) and (len(minushel_list) == 0):

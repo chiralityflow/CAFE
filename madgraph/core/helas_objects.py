@@ -683,7 +683,7 @@ class HelasWavefunction(base_objects.PhysicsObject):
                     # AL: if gauge boson, set reference momentum
                     # AL: TODO: update when we update pid conventions
                     # AW: added gluons
-                    if leg.get('id') in [90023, 90024, 70021, 80021, 721, 821]:
+                    if abs(leg.get('id')) in [90023, 90024, 70021, 80021, 721, 821, 70106, 80106]:
                         self.set('ref_mom', ref_momenta[leg.get('number')-1])
                 
                 # decay_ids is the pdg codes for particles with decay
@@ -3638,7 +3638,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # If not all-outgoing, then we have an LL or RR vertex
         # AW: we must check for tripple gluon vertex 
         # AW: for [-f, -f, V] we get [f, -f, V] while madgraph prefers [-f, f, V]
-        if not pdg_codes[0]*pdg_codes[1] < 0 and pdg_codes[0] != 21 and pdg_codes[0] != 70021 and pdg_codes[0] != 80021 and pdg_codes[0] != 821 and pdg_codes[0] != 721:
+        if not pdg_codes[0]*pdg_codes[1] < 0 and pdg_codes[0] not in [21,721,821,70021,80021,-70106,-80106,70106,80106,-6,6]:
             # change to all outgoing particles
             if pdg_codes[0] < 0:
                 pdg_codes[1] = -pdg_codes[1]
@@ -3885,6 +3885,16 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     ref_moms.append(right_boson.get('number'))
                 elif leg.get('id') in [821,80021]:
                     ref_moms.append(left_boson.get('number'))
+                elif leg.get('id') in [70106, -70106]:
+                    if leg.get('state'):
+                        ref_moms.append(right_boson.get('number'))
+                    else:
+                        ref_moms.append(left_boson.get('number'))
+                elif leg.get('id') in [80106, -80106]:
+                    if leg.get('state'):
+                        ref_moms.append(left_boson.get('number'))
+                    else:
+                        ref_moms.append(right_boson.get('number'))
                 else:
                     ref_moms.append(-1)
         else:
@@ -4040,7 +4050,6 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     vids = []
                     for part in vertex['legs']:
                         vids.append(part['id'])
-                    #misc.sprint(vids, vert_id_to_pdgs_dict)
                     updated_vertex = self.set_new_vertex_id(vertex, vids, vert_id_to_pdgs_dict)
                     vertex.set('id', updated_vertex.get('id'))
                     #misc.sprint(vertex.get('id'), vids)
