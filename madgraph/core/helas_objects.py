@@ -3578,7 +3578,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             # All chiral fermion numbers between 90000 and 90021
             # TODO: Update this after choosing a consistent set of conventions!!
             # AW: Updated for QCD
-            if pdg_code > 70000 and pdg_code < 90022 and not pdg_code in [721,821,70021,80021]:
+            if pdg_code > 70000 and pdg_code < 90022 and not pdg_code in [721,821,70021,80021,70106,80106,6]:
                 pdg_code = ext_wfs[key]['particle']['pdg_code']
                 if pdg_code not in pdg_codes:
                     pdg_codes.append(pdg_code)

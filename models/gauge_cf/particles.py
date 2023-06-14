@@ -308,6 +308,21 @@ tM = Particle(pdg_code = 80106,
 
 tM__tilde__ = tM.anti()
 
+t = Particle(pdg_code = 6,
+             name = 't',
+             antiname = 't~',
+             spin = 2,
+             color = 3,
+             mass = Param.MT,
+             width = Param.ZERO,
+             texname = 't',
+             antitexname = 't~',
+             charge = 2/3,
+             GhostNumber = 0,
+             LeptonNumber = 0,
+             Y = 0)
+
+t__tilde__ = t.anti()
 
 # W boson included since MadEvent relies on its mass to determine couplings
 

@@ -1389,7 +1389,7 @@ class Amplitude(base_objects.PhysicsObject):
                     elif leg.get('id') in [821,80021]:
                         ref_mom.append(left_boson.get('number'))
                     else:
-                        misc.sprint('ERROR')
+                        misc.sprint('Error or top quarks')
             if found_left_boson and found_right_boson:
                 if left_boson.get('number') < right_boson.get('number'):
                     vanishing_combs.append((left_boson,right_boson))
@@ -1510,11 +1510,11 @@ class Amplitude(base_objects.PhysicsObject):
 
         
         if (is_first_it):
-            #AW: check for forbidden chiralities
-            left_particles = [721,70021,70001,-70001,70002,-70002,90001,-90001,90005,-90005,90023]
-            right_particles = [821,80021,80001,-80001,80002,-80002,90003,-90003,90007,-90007,90024]
-            left_fermions = [70001,-70001,70002,-70002,90001,-90001,90005,-90005]
-            right_fermions = [80001,-80001,80002,-80002,90003,-90003,90007,-90007]
+            #AW: check for forbidden chiralities, added massive particles 14/06/2023
+            left_particles = [721,70021,70001,-70001,70002,-70002,90001,-90001,90005,-90005,90023,70106,80106]
+            right_particles = [821,80021,80001,-80001,80002,-80002,90003,-90003,90007,-90007,90024,70106,80106]
+            left_fermions = [70001,-70001,70002,-70002,90001,-90001,90005,-90005,70106,80106]
+            right_fermions = [80001,-80001,80002,-80002,90003,-90003,90007,-90007,70106,80106]
             N_left = 0
             N_right = 0
             left_fermion = False
