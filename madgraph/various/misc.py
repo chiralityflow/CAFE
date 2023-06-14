@@ -1726,13 +1726,14 @@ def vertex_replacer(text, vertex):
              + FFV1_0_replace + text_copy[linebreaks[-4]+1:]"""
 
     # Temp version to try new way of writing files
-    if (vertex in ['FFV1_0', 'FMV1_0', 'MFV1_0', 'PFV1_0', 'FPV1_0','MMV1_0', 'MPV1_0', 'PMV1_0', 'PPV1_0']):
-        FFV1_0_replace = '      VERTEX = COUP*(F1(3)*V3(6)*F2(5)-F1(3)*V3(4)*F2(6)-F1(4)*V3(5)*F2(5)+F1(4)*V3(3)*F2(6)\n'\
-            + '     &+F2(3)*V3(6)*F1(5)-F2(3)*V3(4)*F1(6)-F2(4)*V3(5)*F1(5)+F2(4)*V3(3)*F1(6))\n'
+    if (vertex in ['FFV1_0', 'FMV1_0', 'MFV1_0', 'PFV1_0', 'FPV1_0','MMV1_0', 'MPV1_0', 'PMV1_0', 'PPV1_0','FFV1L_0', 'FMV1L_0', 'MFV1L_0', 'PFV1L_0', 'FPV1L_0','MMV1L_0',\
+         'MPV1L_0', 'PMV1L_0', 'PPV1L_0','FFV1R_0', 'FMV1R_0', 'MFV1R_0', 'PFV1R_0', 'FPV1R_0','MMV1R_0', 'MPV1R_0', 'PMV1R_0', 'PPV1R_0']):
+        FFV1_0_replace = '      VERTEX = COUP*(F1(3)*(V3(6)*F2(5)-V3(4)*F2(6))-F1(4)*(V3(5)*F2(5)-V3(3)*F2(6))\n'\
+            + '     &+F2(3)*(V3(6)*F1(5)-V3(4)*F1(6))-F2(4)*(V3(5)*F1(5)-V3(3)*F1(6)))\n'
         text_copy = text_copy[:linebreaks[-10]+1] + text_copy[linebreaks[-9]+1:linebreaks[-7]+1]\
              + FFV1_0_replace + text_copy[linebreaks[-4]+1:]
             
-    """if (vertex in ['FFV1_1', 'FMV1_1', 'MFV1_1', 'PFV1_1', 'FPV1_1']):
+    """if (vertex in ['FFV1_1', 'FMV1_1', 'MFV1_1', 'PFV1_1', 'FPV1_1','FFV1L_1', 'FMV1L_1', 'MFV1L_1', 'PFV1L_1', 'FPV1L_1','FFV1R_1', 'FMV1R_1', 'MFV1R_1', 'PFV1R_1', 'FPV1R_1']):
         spinor11 = bra_eme_pbar('F2','V3','P1')
         spinor12 = eme_ket('V3','F2')
         spinor21 = ket_eme_pbar('F2','V3','P1')
@@ -1745,7 +1746,7 @@ def vertex_replacer(text, vertex):
         text_copy = text_copy[:linebreaks[-18]+1] + FFV1_1_replace + text_copy[linebreaks[-4]+1:]"""
     
     # Temp version to try new way of writing files.
-    if (vertex in ['FFV1_1', 'FMV1_1', 'MFV1_1', 'PFV1_1', 'FPV1_1']):
+    if (vertex in ['FFV1_1', 'FMV1_1', 'MFV1_1', 'PFV1_1', 'FPV1_1','FFV1L_1', 'FMV1L_1', 'MFV1L_1', 'PFV1L_1', 'FFV1R_1', 'MFV1R_1', 'PFV1R_1', 'FPV1R_1']):
 
         init_replace = '      COMPLEX*16 TEMP1,TEMP2,TEMP3,TEMP4\n'\
             + '      COMPLEX*16 P1_11, P1_12, P1_21, P1_22\n'
@@ -1758,6 +1759,11 @@ def vertex_replacer(text, vertex):
             + '      TEMP2 = (F2(3)*V3(4) - F2(4)*V3(3))\n'\
             + '      TEMP3 = (V3(4)*F2(6) - V3(6)*F2(5))\n'\
             + '      TEMP4 = (V3(5)*F2(5) - V3(3)*F2(6))\n\n'\
+            + "c      IF (ABS(TEMP1).le.1E-10.or.ABS(TEMP2).le.1E-10.or.ABS(TEMP3).le.1E-10.or.ABS(TEMP4).le.1E-10) THEN\n"\
+            + "c        open(2, FILE = '/home/emil/Desktop/MadCAFE-Massive/MadCAFE/bin/testzeros.txt', STATUS = 'old', POSITION= 'append',\n"\
+            + "c     &ACTION= 'write')\n"\
+            + 'c        WRITE(2,*) TEMP1, TEMP2, TEMP3, TEMP4\n'\
+            + 'c      ENDIF\n\n'\
             + '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
             + '      F1(3) = DENOM*CI*(P1_11*TEMP1 + P1_21*TEMP2 - M1*TEMP4)\n'\
             + '      F1(4) = DENOM*CI*(P1_12*TEMP1 + P1_22*TEMP2 + M1*TEMP3)\n'\
@@ -1765,6 +1771,145 @@ def vertex_replacer(text, vertex):
             + '      F1(6) = DENOM*CI*(P1_21*TEMP3 + P1_22*TEMP4 - M1*TEMP1)\n'
 
         text_copy = text_copy[:linebreaks[-24]+1] + init_replace + text_copy[linebreaks[-24]+1:linebreaks[-18]+1] + FFV1_1_replace + text_copy[linebreaks[-4]+1:]
+        reduced_subrout_pb = '\n'
+        reduced_subrout_q = '\n'
+        if vertex[1] == 'M':
+            reduced_sub_replace_pb = '      P1_11 = (P1(0)+P1(3))\n'\
+            + '      P1_12 = (P1(1)-CI*P1(2))\n'\
+            + '      P1_21 = (P1(1)+CI*P1(2))\n'\
+            + '      P1_22 = (P1(0)-P1(3))\n'\
+            + '      TEMP3 = (V3(4)*F2(6) - V3(6)*F2(5))\n'\
+            + '      TEMP4 = (V3(5)*F2(5) - V3(3)*F2(6))\n\n'\
+            + "c      IF (ABS(TEMP1).le.1E-10.or.ABS(TEMP2).le.1E-10.or.ABS(TEMP3).le.1E-10.or.ABS(TEMP4).le.1E-10) THEN\n"\
+            + "c        open(2, FILE = '/home/emil/Desktop/MadCAFE-Massive/MadCAFE/bin/testzeros.txt', STATUS = 'old', POSITION= 'append',\n"\
+            + "c     &ACTION= 'write')\n"\
+            + 'c        WRITE(2,*) TEMP1, TEMP2, TEMP3, TEMP4\n'\
+            + 'c      ENDIF\n\n'\
+            + '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
+            + '      F1(3) = DENOM*CI*(-1*M1*TEMP4)\n'\
+            + '      F1(4) = DENOM*CI*(M1*TEMP3)\n'\
+            + '      F1(5) = DENOM*CI*(P1_11*TEMP3 + P1_12*TEMP4)\n'\
+            + '      F1(6) = DENOM*CI*(P1_21*TEMP3 + P1_22*TEMP4)\n'\
+            + '      end\n'
+        
+            reduced_subrout_pb = text_copy[linebreaks[3]:linebreaks[-16]] + '\n' + reduced_sub_replace_pb
+            reduced_subrout_pb = reduced_subrout_pb[:22] + 'R' + reduced_subrout_pb[22:] 
+            
+            reduced_sub_replace_q = '      P1_11 = (P1(0)+P1(3))\n'\
+            + '      P1_12 = (P1(1)-CI*P1(2))\n'\
+            + '      P1_21 = (P1(1)+CI*P1(2))\n'\
+            + '      P1_22 = (P1(0)-P1(3))\n'\
+            + '      TEMP1 = (F2(4)*V3(5) - F2(3)*V3(6))\n'\
+            + '      TEMP2 = (F2(3)*V3(4) - F2(4)*V3(3))\n'\
+            + "c      IF (ABS(TEMP1).le.1E-10.or.ABS(TEMP2).le.1E-10.or.ABS(TEMP3).le.1E-10.or.ABS(TEMP4).le.1E-10) THEN\n"\
+            + "c        open(2, FILE = '/home/emil/Desktop/MadCAFE-Massive/MadCAFE/bin/testzeros.txt', STATUS = 'old', POSITION= 'append',\n"\
+            + "c     &ACTION= 'write')\n"\
+            + 'c        WRITE(2,*) TEMP1, TEMP2, TEMP3, TEMP4\n'\
+            + 'c      ENDIF\n\n'\
+            + '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
+            + '      F1(3) = DENOM*CI*(P1_11*TEMP1 + P1_21*TEMP2)\n'\
+            + '      F1(4) = DENOM*CI*(P1_12*TEMP1 + P1_22*TEMP2)\n'\
+            + '      F1(5) = DENOM*CI*(M1*TEMP2)\n'\
+            + '      F1(6) = DENOM*CI*(-M1*TEMP1)\n'\
+            + '      end\n'
+
+            reduced_subrout_q = text_copy[linebreaks[3]:linebreaks[-16]] + '\n' + reduced_sub_replace_q 
+            reduced_subrout_q = reduced_subrout_q[:22] + 'L' + reduced_subrout_q[22:]
+
+
+        if vertex[1] == 'P':
+            reduced_sub_replace_pb = '      P1_11 = (P1(0)+P1(3))\n'\
+            + '      P1_12 = (P1(1)-CI*P1(2))\n'\
+            + '      P1_21 = (P1(1)+CI*P1(2))\n'\
+            + '      P1_22 = (P1(0)-P1(3))\n'\
+            + '      TEMP1 = (F2(4)*V3(5) - F2(3)*V3(6))\n'\
+            + '      TEMP2 = (F2(3)*V3(4) - F2(4)*V3(3))\n'\
+            + "c      IF (ABS(TEMP1).le.1E-10.or.ABS(TEMP2).le.1E-10.or.ABS(TEMP3).le.1E-10.or.ABS(TEMP4).le.1E-10) THEN\n"\
+            + "c        open(2, FILE = '/home/emil/Desktop/MadCAFE-Massive/MadCAFE/bin/testzeros.txt', STATUS = 'old', POSITION= 'append',\n"\
+            + "c     &ACTION= 'write')\n"\
+            + 'c        WRITE(2,*) TEMP1, TEMP2, TEMP3, TEMP4\n'\
+            + 'c      ENDIF\n\n'\
+            + '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
+            + '      F1(3) = DENOM*CI*(P1_11*TEMP1 + P1_21*TEMP2)\n'\
+            + '      F1(4) = DENOM*CI*(P1_12*TEMP1 + P1_22*TEMP2)\n'\
+            + '      F1(5) = DENOM*CI*(M1*TEMP2)\n'\
+            + '      F1(6) = DENOM*CI*(-M1*TEMP1)\n'\
+            + '      end\n'
+
+            reduced_subrout_pb = text_copy[linebreaks[3]:linebreaks[-16]] + '\n' + reduced_sub_replace_pb 
+            reduced_subrout_pb = reduced_subrout_pb[:22] + 'L' + reduced_subrout_pb[22:]
+
+            reduced_sub_replace_q = '      P1_11 = (P1(0)+P1(3))\n'\
+            + '      P1_12 = (P1(1)-CI*P1(2))\n'\
+            + '      P1_21 = (P1(1)+CI*P1(2))\n'\
+            + '      P1_22 = (P1(0)-P1(3))\n'\
+            + '      TEMP3 = (V3(4)*F2(6) - V3(6)*F2(5))\n'\
+            + '      TEMP4 = (V3(5)*F2(5) - V3(3)*F2(6))\n\n'\
+            + "c      IF (ABS(TEMP1).le.1E-10.or.ABS(TEMP2).le.1E-10.or.ABS(TEMP3).le.1E-10.or.ABS(TEMP4).le.1E-10) THEN\n"\
+            + "c        open(2, FILE = '/home/emil/Desktop/MadCAFE-Massive/MadCAFE/bin/testzeros.txt', STATUS = 'old', POSITION= 'append',\n"\
+            + "c     &ACTION= 'write')\n"\
+            + 'c        WRITE(2,*) TEMP1, TEMP2, TEMP3, TEMP4\n'\
+            + 'c      ENDIF\n\n'\
+            + '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
+            + '      F1(3) = DENOM*CI*(-1*M1*TEMP4)\n'\
+            + '      F1(4) = DENOM*CI*(M1*TEMP3)\n'\
+            + '      F1(5) = DENOM*CI*(P1_11*TEMP3 + P1_12*TEMP4)\n'\
+            + '      F1(6) = DENOM*CI*(P1_21*TEMP3 + P1_22*TEMP4)\n'\
+            + '      end\n'
+
+            reduced_subrout_q = text_copy[linebreaks[3]:linebreaks[-16]] + '\n' + reduced_sub_replace_q
+            reduced_subrout_q = reduced_subrout_q[:22] + 'R' + reduced_subrout_q[22:]
+
+       # misc.sprint(text_copy[linebreaks[3]:linebreaks[-16]])
+        text_copy = text_copy + reduced_subrout_pb + reduced_subrout_q
+    
+    if (vertex == 'FMV1R_1'):
+
+        init_replace = '      COMPLEX*16 TEMP1,TEMP2,TEMP3,TEMP4\n'\
+            + '      COMPLEX*16 P1_11, P1_12, P1_21, P1_22\n'
+
+        FMV1R_1_replace = '      P1_11 = (P1(0)+P1(3))\n'\
+            + '      P1_12 = (P1(1)-CI*P1(2))\n'\
+            + '      P1_21 = (P1(1)+CI*P1(2))\n'\
+            + '      P1_22 = (P1(0)-P1(3))\n'\
+            + '      TEMP3 = (V3(4)*F2(6) - V3(6)*F2(5))\n'\
+            + '      TEMP4 = (V3(5)*F2(5) - V3(3)*F2(6))\n\n'\
+            + "c      IF (ABS(TEMP1).le.1E-10.or.ABS(TEMP2).le.1E-10.or.ABS(TEMP3).le.1E-10.or.ABS(TEMP4).le.1E-10) THEN\n"\
+            + "c        open(2, FILE = '/home/emil/Desktop/MadCAFE-Massive/MadCAFE/bin/testzeros.txt', STATUS = 'old', POSITION= 'append',\n"\
+            + "c     &ACTION= 'write')\n"\
+            + 'c        WRITE(2,*) TEMP1, TEMP2, TEMP3, TEMP4\n'\
+            + 'c      ENDIF\n\n'\
+            + '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
+            + '      F1(3) = DENOM*CI*(-1*M1*TEMP4)\n'\
+            + '      F1(4) = DENOM*CI*(M1*TEMP3)\n'\
+            + '      F1(5) = DENOM*CI*(P1_11*TEMP3 + P1_12*TEMP4)\n'\
+            + '      F1(6) = DENOM*CI*(P1_21*TEMP3 + P1_22*TEMP4)\n'
+
+        text_copy = text_copy[:linebreaks[-24]+1] + init_replace + text_copy[linebreaks[-24]+1:linebreaks[-18]+1] + FMV1R_1_replace + text_copy[linebreaks[-4]+1:]
+    
+    if (vertex == 'FPV1L_1'):
+
+        init_replace = '      COMPLEX*16 TEMP1,TEMP2,TEMP3,TEMP4\n'\
+            + '      COMPLEX*16 P1_11, P1_12, P1_21, P1_22\n'
+
+        FPV1_1_replace = '      P1_11 = (P1(0)+P1(3))\n'\
+            + '      P1_12 = (P1(1)-CI*P1(2))\n'\
+            + '      P1_21 = (P1(1)+CI*P1(2))\n'\
+            + '      P1_22 = (P1(0)-P1(3))\n'\
+            + '      TEMP1 = (F2(4)*V3(5) - F2(3)*V3(6))\n'\
+            + '      TEMP2 = (F2(3)*V3(4) - F2(4)*V3(3))\n'\
+            + "c      IF (ABS(TEMP1).le.1E-10.or.ABS(TEMP2).le.1E-10.or.ABS(TEMP3).le.1E-10.or.ABS(TEMP4).le.1E-10) THEN\n"\
+            + "c        open(2, FILE = '/home/emil/Desktop/MadCAFE-Massive/MadCAFE/bin/testzeros.txt', STATUS = 'old', POSITION= 'append',\n"\
+            + "c     &ACTION= 'write')\n"\
+            + 'c        WRITE(2,*) TEMP1, TEMP2, TEMP3, TEMP4\n'\
+            + 'c      ENDIF\n\n'\
+            + '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
+            + '      F1(3) = DENOM*CI*(P1_11*TEMP1 + P1_21*TEMP2)\n'\
+            + '      F1(4) = DENOM*CI*(P1_12*TEMP1 + P1_22*TEMP2)\n'\
+            + '      F1(5) = DENOM*CI*(M1*TEMP2)\n'\
+            + '      F1(6) = DENOM*CI*(-M1*TEMP1)\n'
+
+        text_copy = text_copy[:linebreaks[-24]+1] + init_replace + text_copy[linebreaks[-24]+1:linebreaks[-18]+1] + FPV1_1_replace + text_copy[linebreaks[-4]+1:]
 
     """if vertex in ['FFV1_2', 'FMV1_2', 'MFV1_2', 'PFV1_2', 'FPV1_2']:
         spinor11 = bra_eme_pbar('F1','V3','P2')
@@ -1779,7 +1924,7 @@ def vertex_replacer(text, vertex):
         text_copy = text_copy[:linebreaks[-18]+1] + FFV1_2_replace + text_copy[linebreaks[-4]+1:]"""
 
     #Temp version to try new way of writing files.
-    if vertex in ['FFV1_2', 'FMV1_2', 'MFV1_2', 'PFV1_2', 'FPV1_2']:
+    if vertex in ['FFV1_2', 'FMV1_2', 'MFV1_2', 'PFV1_2', 'FPV1_2','FFV1L_2', 'FMV1L_2', 'MFV1L_2', 'PFV1L_2', 'FPV1L_2','FFV1R_2', 'FMV1R_2', 'MFV1R_2', 'PFV1R_2', 'FPV1R_2']:
 
         init_replace = '      COMPLEX*16 TEMP1,TEMP2,TEMP3,TEMP4\n'\
             + '      COMPLEX*16 P2_11, P2_12, P2_21, P2_22\n'
@@ -1792,6 +1937,11 @@ def vertex_replacer(text, vertex):
             + '      TEMP2 = (F1(3)*V3(4) - F1(4)*V3(3))\n'\
             + '      TEMP3 = (V3(4)*F1(6) - V3(6)*F1(5))\n'\
             + '      TEMP4 = (V3(5)*F1(5) - V3(3)*F1(6))\n\n'\
+            + "c      IF (ABS(TEMP1).le.1E-10.or.ABS(TEMP2).le.1E-10.or.ABS(TEMP3).le.1E-10.or.ABS(TEMP4).le.1E-10) THEN\n"\
+            + "c        open(2, FILE = '/home/emil/Desktop/MadCAFE-Massive/MadCAFE/bin/testzeros.txt', STATUS = 'old', POSITION= 'append',\n"\
+            + "c     &ACTION= 'write')\n"\
+            + 'c        WRITE(2,*) TEMP1, TEMP2, TEMP3, TEMP4\n'\
+            + 'c      ENDIF\n\n'\
             + '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2 - M2 * (M2 -CI * W2))\n'\
             + '      F2(3) = DENOM*CI*(-P2_11*TEMP1 - P2_21*TEMP2 + M2*TEMP4)\n'\
             + '      F2(4) = DENOM*CI*(-P2_12*TEMP1 - P2_22*TEMP2 - M2*TEMP3)\n'\
@@ -1799,6 +1949,96 @@ def vertex_replacer(text, vertex):
             + '      F2(6) = DENOM*CI*(-P2_21*TEMP3 - P2_22*TEMP4 + M2*TEMP1)\n'
         
         text_copy = text_copy[:linebreaks[-24]+1] + init_replace + text_copy[linebreaks[-24]+1:linebreaks[-18]+1] + FFV1_2_replace + text_copy[linebreaks[-4]+1:]
+
+        reduced_subrout_pb = '\n'
+        reduced_subrout_q = '\n'
+        if vertex[0] == 'M':
+            reduced_sub_replace_pb = '      P2_11 = (P2(0)+P2(3))\n'\
+            + '      P2_12 = (P2(1)-CI*P2(2))\n'\
+            + '      P2_21 = (P2(1)+CI*P2(2))\n'\
+            + '      P2_22 = (P2(0)-P2(3))\n'\
+            + '      TEMP3 = (V3(4)*F1(6) - V3(6)*F1(5))\n'\
+            + '      TEMP4 = (V3(5)*F1(5) - V3(3)*F1(6))\n\n'\
+            + "c      IF (ABS(TEMP1).le.1E-10.or.ABS(TEMP2).le.1E-10.or.ABS(TEMP3).le.1E-10.or.ABS(TEMP4).le.1E-10) THEN\n"\
+            + "c        open(2, FILE = '/home/emil/Desktop/MadCAFE-Massive/MadCAFE/bin/testzeros.txt', STATUS = 'old', POSITION= 'append',\n"\
+            + "c     &ACTION= 'write')\n"\
+            + 'c        WRITE(2,*) TEMP1, TEMP2, TEMP3, TEMP4\n'\
+            + 'c      ENDIF\n\n'\
+            + '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2 - M2 * (M2 -CI * W2))\n'\
+            + '      F2(3) = DENOM*CI*(M2*TEMP4)\n'\
+            + '      F2(4) = DENOM*CI*(-M2*TEMP3)\n'\
+            + '      F2(5) = DENOM*CI*(-P2_11*TEMP3 - P2_12*TEMP4)\n'\
+            + '      F2(6) = DENOM*CI*(-P2_21*TEMP3 - P2_22*TEMP4)\n'\
+            + '      end\n'
+
+            reduced_subrout_pb = text_copy[linebreaks[3]:linebreaks[-16]] + '\n' + reduced_sub_replace_pb
+            reduced_subrout_pb = reduced_subrout_pb[:22] + 'R' + reduced_subrout_pb[22:]
+
+            reduced_sub_replace_q = '      P2_11 = (P2(0)+P2(3))\n'\
+            + '      P2_12 = (P2(1)-CI*P2(2))\n'\
+            + '      P2_21 = (P2(1)+CI*P2(2))\n'\
+            + '      P2_22 = (P2(0)-P2(3))\n'\
+            + '      TEMP1 = (F1(4)*V3(5) - F1(3)*V3(6))\n'\
+            + '      TEMP2 = (F1(3)*V3(4) - F1(4)*V3(3))\n'\
+            + "c      IF (ABS(TEMP1).le.1E-10.or.ABS(TEMP2).le.1E-10.or.ABS(TEMP3).le.1E-10.or.ABS(TEMP4).le.1E-10) THEN\n"\
+            + "c        open(2, FILE = '/home/emil/Desktop/MadCAFE-Massive/MadCAFE/bin/testzeros.txt', STATUS = 'old', POSITION= 'append',\n"\
+            + "c     &ACTION= 'write')\n"\
+            + 'c        WRITE(2,*) TEMP1, TEMP2, TEMP3, TEMP4\n'\
+            + 'c      ENDIF\n\n'\
+            + '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2 - M2 * (M2 -CI * W2))\n'\
+            + '      F2(3) = DENOM*CI*(-P2_11*TEMP1 - P2_21*TEMP2)\n'\
+            + '      F2(4) = DENOM*CI*(-P2_12*TEMP1 - P2_22*TEMP2)\n'\
+            + '      F2(5) = DENOM*CI*(-M2*TEMP2)\n'\
+            + '      F2(6) = DENOM*CI*(M2*TEMP1)\n'\
+            + '      end\n'
+
+            reduced_subrout_q = text_copy[linebreaks[3]:linebreaks[-16]] + '\n' + reduced_sub_replace_q 
+            reduced_subrout_q = reduced_subrout_q[:22] + 'L' + reduced_subrout_q[22:]
+        
+        if vertex[0] == 'P':
+            reduced_sub_replace_pb = '      P2_11 = (P2(0)+P2(3))\n'\
+            + '      P2_12 = (P2(1)-CI*P2(2))\n'\
+            + '      P2_21 = (P2(1)+CI*P2(2))\n'\
+            + '      P2_22 = (P2(0)-P2(3))\n'\
+            + '      TEMP1 = (F1(4)*V3(5) - F1(3)*V3(6))\n'\
+            + '      TEMP2 = (F1(3)*V3(4) - F1(4)*V3(3))\n'\
+            + "c      IF (ABS(TEMP1).le.1E-10.or.ABS(TEMP2).le.1E-10.or.ABS(TEMP3).le.1E-10.or.ABS(TEMP4).le.1E-10) THEN\n"\
+            + "c        open(2, FILE = '/home/emil/Desktop/MadCAFE-Massive/MadCAFE/bin/testzeros.txt', STATUS = 'old', POSITION= 'append',\n"\
+            + "c     &ACTION= 'write')\n"\
+            + 'c        WRITE(2,*) TEMP1, TEMP2, TEMP3, TEMP4\n'\
+            + 'c      ENDIF\n\n'\
+            + '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2 - M2 * (M2 -CI * W2))\n'\
+            + '      F2(3) = DENOM*CI*(-P2_11*TEMP1 - P2_21*TEMP2)\n'\
+            + '      F2(4) = DENOM*CI*(-P2_12*TEMP1 - P2_22*TEMP2)\n'\
+            + '      F2(5) = DENOM*CI*(-M2*TEMP2)\n'\
+            + '      F2(6) = DENOM*CI*(M2*TEMP1)\n'\
+            + '      end\n'
+
+            reduced_subrout_pb = text_copy[linebreaks[3]:linebreaks[-16]] + '\n' + reduced_sub_replace_pb 
+            reduced_subrout_pb = reduced_subrout_pb[:22] + 'L' + reduced_subrout_pb[22:]
+
+            reduced_sub_replace_q = '      P2_11 = (P2(0)+P2(3))\n'\
+            + '      P2_12 = (P2(1)-CI*P2(2))\n'\
+            + '      P2_21 = (P2(1)+CI*P2(2))\n'\
+            + '      P2_22 = (P2(0)-P2(3))\n'\
+            + '      TEMP3 = (V3(4)*F1(6) - V3(6)*F1(5))\n'\
+            + '      TEMP4 = (V3(5)*F1(5) - V3(3)*F1(6))\n\n'\
+            + "c      IF (ABS(TEMP1).le.1E-10.or.ABS(TEMP2).le.1E-10.or.ABS(TEMP3).le.1E-10.or.ABS(TEMP4).le.1E-10) THEN\n"\
+            + "c        open(2, FILE = '/home/emil/Desktop/MadCAFE-Massive/MadCAFE/bin/testzeros.txt', STATUS = 'old', POSITION= 'append',\n"\
+            + "c     &ACTION= 'write')\n"\
+            + 'c        WRITE(2,*) TEMP1, TEMP2, TEMP3, TEMP4\n'\
+            + 'c      ENDIF\n\n'\
+            + '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2 - M2 * (M2 -CI * W2))\n'\
+            + '      F2(3) = DENOM*CI*(M2*TEMP4)\n'\
+            + '      F2(4) = DENOM*CI*(-M2*TEMP3)\n'\
+            + '      F2(5) = DENOM*CI*(-P2_11*TEMP3 - P2_12*TEMP4)\n'\
+            + '      F2(6) = DENOM*CI*(-P2_21*TEMP3 - P2_22*TEMP4)\n'\
+            + '      end\n'
+
+            reduced_subrout_q = text_copy[linebreaks[3]:linebreaks[-16]] + '\n' + reduced_sub_replace_q
+            reduced_subrout_q = reduced_subrout_q[:22] + 'R' + reduced_subrout_q[22:]
+
+        text_copy = text_copy + reduced_subrout_pb + reduced_subrout_q
     
     if vertex in ['FFV1P0_3', 'MFV1P0_3', 'FMV1P0_3', 'PFV1P0_3', 'FPV1P0_3','MMV1P0_3', 'MPV1P0_3', 'PMV1P0_3', 'PPV1P0_3']:
         FFV1P0_3_replace = '      V3(3) = 2*DENOM*(F1(5)*F2(3)+F2(5)*F1(3))\n'\
@@ -2038,7 +2278,17 @@ def postex_vertex_replacer(working_dir):
         'MMV1_0.f', 'MPV1_0.f', 'PMV1_0.f', 'PPV1_0.f',\
         'FFV1_1.f', 'FMV1_1.f',  'FPV1_1.f', 'FFV1_2.f', 'MFV1_2.f', 'PFV1_2.f', \
         'FFV1P0_3.f', 'MFV1P0_3.f', 'FMV1P0_3.f', 'PFV1P0_3.f', 'FPV1P0_3.f',\
-        'MMV1P0_3.f', 'MPV1P0_3.f', 'PMV1P0_3.f', 'PPV1P0_3.f']
+        'MMV1P0_3.f', 'MPV1P0_3.f', 'PMV1P0_3.f', 'PPV1P0_3.f',\
+        'FFV1L_0.f', 'FMV1L_0.f', 'MFV1L_0.f', 'PFV1L_0.f', 'FPV1L_0.f',\
+        'MMV1L_0.f', 'MPV1L_0.f', 'PMV1L_0.f', 'PPV1L_0.f',\
+        'FFV1L_1.f', 'FMV1L_1.f',  'FPV1L_1.f', 'FFV1L_2.f', 'MFV1L_2.f', 'PFV1L_2.f', \
+        'FFV1LP0_3.f', 'MFV1LP0_3.f', 'FMV1LP0_3.f', 'PFV1LP0_3.f', 'FPV1LP0_3.f',\
+        'MMV1LP0_3.f', 'MPV1LP0_3.f', 'PMV1LP0_3.f', 'PPV1LP0_3.f',\
+        'FFV1R_0.f', 'FMV1R_0.f', 'MFV1R_0.f', 'PFV1R_0.f', 'FPV1R_0.f',\
+        'MMV1R_0.f', 'MPV1R_0.f', 'PMV1R_0.f', 'PPV1R_0.f',\
+        'FFV1R_1.f', 'FMV1R_1.f',  'FPV1R_1.f', 'FFV1R_2.f', 'MFV1R_2.f', 'PFV1R_2.f', \
+        'FFV1RP0_3.f', 'MFV1RP0_3.f', 'FMV1RP0_3.f', 'PFV1RP0_3.f', 'FPV1RP0_3.f',\
+        'MMV1RP0_3.f', 'MPV1RP0_3.f', 'PMV1RP0_3.f', 'PPV1RP0_3.f'    ]
     onlyfiles = [f for f in os.listdir(write_dir) if os.path.isfile(os.path.join(write_dir, f))]
     konlyfiles = [f[:4] + f[-4:] for f in onlyfiles]
     for vertex in vertex_list:
