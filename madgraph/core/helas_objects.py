@@ -3854,9 +3854,14 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         #     TODO: Add additional massive fermions to list when they are implemented.
         found_left_ferm = False
         found_right_ferm = False
-        found_mass_ferm = False
+        found_mass_pos_ferm = False
+        found_mass_neg_ferm = False
+        found_second_mass_pos_ferm = False
+        found_second_mass_neg_ferm = False
         found_first_photon = False
         found_second_photon = False
+        found_left_photon = False
+        found_right_photon = False
         for leg in legs:
             if abs(leg.get('id')) in [90001, 90005, 70001, 70002] and not found_left_ferm:
                 left_ferm = leg
@@ -3865,10 +3870,34 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             elif abs(leg.get('id')) in [90003, 90007, 80001, 80002] and not found_right_ferm:
                 right_ferm = leg
                 found_right_ferm = True
-            elif abs(leg.get('id')) in [70011,70013,70015,80011,80013,80015] and not found_mass_ferm:
-                mass_ferm = leg
-                found_mass_ferm = True
-            elif abs(leg.get('id')) in [90023,90024]:
+            elif abs(leg.get('id')) in [70011,70013,70015]:
+                if not found_mass_pos_ferm:
+                    mass_pos_ferm = leg
+                    found_mass_pos_ferm = True
+                elif not found_second_mass_pos_ferm:
+                    second_mass_pos_ferm = leg
+                    found_second_mass_pos_ferm = True
+            elif abs(leg.get('id')) in [80011,80013,80015]:
+                if not found_mass_neg_ferm:
+                    mass_neg_ferm = leg
+                    found_mass_neg_ferm = True
+                elif not found_second_mass_neg_ferm:
+                    second_mass_neg_ferm = leg
+                    found_second_mass_neg_ferm = True
+            elif leg.get('id') == 90023:
+                if not found_left_photon:
+                    left_photon = leg
+                    found_left_photon = True
+                if not found_first_photon:
+                    first_photon = leg
+                    found_first_photon = True
+                elif found_first_photon and not found_second_photon:
+                    second_photon = leg
+                    found_second_photon = True
+            elif leg.get('id') == 90024:
+                if not found_right_photon:
+                    right_photon = leg
+                    found_right_photon = True
                 if not found_first_photon:
                     first_photon = leg
                     found_first_photon = True
@@ -3880,29 +3909,65 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         
         # EB: Setting photon reference momenta and fermion q momenta.
         # TODO: Update this to proper one once working.
-        if found_mass_ferm:
-            
+        if found_mass_pos_ferm or found_mass_neg_ferm:
             for leg in legs:
                 # if massive fermion
                 if abs(leg.get('id')) in [70011,70013,70015,80011,80013,80015]:
-                    if leg.get('number') == mass_ferm.get('number'):
+                    if leg.get('number')%2 == 1:
                         if found_first_photon == True:
                             ref_moms.append(first_photon.get('number'))
                         else:
                             # EB: update this later
-                            ref_moms.append(mass_ferm.get('number'))
+                            misc.sprint('photons needed for now')
                     else:
-                        ref_moms.append(mass_ferm.get('number'))
-                
+                        if found_second_photon == True:
+                            ref_moms.append(second_photon.get('number'))
+                        elif found_first_photon == True:
+                            ref_moms.append(first_photon.get('number'))
+                        else:
+                            # EB: update this later
+                            misc.sprint('photons needed for now')
                 # if photon
-                if leg.get('id') in [90023,90024]:
+                #if leg.get('id') in [90023,90024]:
                     # if first photon
-                    if leg.get('number') == first_photon.get('number'):
+                    #if leg.get('number') == first_photon.get('number'):
                         #ref_moms.append(mass_ferm.get('number'))
-                        ref_moms.append(second_photon.get('number'))
-                        
-                    else:
+                      #  ref_moms.append(second_photon.get('number'))             
+                   # else:
+                      #  ref_moms.append(first_photon.get('number'))
+                # if right-chiral photon
+                if leg.get('id') == 90024:
+                    if found_mass_neg_ferm:
+                       # ref_moms.append(mass_neg_ferm.get('number'))
+                        if not found_second_mass_neg_ferm or leg.get('number') == first_photon.get('number'):
+                            ref_moms.append(mass_neg_ferm.get('number'))
+                        else:
+                            ref_moms.append(second_mass_neg_ferm.get('number'))
+                    elif found_left_photon:
+                        ref_moms.append(left_photon.get('number'))
+                    elif not leg.get('number') == first_photon.get('number'):
                         ref_moms.append(first_photon.get('number'))
+                    elif found_second_photon:
+                        ref_moms.append(second_photon.get('number'))
+                    else:
+                        ref_moms.append(mass_pos_ferm.get('number'))
+                
+                # if left-chiral photon
+                if leg.get('id') == 90023:
+                    if found_mass_pos_ferm:
+                        #ref_moms.append(mass_pos_ferm.get('number'))
+                        if not found_second_mass_pos_ferm or leg.get('number') == first_photon.get('number'):
+                            ref_moms.append(mass_pos_ferm.get('number'))
+                        else:
+                            ref_moms.append(second_mass_pos_ferm.get('number'))
+                    elif found_right_photon:
+                        ref_moms.append(right_photon.get('number'))
+                    elif not leg.get('number') == first_photon.get('number'):
+                        ref_moms.append(first_photon.get('number'))
+                    elif found_second_photon:
+                        ref_moms.append(second_photon.get('number'))
+                    else:
+                        ref_moms.append(mass_neg_ferm.get('number'))
 
         else:
         # find photons and update its reference momenta
@@ -3946,6 +4011,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     # ref_moms.append(right_ferm.get('number'))
                 # else append -1
                 else: ref_moms.append(-1)
+       
         return ref_moms
         
     def generate_helas_diagrams(self, amplitude, optimization=1,decay_ids=[]):
@@ -4030,7 +4096,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         # and get dictionary of vertex names to vertex ids
         #EB: Don't do this for massive case
 
-        if not model.get('name') in ['massive_cf', 'massive_cf-lepton_masses', 'massive_cf-lepton_masses_2', 'massive_cf-lepton_masses_3', 'massive_cf-lepton_masses_4']:
+        if not model.get('name') in ['massive_cf', 'massive_cf-lepton_masses', 'massive_cf-lepton_masses_mu5',\
+            'massive_cf-lepton_masses_mu10', 'massive_cf-lepton_masses_mu20','massive_cf-lepton_masses_mu100','massive_cf-lepton_masses_mu500','massive_cf_copy-lepton_masses']:
             model, vert_id_to_pdgs_dict = self.add_LL_RR_vertices(\
                                  amplitude, external_wavefunctions)
 
@@ -4075,7 +4142,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
 
                 # if chiral and LL or RR, get the new vertex id
                 # EB: Update to not do this for massive case
-                if is_chiral and not model.get('name') in ['massive_cf','massive_cf-lepton_masses','massive_cf-lepton_masses_2','massive_cf-lepton_masses_3','massive_cf-lepton_masses_4']:
+                if is_chiral and not model.get('name') in ['massive_cf','massive_cf-lepton_masses','massive_cf-lepton_masses_mu5',\
+                    'massive_cf-lepton_masses_mu10','massive_cf-lepton_masses_mu20','massive_cf-lepton_masses_mu100','massive_cf-lepton_masses_mu500','massive_cf_copy-lepton_masses']:
                     # First get ids in vertex.
                     vids = []
                     for part in vertex['legs']:
@@ -4177,7 +4245,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     
                     # if chiral and LL or RR, get the new vertex id
                     # EB: don't do this in massive case
-                    if is_chiral and not model.get('name') in ['massive_cf','massive_cf-lepton_masses','massive_cf-lepton_masses_2','massive_cf-lepton_masses_3','massive_cf-lepton_masses_4']:
+                    if is_chiral and not model.get('name') in ['massive_cf','massive_cf-lepton_masses','massive_cf-lepton_masses_mu5',\
+                        'massive_cf-lepton_masses_mu10','massive_cf-lepton_masses_mu20','massive_cf-lepton_masses_mu100','massive_cf-lepton_masses_mu500','massive_cf_copy-lepton_masses']:
                     # First get ids in vertex.
                         vids = []
                         for part in lastvx['legs']:
