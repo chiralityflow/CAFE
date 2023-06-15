@@ -340,7 +340,7 @@ c                    ((p^1+i*p^2)/sqrt(p^0+p^3))                   (sqrt(p^0-p^3
       return
       end
 
-      subroutine imxxxx(p, fmass, nspin, nsf, q, fmi)
+      subroutine imxxxx(p, fmass, nspin, nsf, q, pbt, fmi)
 c
 c This subroutine computes a massive fermion wavefunction for 
 c an inflowing fermion under the chirality-flow formalism.
@@ -575,7 +575,7 @@ c     AL: checked (note -1 compensates for `wrong' order of inner product!)
       end
 
 
-      subroutine omxxxx(p, fmass, nspin, nsf, q, fmo)
+      subroutine omxxxx(p, fmass, nspin, nsf, q, pbt, fmo)
 c
 c This subroutine computes a massive fermion wavefunction for 
 c an outflowing fermion under the chirality-flow formalism.

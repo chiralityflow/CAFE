@@ -341,6 +341,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
         pdg_code = wavefunction.get('particle').get('pdg_code')
         nsv_new = wavefunction.get('leg_state')
         ref_mom = wavefunction.get('ref_mom')
+        leg_num = wavefunction.get('number')
         
         # AL: update LH spinor wavefunction
         # AW: adding paricle codes for quarks and gluons
@@ -380,7 +381,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             # insert reference momentum as argument
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
+            call = call_lhs + ',PB(0,' + str(ref_mom) + '),' + call_rhs
 
         # AL: update RH vector wavefunction
         elif pdg_code == 90024 or pdg_code == 80021 or pdg_code == 821:
@@ -390,7 +391,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             # insert reference momentum as argument
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
+            call = call_lhs + ',PB(0,' + str(ref_mom) + '),' + call_rhs
 
         elif pdg_code in [70106,80106]:
             # update name
@@ -399,7 +400,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             # insert reference momentum as argument
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
+            call = call_lhs + ',PB(0,' + str(ref_mom) + '),' + 'PB(0,' + str(leg_num) + '),' + call_rhs
             misc.sprint(call)
 
         return call

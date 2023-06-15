@@ -3896,18 +3896,28 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 elif leg.get('id') in [821,80021]:
                     ref_moms.append(left_boson.get('number'))
                 elif leg.get('id') in [70106, -70106, 80106, -80106]:
-                    ref_moms.append(first_boson.get('number'))
+                    #ref_moms.append(first_boson.get('number'))
+                    ref_moms.append(3)
                 else:
                     ref_moms.append(-1)
         else:
             for leg in legs:
-                if leg.get('id') in [70106, -70106, 80106, -80106]:
+                if leg.get('number') == 1:
+                    ref_moms.append(3)
+                elif leg.get('number') == 2:
+                    ref_moms.append(3)
+                elif leg.get('number') == 3:
+                    ref_moms.append(4)
+                else:
+                    ref_moms.append(3)
+
+                """ if leg.get('id') in [70106, -70106, 80106, -80106]:
                     ref_moms.append(first_boson.get('number'))
                 elif leg.get('id') in [721,70021,821,80021]:
                     for ref_leg in legs:
                         if not ref_leg.get('id') in [70106, -70106, 80106, -80106] and ref_leg.get('number') != leg.get('number'):
                             ref_moms.append(ref_leg.get('number'))
-                            break
+                            break """
         misc.sprint(ref_moms)
         return ref_moms
             

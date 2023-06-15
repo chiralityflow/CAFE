@@ -1785,7 +1785,7 @@ def vertex_replacer(text, vertex):
             + '      F2(6) = DENOM*CI*{}\n'.format(spinor[1])
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[-18]+1] + RRV1_2_replace + text_copy[linebreaks[-4]+1:]
-    if (vertex == 'VVV1_0'):
+    if (vertex == 'VVV1_0' or vertex == 'VVLVL1_0' or vertex == 'VVRVR1_0'):
         # AW: we divide by 4 to take care of some extra factor of 2. Might be the *2 from LRV_3 in d d~ to g g
         # and u u~ to d d~ g
         TMP_replace = '      COMPLEX*16 TMP1\n' \
@@ -1807,7 +1807,7 @@ def vertex_replacer(text, vertex):
         + '      TMP7 = {}\n'.format(vec_vec('V3','V1')) \
         + '      TMP8 = {}\n'.format(vec_p('V2','P3')) \
         + '      TMP9 = {}\n'.format(vec_p('V2','P1')) \
-        + '      VERTEX = COUP*CI*(TMP1*(TMP2 - TMP3) + TMP4*(TMP5 - TMP6) + TMP7*(TMP8 - TMP9))/4\n'
+        + '      VERTEX = -COUP*CI*(TMP1*(TMP2 - TMP3) + TMP4*(TMP5 - TMP6) + TMP7*(TMP8 - TMP9))/4\n'
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[12]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[37]+1] + VVV1_0_replace + text_copy[linebreaks[48]+1:]
     
@@ -1830,7 +1830,7 @@ def vertex_replacer(text, vertex):
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[12]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[25]+1] + text_copy[linebreaks[29]+1:linebreaks[37]+1] + VVV1_0_replace + text_copy[linebreaks[48]+1:]
 
-    if (vertex == 'VVRVR1_0'):
+    if (vertex == 'VVRVR1_0 ta bort här sen'):
         # AW: we divide by 4 to take care of some extra factor of 2. Might be the *2 from LRV_3 in d d~ to g g
         # and u u~ to d d~ g
         TMP_replace = '      COMPLEX*16 TMP1\n' \
@@ -1850,7 +1850,7 @@ def vertex_replacer(text, vertex):
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[12]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[37]+1] + VVRVR1_0_replace + text_copy[linebreaks[48]+1:]
 
-    if (vertex == 'VVLVL1_0'):
+    if (vertex == 'VVLVL1_0 ta bort detta sen'):
         # AW: we divide by 4 to take care of some extra factor of 2. Might be the *2 from LRV_3 in d d~ to g g
         # and u u~ to d d~ g
         TMP_replace = '      COMPLEX*16 TMP1\n' \
