@@ -1667,7 +1667,7 @@ def vertex_replacer(text, vertex):
             + '      V3(6) = 2*DENOM*F1(6)*F2(4)\n'
         text_copy = text_copy[:linebreaks[-8]+1] + RLV1P0_3_replace + text_copy[linebreaks[-4]+1:]
     if vertex == 'FFV1_0':
-        FFV1_0_replace = '      VERTEX = COUP*(F1(3)*(V3(6)*F2(5)-V3(4)*F2(6))-F1(4)*(V3(5)*F2(5)-V3(3)*F2(6))\n'\
+        FFV1_0_replace = '      VERTEX = -COUP*(F1(3)*(V3(6)*F2(5)-V3(4)*F2(6))-F1(4)*(V3(5)*F2(5)-V3(3)*F2(6))\n'\
             + '     &+F2(3)*(V3(6)*F1(5)-V3(4)*F1(6))-F2(4)*(V3(5)*F1(5)-V3(3)*F1(6)))\n'
         text_copy = text_copy[:linebreaks[-10]+1] + text_copy[linebreaks[-9]+1:linebreaks[-7]+1]\
              + FFV1_0_replace + text_copy[linebreaks[-4]+1:]
@@ -1807,7 +1807,7 @@ def vertex_replacer(text, vertex):
         + '      TMP7 = {}\n'.format(vec_vec('V3','V1')) \
         + '      TMP8 = {}\n'.format(vec_p('V2','P3')) \
         + '      TMP9 = {}\n'.format(vec_p('V2','P1')) \
-        + '      VERTEX = -COUP*CI*(TMP1*(TMP2 - TMP3) + TMP4*(TMP5 - TMP6) + TMP7*(TMP8 - TMP9))/4\n'
+        + '      VERTEX = COUP*CI*(TMP1*(TMP2 - TMP3) + TMP4*(TMP5 - TMP6) + TMP7*(TMP8 - TMP9))/4\n'
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[12]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[37]+1] + VVV1_0_replace + text_copy[linebreaks[48]+1:]
     

@@ -3889,7 +3889,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 break
         if not found_first_boson:
             misc.sprint('PROCESS HAS NO BOSONS')
-        if found_left_boson and found_right_boson:
+        if found_left_boson and found_right_boson and False:
             for leg in legs:
                 if leg.get('id') in [721,70021]:
                     ref_moms.append(right_boson.get('number'))
@@ -3908,6 +3908,8 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     ref_moms.append(3)
                 elif leg.get('number') == 3:
                     ref_moms.append(4)
+                elif leg.get('number') == 4:
+                    ref_moms.append(5)
                 else:
                     ref_moms.append(3)
 

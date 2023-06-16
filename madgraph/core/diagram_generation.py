@@ -1013,7 +1013,7 @@ class Amplitude(base_objects.PhysicsObject):
                         
         # AW: speical gluon diagram removal
         forbidden_verts = [52,54,55,57,58,61,77,80,81,83,84,85,86,87,88,89]
-        if reduced_leglist:       
+        if reduced_leglist and remove_after:       
             for i, diag in enumerate(reduced_leglist):
                 if reduced_leglist[i][-1]['id'] in forbidden_verts:
                     diag_index_to_remove.append(i) 

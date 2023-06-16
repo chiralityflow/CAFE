@@ -32,9 +32,10 @@ c
       double precision p(0:3),vmass,hel,hel0,pt,pt2,pp,pzpt,emp,sqh,r(0:3),sqp0p3,sqr0r3, svhel,sv
       integer nhel,nsv,nsvahl,nsvhel, i
 
-      double precision rZero, rHalf, rOne, rTwo
+      double precision rZero, rHalf, rOne, rTwo, rTol
       parameter( rZero = 0.0d0, rHalf = 0.5d0 )
       parameter( rOne = 1.0d0, rTwo = 2.0d0 )
+      parameter( rTol = 100d0)
 
       sqh = dsqrt(rHalf)
       hel = dble(nhel)
@@ -64,10 +65,13 @@ c rpprod = <rp>
          pketsq(2) = dcmplx( - sqp0p3 )
          if(r(1).eq.0d0.and.r(2).eq.0d0.and.r(3).lt.0d0) then
             sqr0r3 = 0d0
+         else if ((r(0)+r(3)).le.rTol) then
+            sqr0r3 = dsqrt((r(0)**2-r(3)**2)/(r(0)-r(3)))
          else
             sqr0r3 = dsqrt(max(r(0)+r(3),rZero))
          endif
          rbraan(2) = dcmplx ( - sqr0r3 )
+         write(*,*) r(0:3), r(0)**2-r(1)**2-r(2)**2-r(3)**2
 
 c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
          if ( nsvhel.eq.1 ) then
@@ -81,6 +85,7 @@ c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
             else
                rbraan(1) = dcmplx(r(1),r(2))/sqr0r3
             endif
+         
             
 c           rpprod = <rp> = rbraan*pketan
 c           pketan = |p> = (eps_{ab}|p]^b)^\dagger = (0 & -1)  (pketsq(1)^*) = (-pketsq(2)^*)
@@ -133,9 +138,10 @@ c
       integer nhel,nsv,nsvahl,nsvhel,i
       double precision refmom(4)
 
-      double precision rZero, rHalf, rOne, rTwo
+      double precision rZero, rHalf, rOne, rTwo,rTol
       parameter( rZero = 0.0d0, rHalf = 0.5d0 )
       parameter( rOne = 1.0d0, rTwo = 2.0d0 )
+      parameter( rTol = 100d0)
 
       sqh = dsqrt(rHalf)
       hel = dble(nhel)
@@ -167,10 +173,13 @@ c prprod = [pr]
          pbraan(2) = dcmplx( - sqp0p3 )
          if(r(1).eq.0d0.and.r(2).eq.0d0.and.r(3).lt.0d0) then
             sqr0r3 = 0d0
+         else if ((r(0)+r(3)).le.rTol) then
+            sqr0r3 = dsqrt((r(0)**2-r(3)**2)/(r(0)-r(3)))
          else
             sqr0r3 = dsqrt(max(r(0)+r(3),rZero))
          endif
          rketsq(2) = dcmplx ( - sqr0r3 )
+         write(*,*) r(0:3), r(0)**2-r(1)**2-r(2)**2-r(3)**2 
 
 c nsvhel = -1, i.e. right-chiral (outgoing - hel or incoming + hel)
          if ( nsvhel.eq.-1 ) then

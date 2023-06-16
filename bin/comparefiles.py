@@ -23,6 +23,8 @@ if compare_type == "mg5":
 
 	# calculate the error compared to reference data
 	error = abs(1-(proc_total)/(float(comparelines[0][:-1])))
+	
+	diff = proc_total-float(comparelines[0][:-1])
 
 	# record results in file.
 	no_error = True
@@ -31,9 +33,9 @@ if compare_type == "mg5":
 	if error > 10**(-14):
 		no_error = False
 	if no_error:
-		test_res.write(proc + ":  all tests passed, error:" + str(error) + '.   Res:  ' + str(proc_total) + "\n")
+		test_res.write(proc + ":  all tests passed, error:" + str(error) + '.   Res:  ' + str(proc_total) + '.   Diff:  ' + str(diff) + "\n")
 	else:
-		test_res.write(proc + ":  test failed, error:" + str(error) + '.   Res:  ' + str(proc_total) + "\n")
+		test_res.write(proc + ":  test failed, error:" + str(error) + '.   Res:  ' + str(proc_total) + '.   Diff:  ' + str(diff) + "\n")
 	test_res.close()
 
 #needs to be tested
