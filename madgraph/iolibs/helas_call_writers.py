@@ -381,7 +381,12 @@ class HelasCallWriter(base_objects.PhysicsObject):
             # insert reference momentum as argument
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',PB(0,' + str(ref_mom) + '),' + call_rhs
+            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
+            #call = call_lhs + ',REFVEC1(0),' + call_rhs
+            #if leg_num == 3:
+            #    call = call_lhs + ',REFVEC1(0),' + call_rhs
+            #else:
+            #    call = call_lhs + ',REFVEC2(0),' + call_rhs
 
         # AL: update RH vector wavefunction
         elif pdg_code == 90024 or pdg_code == 80021 or pdg_code == 821:
@@ -391,7 +396,12 @@ class HelasCallWriter(base_objects.PhysicsObject):
             # insert reference momentum as argument
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',PB(0,' + str(ref_mom) + '),' + call_rhs
+            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
+            #call = call_lhs + ',REFVEC2(0),' + call_rhs
+            #if leg_num == 3:
+            #    call = call_lhs + ',REFVEC1(0),' + call_rhs
+            #else:
+            #    call = call_lhs + ',REFVEC2(0),' + call_rhs
 
         elif pdg_code in [70106,80106]:
             # update name
@@ -401,7 +411,12 @@ class HelasCallWriter(base_objects.PhysicsObject):
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
             call = call_lhs + ',PB(0,' + str(ref_mom) + '),' + 'PB(0,' + str(leg_num) + '),' + call_rhs
-            misc.sprint(call)
+            #if leg_num in [1]:
+            #    call = call_lhs + ',REFVEC1(0),'+ 'PB(0,' + str(leg_num) + '),' + call_rhs
+            #else:
+            #    call = call_lhs + ',PB(0,' + str(ref_mom) + '),' + 'PB(0,' + str(leg_num) + '),' + call_rhs
+                #call = call_lhs + ',REFVEC2(0),'+ 'PB(0,' + str(leg_num) + '),' + call_rhs
+            #misc.sprint(call)
 
         return call
 

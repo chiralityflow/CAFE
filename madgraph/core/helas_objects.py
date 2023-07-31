@@ -2440,7 +2440,7 @@ class HelasWavefunctionList(base_objects.PhysicsObjectList):
             return mothers, my_index
         
         # AW: debug
-        #misc.sprint(mother_codes, pdg_codes)
+        misc.sprint(mother_codes, pdg_codes)
         sorted_mothers = []
         for i, code in enumerate(pdg_codes):
             #misc.sprint(mother_codes)
@@ -3909,8 +3909,12 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 elif leg.get('number') == 3:
                     ref_moms.append(4)
                 elif leg.get('number') == 4:
-                    ref_moms.append(5)
-                else:
+                    ref_moms.append(3)
+                elif leg.get('number') == 5:
+                    ref_moms.append(3)
+                elif leg.get('number') == 6:
+                    ref_moms.append(3)
+                elif leg.get('number') == 7:
                     ref_moms.append(3)
 
                 """ if leg.get('id') in [70106, -70106, 80106, -80106]:
@@ -4205,6 +4209,12 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                         N_ur = 0
                         N_ul_bar = 0
                         N_ur_bar = 0
+                        N_tm = 0
+                        N_tp = 0
+                        N_tm_bar = 0
+                        N_tp_bar = 0
+                        N_t = 0
+                        N_t_bar = 0
                         for part in lastvx['legs']:
                             if part['id'] == 21:
                                 N_g += 1
@@ -4224,6 +4234,19 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                                 N_ul_bar += 1
                             if part['id'] == -80002:
                                 N_ur_bar += 1
+                            if part['id'] == 70106:
+                                N_tp += 1
+                            if part['id'] == -70106:
+                                N_tp_bar += 1
+                            if part['id'] == 80106:
+                                N_tm += 1
+                            if part['id'] == -80106:
+                                N_tm_bar += 1
+                            if part['id'] == 6:
+                                N_t += 1
+                            if part['id'] == -6:
+                                N_t_bar += 1
+                            
                         if N_ul_bar == 1 and N_ur == 1 and N_g == 1:
                                 lastvx.set('id', 13)
                         if N_ul_bar == 1 and N_ur == 1 and N_gl == 1:
@@ -4244,7 +4267,98 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                                 lastvx.set('id', 97)
                         if N_ur_bar == 1 and N_ul == 1 and N_gri == 1:
                                 lastvx.set('id', 98)
-
+                        # top quarks from here        
+                        if N_tm_bar == 1 and N_tm == 1 and N_g == 1:
+                                lastvx.set('id', 99)
+                        if N_tm_bar == 1 and N_tm == 1 and N_gli == 1:
+                                lastvx.set('id', 100)
+                        if N_tm_bar == 1 and N_tm == 1 and N_gri == 1:
+                                lastvx.set('id', 101)
+                        if N_tm_bar == 1 and N_tm == 1 and N_gl == 1:
+                                lastvx.set('id', 102)
+                        if N_tm_bar == 1 and N_tm == 1 and N_gr == 1:
+                                lastvx.set('id', 103)
+                        if N_tm_bar == 1 and N_tp == 1 and N_g == 1:
+                                lastvx.set('id', 104)
+                        if N_tm_bar == 1 and N_tp == 1 and N_gli == 1:
+                                lastvx.set('id', 105)
+                        if N_tm_bar == 1 and N_tp == 1 and N_gri == 1:
+                                lastvx.set('id', 106)
+                        if N_tm_bar == 1 and N_tp == 1 and N_gl == 1:
+                                lastvx.set('id', 107)
+                        if N_tm_bar == 1 and N_tp == 1 and N_gr == 1:
+                                lastvx.set('id', 108)
+                        if N_tm_bar == 1 and N_t == 1 and N_g == 1:
+                                lastvx.set('id', 109)
+                        if N_tm_bar == 1 and N_t == 1 and N_gli == 1:
+                                lastvx.set('id', 110)
+                        if N_tm_bar == 1 and N_t == 1 and N_gri == 1:
+                                lastvx.set('id', 111)
+                        if N_tm_bar == 1 and N_t == 1 and N_gl == 1:
+                                lastvx.set('id', 112)
+                        if N_tm_bar == 1 and N_t == 1 and N_gr == 1:
+                                lastvx.set('id', 113)
+                        if N_tp_bar == 1 and N_tm == 1 and N_g == 1:
+                                lastvx.set('id', 114)
+                        if N_tp_bar == 1 and N_tm == 1 and N_gli == 1:
+                                lastvx.set('id', 115)
+                        if N_tp_bar == 1 and N_tm == 1 and N_gri == 1:
+                                lastvx.set('id', 116)
+                        if N_tp_bar == 1 and N_tm == 1 and N_gl == 1:
+                                lastvx.set('id', 117)
+                        if N_tp_bar == 1 and N_tm == 1 and N_gr == 1:
+                                lastvx.set('id', 118)
+                        if N_tp_bar == 1 and N_tp == 1 and N_g == 1:
+                                lastvx.set('id', 119)
+                        if N_tp_bar == 1 and N_tp == 1 and N_gli == 1:
+                                lastvx.set('id', 120)
+                        if N_tp_bar == 1 and N_tp == 1 and N_gri == 1:
+                                lastvx.set('id', 121)
+                        if N_tp_bar == 1 and N_tp == 1 and N_gl == 1:
+                                lastvx.set('id', 122)
+                        if N_tp_bar == 1 and N_tp == 1 and N_gr == 1:
+                                lastvx.set('id', 123)
+                        if N_tp_bar == 1 and N_t == 1 and N_g == 1:
+                                lastvx.set('id', 124)
+                        if N_tp_bar == 1 and N_t == 1 and N_gli == 1:
+                                lastvx.set('id', 125)
+                        if N_tp_bar == 1 and N_t == 1 and N_gri == 1:
+                                lastvx.set('id', 126)
+                        if N_tp_bar == 1 and N_t == 1 and N_gl == 1:
+                                lastvx.set('id', 127)
+                        if N_tp_bar == 1 and N_t == 1 and N_gr == 1:
+                                lastvx.set('id', 128)
+                        if N_t_bar == 1 and N_tm == 1 and N_g == 1:
+                                lastvx.set('id', 129)
+                        if N_t_bar == 1 and N_tm == 1 and N_gli == 1:
+                                lastvx.set('id', 130)
+                        if N_t_bar == 1 and N_tm == 1 and N_gri == 1:
+                                lastvx.set('id', 131)
+                        if N_t_bar == 1 and N_tm == 1 and N_gl == 1:
+                                lastvx.set('id', 132)
+                        if N_t_bar == 1 and N_tm == 1 and N_gr == 1:
+                                lastvx.set('id', 133)
+                        if N_t_bar == 1 and N_tp == 1 and N_g == 1:
+                                lastvx.set('id', 134)
+                        if N_t_bar == 1 and N_tp == 1 and N_gli == 1:
+                                lastvx.set('id', 135)
+                        if N_t_bar == 1 and N_tp == 1 and N_gri == 1:
+                                lastvx.set('id', 136)
+                        if N_t_bar == 1 and N_tp == 1 and N_gl == 1:
+                                lastvx.set('id', 137)
+                        if N_t_bar == 1 and N_tp == 1 and N_gr == 1:
+                                lastvx.set('id', 138)
+                        if N_t_bar == 1 and N_t == 1 and N_g == 1:
+                                lastvx.set('id', 139)
+                        if N_t_bar == 1 and N_t == 1 and N_gli == 1:
+                                lastvx.set('id', 140)
+                        if N_t_bar == 1 and N_t == 1 and N_gri == 1:
+                                lastvx.set('id', 141)
+                        if N_t_bar == 1 and N_t == 1 and N_gl == 1:
+                                lastvx.set('id', 142)
+                        if N_t_bar == 1 and N_t == 1 and N_gr == 1:
+                                lastvx.set('id', 143)
+                                
                         is_ggg = True
                         for part in lastvx['legs']:
                             if part['id'] not in [21,721,821,70021,80021]:
