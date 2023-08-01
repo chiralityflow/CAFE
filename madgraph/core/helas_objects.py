@@ -2440,7 +2440,7 @@ class HelasWavefunctionList(base_objects.PhysicsObjectList):
             return mothers, my_index
         
         # AW: debug
-        misc.sprint(mother_codes, pdg_codes)
+        #misc.sprint(mother_codes, pdg_codes)
         sorted_mothers = []
         for i, code in enumerate(pdg_codes):
             #misc.sprint(mother_codes)
@@ -3924,7 +3924,7 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                         if not ref_leg.get('id') in [70106, -70106, 80106, -80106] and ref_leg.get('number') != leg.get('number'):
                             ref_moms.append(ref_leg.get('number'))
                             break """
-        misc.sprint(ref_moms)
+        #misc.sprint(ref_moms)
         return ref_moms
             
             

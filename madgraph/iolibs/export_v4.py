@@ -3077,7 +3077,7 @@ CF2PY integer, intent(in) :: new_value
         # I.e. for a final-state left-handed particle, only terms where the particle
         # has helicity +1 will contribute
         for k in range(nexternal):
-            misc.sprint(helas_calls[k])
+            #misc.sprint(helas_calls[k])
             if (helas_calls[k][5:11] == 'LXXXXX') or (helas_calls[k][5:11] == 'VLXXXX'):
                 icpos = helas_calls[k].find('*IC(')
                 state_status = helas_calls[k][icpos-2:icpos]
