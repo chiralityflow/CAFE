@@ -3911,11 +3911,11 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                 elif leg.get('number') == 4:
                     ref_moms.append(3)
                 elif leg.get('number') == 5:
-                    ref_moms.append(3)
+                    ref_moms.append(4)
                 elif leg.get('number') == 6:
-                    ref_moms.append(3)
+                    ref_moms.append(5)
                 elif leg.get('number') == 7:
-                    ref_moms.append(3)
+                    ref_moms.append(6)
 
                 """ if leg.get('id') in [70106, -70106, 80106, -80106]:
                     ref_moms.append(first_boson.get('number'))
