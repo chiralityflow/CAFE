@@ -3887,9 +3887,20 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     found_first_boson = True
             elif found_left_boson and found_right_boson:
                 break
+        found_m_fermion = False
+        found_p_fermion = False
+        for leg in legs:
+            if leg.get('id') in [70106, -70106] and not found_p_fermion:
+                p_fermion = leg
+                found_p_fermion = True
+            elif leg.get('id') in [80106, -80106] and not found_m_fermion:
+                m_fermion = leg
+                found_m_fermion = True
+            elif found_p_fermion and found_m_fermion:
+                break
         if not found_first_boson:
             misc.sprint('PROCESS HAS NO BOSONS')
-        if found_left_boson and found_right_boson and False:
+        if found_left_boson and found_right_boson:
             for leg in legs:
                 if leg.get('id') in [721,70021]:
                     ref_moms.append(right_boson.get('number'))
@@ -3900,6 +3911,17 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                     ref_moms.append(3)
                 else:
                     ref_moms.append(-1)
+        elif found_m_fermion or found_p_fermion:
+            for leg in legs:
+                if leg.get('id') in [721,70021,821,80021]:
+                    if found_m_fermion:
+                        ref_moms.append(m_fermion.get('number'))
+                    else:
+                        ref_moms.append(p_fermion.get('number'))
+                if leg.get('id') in [70106, -70106, 80106, -80106]:
+                    #ref_moms.append(first_boson.get('number'))
+                    ref_moms.append(3)
+
         else:
             for leg in legs:
                 if leg.get('number') == 1:

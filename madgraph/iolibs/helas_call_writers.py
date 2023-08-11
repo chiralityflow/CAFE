@@ -381,7 +381,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             # insert reference momentum as argument
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
+            call = call_lhs + ',PB(0,' + str(ref_mom) + '),' + call_rhs
             #call = call_lhs + ',REFVEC1(0),' + call_rhs
             #if leg_num == 3:
             #    call = call_lhs + ',REFVEC1(0),' + call_rhs
@@ -396,7 +396,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             # insert reference momentum as argument
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
+            call = call_lhs + ',PB(0,' + str(ref_mom) + '),' + call_rhs
             #call = call_lhs + ',REFVEC2(0),' + call_rhs
             #if leg_num == 3:
             #    call = call_lhs + ',REFVEC1(0),' + call_rhs

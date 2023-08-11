@@ -2030,11 +2030,22 @@ def vertex_replacer(text, vertex):
         text_copy = text_copy[:linebreaks[8]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[17]+1] + VVVV4_0_replace + text_copy[linebreaks[22]+1:]
     
     if (vertex == 'VVIVLVR1_0' or vertex == 'VVRVRVR1_0' or vertex == 'VVRVRVR3_0' or vertex == 'VVRVRVR4_0' or vertex == 'VVIVLVL1_0' or vertex == 'VVIVLVL3_0' or vertex == 'VVIVLVL4_0'  \
-        or vertex == 'VIVLVLVR1_0' or vertex == 'VIVLVLVR3_0' or vertex == 'VIVLVLVR4_0' or vertex == 'VIVLVRVR1_0' or vertex == 'VIVLVRVR3_0' or vertex == 'VIVLVRVR4_0'):
+        or vertex == 'VIVLVLVR1_0' or vertex == 'VIVLVLVR3_0' or vertex == 'VIVLVLVR4_0' or vertex == 'VIVLVRVR1_0' or vertex == 'VIVLVRVR3_0' or vertex == 'VIVLVRVR4_0' \
+        or vertex == 'VVLVLVL1_0' or vertex == 'VVLVLVL3_0' or vertex == 'VVLVLVL4_0' or vertex == 'VVRVRVR1_0' or vertex == 'VVRVRVR3_0' or vertex == 'VVRVRVR4_0'   ):
 
         VVVV1_0_replace_0 = '      VERTEX = 0\n'
-
         text_copy = text_copy[:linebreaks[8]+1] + text_copy[linebreaks[12]+1:linebreaks[17]+1] + VVVV1_0_replace_0 + text_copy[linebreaks[22]+1:]
+
+    if (vertex == 'VVLVLVL1P0_1' or vertex == 'VVLVLVL3P0_1' or vertex == 'VVLVLVL4P0_1' or vertex == 'VVRVRVR1P0_1' or vertex == 'VVRVRVR3P0_1' or vertex == 'VVRVRVR4P0_1'):
+        # AW:
+
+        VVVV1P0_1_replace = '      V1(3) = 0 \n' \
+        +'      V1(4) = 0 \n' \
+        +'      V1(5) = 0 \n' \
+        +'      V1(6) = 0 \n'
+
+        text_copy = text_copy[:linebreaks[10]+1] + text_copy[linebreaks[12]+1:linebreaks[24]+1] + text_copy[linebreaks[26]+1:linebreaks[28]+1] + VVVV1P0_1_replace + text_copy[linebreaks[32]+1:]
+
 
     if (vertex == 'VVIVLVR3_0'):
         TMP_replace = '      COMPLEX*16 TMP1\n' \
@@ -2057,7 +2068,7 @@ def vertex_replacer(text, vertex):
         text_copy = text_copy[:linebreaks[8]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[17]+1] + VVVV4_0_replace + text_copy[linebreaks[22]+1:]
 
     
-    if (vertex == 'VLVLVRVR1_0' or vertex == 'VVVIVL1_0' or vertex == 'VVVLVL1_0'):
+    if (vertex == 'VLVLVRVR1_0' or vertex == 'VVVIVL1_0' or vertex == 'VVVLVL1_0' or vertex == 'VVVRVR1_0'):
         # AW:
         TMP_replace = '      COMPLEX*16 TMP1\n' \
         + '      COMPLEX*16 TMP2\n' \
@@ -2071,8 +2082,9 @@ def vertex_replacer(text, vertex):
         + '      VERTEX = COUP*CI*(TMP1*TMP2 - TMP3*TMP4)/4\n'
 
         text_copy = text_copy[:linebreaks[8]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[17]+1] + VLVLVRVR1_0_replace + text_copy[linebreaks[22]+1:]
-        
-    if (vertex == 'VLVLVRVR3_0' or vertex == 'VVVIVL3_0' or vertex == 'VVVLVL3_0'):
+
+
+    if (vertex == 'VLVLVRVR3_0' or vertex == 'VVVIVL3_0' or vertex == 'VVVLVL3_0' or vertex == 'VVVRVR3_0'):
         # AW:
         TMP_replace = '      COMPLEX*16 TMP1\n' \
         + '      COMPLEX*16 TMP2\n' \
@@ -2083,7 +2095,7 @@ def vertex_replacer(text, vertex):
 
         text_copy = text_copy[:linebreaks[8]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[17]+1] + VLVLVRVR3_0_replace + text_copy[linebreaks[22]+1:]
         
-    if (vertex == 'VLVLVRVR4_0' or vertex == 'VVVIVL4_0' or vertex == 'VVVLVL4_0'):
+    if (vertex == 'VLVLVRVR4_0' or vertex == 'VVVIVL4_0' or vertex == 'VVVLVL4_0' or vertex == 'VVVRVR4_0'):
         # AW:
         TMP_replace = '      COMPLEX*16 TMP1\n' \
         + '      COMPLEX*16 TMP2\n' \
@@ -2446,7 +2458,7 @@ def vertex_replacer(text, vertex):
         text_copy = text_copy[:linebreaks[10]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[24]+1] + text_copy[linebreaks[26]+1:linebreaks[28]+1] + VVVV4P0_2_replace + text_copy[linebreaks[32]+1:]
 
 
-    if (vertex == 'VLVRVRVR1P0_2' or vertex == 'VVLVLVL1P0_2'):
+    if (vertex == 'VLVRVRVR1P0_2' or vertex == 'VVLVLVL1P0_2' or vertex == 'VVRVRVR1P0_2'):
         # AW: Hacking the VVVV_2 files for now
         TMP_replace = '      COMPLEX*16 TMP1\n' \
         + '      COMPLEX*16 TMP2\n'
@@ -2460,7 +2472,7 @@ def vertex_replacer(text, vertex):
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[10]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[24]+1] + text_copy[linebreaks[26]+1:linebreaks[28]+1] + VLVRVRVR1P0_2_replace + text_copy[linebreaks[32]+1:]
 
-    if (vertex == 'VLVRVRVR3P0_2' or vertex == 'VVLVLVL3P0_2'):
+    if (vertex == 'VLVRVRVR3P0_2' or vertex == 'VVLVLVL3P0_2' or vertex == 'VVRVRVR3P0_2'):
         # AW:
         TMP_replace = '      COMPLEX*16 TMP1\n' \
 
@@ -2472,7 +2484,7 @@ def vertex_replacer(text, vertex):
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[10]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[24]+1] + text_copy[linebreaks[26]+1:linebreaks[28]+1] + VLVRVRVR3P0_2_replace + text_copy[linebreaks[32]+1:]
 
-    if (vertex == 'VLVRVRVR4P0_2' or vertex == 'VVLVLVL4P0_2'):
+    if (vertex == 'VLVRVRVR4P0_2' or vertex == 'VVLVLVL4P0_2' or vertex == 'VVRVRVR4P0_2'):
         # AW:
         TMP_replace = '      COMPLEX*16 TMP1\n'
 
@@ -2556,7 +2568,9 @@ def postex_vertex_replacer(working_dir):
         'VVRVRVR3_0.f', 'VVRVRVR4_0.f', 'VVIVLVL1P0_3.f', 'VVIVLVL3P0_3.f', 'VVIVLVL4P0_3.f', 'VVIVLVL1_0.f', 'VVIVLVL3_0.f', 'VVIVLVL4_0.f', \
         'VIVLVLVR1P0_2.f', 'VIVLVLVR3P0_2.f', 'VIVLVLVR4P0_2.f', 'VIVLVRVR1P0_3.f' , ' VIVLVRVR3P0_3.f', 'VIVLVRVR4P0_3.f', 'VIVLVLVR1_0.f', \
         'VIVLVLVR3_0.f', 'VIVLVLVR4_0.f', 'VIVLVRVR1_0.f', 'VIVLVRVR3_0.f', 'VIVLVRVR4_0.f', 'VVLVLVL1P0_2.f', \
-        'VVLVLVL3P0_2.f', 'VVLVLVL4P0_2.f', 'VVVIVR1_0.f', 'VVVIVR3_0.f', 'VVVIVR4_0.f', 'FFV1_0.f', 'FFV1_1.f', 'FFV1_2.f', 'FFV1P0_3.f'   ]
+        'VVLVLVL3P0_2.f', 'VVLVLVL4P0_2.f', 'VVVIVR1_0.f', 'VVVIVR3_0.f', 'VVVIVR4_0.f', 'FFV1_0.f', 'FFV1_1.f', 'FFV1_2.f', 'FFV1P0_3.f', \
+        'VVLVLVL1_0.f','VVLVLVL3_0.f', 'VVLVLVL4_0.f', 'VVLVLVL1P0_1.f', 'VVLVLVL3P0_1.f', 'VVLVLVL4P0_1.f', \
+        'VVRVRVR1P0_1.f','VVRVRVR3P0_1.f', 'VVRVRVR4P0_1.f', 'VVVRVR1_0.f', 'VVVRVR3_0.f', 'VVVRVR4_0.f', 'VVRVRVR1P0_2.f', 'VVRVRVR3P0_2.f', 'VVRVRVR4P0_2.f'                          ]
     onlyfiles = [f for f in os.listdir(write_dir) if os.path.isfile(os.path.join(write_dir, f))]
     konlyfiles = [f[:4] + f[-4:] for f in onlyfiles]
     for vertex in vertex_list:
