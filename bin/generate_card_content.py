@@ -11,7 +11,10 @@ for a in range(2):
 	for b in range(2):
 		for c in range(2):
 			for d in range(2):
-				stringlist.append(quarks[a] + ' ' + anti_quarks[b] + ' > ' + quarks[c] + ' ' + anti_quarks[d])
+				for e in range(2):
+					for f in range(2):
+						for g in range(2):
+							stringlist.append(quarks[a] + ' ' + anti_quarks[b] + ' > ' + gluons[c] + ' ' + gluons[d] + ' ' + gluons[e] + ' ' + gluons[f] + ' ' + gluons[g])
 					
 final_stringlist = []
 
@@ -21,10 +24,10 @@ for string in stringlist:
 	new_string = ''
 	for particle in string.split(' '):
 		if not placed_left_initial and particle == 'gl':
-			new_string += 'gl '
+			new_string += 'gli '
 			placed_left_initial = True
 		elif not placed_right_initial and particle == 'gr':
-			new_string += 'gr ' 
+			new_string += 'gri ' 
 			placed_right_initial = True
 		else:
 			new_string += particle + ' '
