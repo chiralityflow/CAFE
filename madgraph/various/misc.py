@@ -1785,7 +1785,7 @@ def vertex_replacer(text, vertex):
             + '      F2(6) = DENOM*CI*{}\n'.format(spinor[1])
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[-18]+1] + RRV1_2_replace + text_copy[linebreaks[-4]+1:]
-    if (vertex == 'VVV1_0' or vertex == 'VVLVL1_0' or vertex == 'VVRVR1_0'):
+    if (vertex == 'VVV1_0'):
         # AW: we divide by 4 to take care of some extra factor of 2. Might be the *2 from LRV_3 in d d~ to g g
         # and u u~ to d d~ g
         TMP_replace = '      COMPLEX*16 TMP1\n' \
@@ -1807,6 +1807,11 @@ def vertex_replacer(text, vertex):
         + '      TMP7 = {}\n'.format(vec_vec('V3','V1')) \
         + '      TMP8 = {}\n'.format(vec_p('V2','P3')) \
         + '      TMP9 = {}\n'.format(vec_p('V2','P1')) \
+        + "c      IF (ABS(TMP1).le.1E-10.or.ABS(TMP4).le.1E-10.or.ABS(TMP7).le.1E-10) THEN\n"\
+            + "c        open(2, FILE = '/home/adam/Special_gluons/MadCAFE/bin/testzeros.txt', STATUS = 'old', POSITION= 'append',\n"\
+            + "c     &ACTION= 'write')\n"\
+            + 'c        WRITE(2,*) TMP1, TMP4, TMP7 \n'\
+            + 'c      ENDIF\n\n'\
         + '      VERTEX = COUP*CI*(TMP1*(TMP2 - TMP3) + TMP4*(TMP5 - TMP6) + TMP7*(TMP8 - TMP9))/4\n'
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[12]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[37]+1] + VVV1_0_replace + text_copy[linebreaks[48]+1:]
@@ -1830,7 +1835,7 @@ def vertex_replacer(text, vertex):
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[12]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[25]+1] + text_copy[linebreaks[29]+1:linebreaks[37]+1] + VVV1_0_replace + text_copy[linebreaks[48]+1:]
 
-    if (vertex == 'VVRVR1_0 ta bort här sen'):
+    if (vertex == 'VVRVR1_0'):
         # AW: we divide by 4 to take care of some extra factor of 2. Might be the *2 from LRV_3 in d d~ to g g
         # and u u~ to d d~ g
         TMP_replace = '      COMPLEX*16 TMP1\n' \
@@ -1850,7 +1855,7 @@ def vertex_replacer(text, vertex):
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[12]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[37]+1] + VVRVR1_0_replace + text_copy[linebreaks[48]+1:]
 
-    if (vertex == 'VVLVL1_0 ta bort detta sen'):
+    if (vertex == 'VVLVL1_0'):
         # AW: we divide by 4 to take care of some extra factor of 2. Might be the *2 from LRV_3 in d d~ to g g
         # and u u~ to d d~ g
         TMP_replace = '      COMPLEX*16 TMP1\n' \
@@ -2068,7 +2073,7 @@ def vertex_replacer(text, vertex):
         text_copy = text_copy[:linebreaks[8]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[17]+1] + VVVV4_0_replace + text_copy[linebreaks[22]+1:]
 
     
-    if (vertex == 'VLVLVRVR1_0' or vertex == 'VVVIVL1_0' or vertex == 'VVVLVL1_0' or vertex == 'VVVRVR1_0'):
+    if (vertex == 'VVVIVL1_0' or vertex == 'VVVLVL1_0' or vertex == 'VVVRVR1_0'):
         # AW:
         TMP_replace = '      COMPLEX*16 TMP1\n' \
         + '      COMPLEX*16 TMP2\n' \
@@ -2083,6 +2088,16 @@ def vertex_replacer(text, vertex):
 
         text_copy = text_copy[:linebreaks[8]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[17]+1] + VLVLVRVR1_0_replace + text_copy[linebreaks[22]+1:]
 
+    if (vertex == 'VLVLVRVR1_0'): 
+        # AW:
+        TMP_replace = '      COMPLEX*16 TMP1\n' \
+        + '      COMPLEX*16 TMP2\n' \
+        + '      COMPLEX*16 TMP3\n' \
+        + '      COMPLEX*16 TMP4\n'
+
+        VLVLVRVR1_0_replace = '      VERTEX = 0\n'
+
+        text_copy = text_copy[:linebreaks[8]+1] + TMP_replace + text_copy[linebreaks[12]+1:linebreaks[17]+1] + VLVLVRVR1_0_replace + text_copy[linebreaks[22]+1:]
 
     if (vertex == 'VLVLVRVR3_0' or vertex == 'VVVIVL3_0' or vertex == 'VVVLVL3_0' or vertex == 'VVVRVR3_0'):
         # AW:

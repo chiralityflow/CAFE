@@ -253,6 +253,9 @@ class HelasCallWriter(base_objects.PhysicsObject):
         zero_wfs = []
         for i in range(len(wfs_to_remove)):
             zero_wfs.append(int(wfs_to_remove[i][-5:-1]))
+        # AW 2023-08-14: reset zero_amps and zero_wfs to not destroy runTest.sh
+        zero_amps = []
+        zero_wfs = []
         for diagram in matrix_element.get('diagrams'):
             
             res.extend([ self.get_wavefunction_call(wf) for \
@@ -260,8 +263,14 @@ class HelasCallWriter(base_objects.PhysicsObject):
             res.append("# Amplitude(s) for diagram number %d" % \
                        diagram.get('number'))
             for amplitude in diagram.get('amplitudes'):
-                if not amplitude['number'] in zero_amps: 
-                    res.append(self.get_amplitude_call(amplitude))
+                if not amplitude['number'] in zero_amps:
+                    # AW: 2023-08-15: Change HELAS call to put AMPs equal in cases where Schouten provides simplifications
+                    if self.get_amplitude_call(amplitude)[:16] == "CALL VLVLVRVR4_0":
+                        misc.sprint("hej")
+                        amp_num = int(self.get_amplitude_call(amplitude).split('(')[-1][:-2])
+                        res.append("AMP(" + str(amp_num) + ") = AMP(" + str(amp_num-1) + ")")
+                    else:
+                        res.append(self.get_amplitude_call(amplitude))
         return res
 
 

@@ -492,11 +492,12 @@ V_82 = Vertex(name = 'V_82',
 	color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
 	lorentz = [ L.VLVLVRVR1, L.VLVLVRVR3, L.VLVLVRVR4 ],
 	couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12})
+# AW 2023-08-15: This works, but gives no real benefit since MG preforms the same calculation twice
 """ V_82 = Vertex(name = 'V_82',
 	particles = [ P.gL, P.gL, P.gR, P.gR],
-	color = [ 'f(-1,1,3)*f(2,4,-1)+f(-1,1,4)*f(2,3,-1)' ],
-	lorentz = [ L.VVVV1 ],
-	couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,2):C.GC_12}) """
+	color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
+	lorentz = [ L.VLVLVRVR1, L.VLVLVRVR3 ],
+	couplings = {(1,1):C.GC_12,(0,0):C.GC_12,(2,1):C.GC_12}) """
 V_83 = Vertex(name = 'V_83',
 	particles = [ P.gL, P.gR, P.gR, P.gR],
 	color = [ 'f(-1,1,2)*f(3,4,-1)', 'f(-1,1,3)*f(2,4,-1)', 'f(-1,1,4)*f(2,3,-1)' ],
