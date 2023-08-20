@@ -1807,11 +1807,11 @@ def vertex_replacer(text, vertex):
         + '      TMP7 = {}\n'.format(vec_vec('V3','V1')) \
         + '      TMP8 = {}\n'.format(vec_p('V2','P3')) \
         + '      TMP9 = {}\n'.format(vec_p('V2','P1')) \
-        + "c      IF (ABS(TMP1).le.1E-10.or.ABS(TMP4).le.1E-10.or.ABS(TMP7).le.1E-10) THEN\n"\
-            + "c        open(2, FILE = '/home/adam/Special_gluons/MadCAFE/bin/testzeros.txt', STATUS = 'old', POSITION= 'append',\n"\
-            + "c     &ACTION= 'write')\n"\
-            + 'c        WRITE(2,*) TMP1, TMP4, TMP7 \n'\
-            + 'c      ENDIF\n\n'\
+        + "      IF (ABS(TMP1).le.1E-10.or.ABS(TMP4).le.1E-10.or.ABS(TMP7).le.1E-10) THEN\n"\
+            + "        open(2, FILE = '/home/adam/Special_gluons/MadCAFE/bin/testzeros.txt', STATUS = 'old', POSITION= 'append',\n"\
+            + "     &ACTION= 'write')\n"\
+            + '        WRITE(2,*) TMP1, TMP4, TMP7 \n'\
+            + '      ENDIF\n\n'\
         + '      VERTEX = COUP*CI*(TMP1*(TMP2 - TMP3) + TMP4*(TMP5 - TMP6) + TMP7*(TMP8 - TMP9))/4\n'
         linebreaks = get_symbols(text_copy, '\n')
         text_copy = text_copy[:linebreaks[12]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[37]+1] + VVV1_0_replace + text_copy[linebreaks[48]+1:]

@@ -266,11 +266,10 @@ class HelasCallWriter(base_objects.PhysicsObject):
                 if not amplitude['number'] in zero_amps:
                     # AW: 2023-08-15: Change HELAS call to put AMPs equal in cases where Schouten provides simplifications
                     if self.get_amplitude_call(amplitude)[:16] == "CALL VLVLVRVR4_0":
-                        misc.sprint("hej")
                         amp_num = int(self.get_amplitude_call(amplitude).split('(')[-1][:-2])
                         res.append("AMP(" + str(amp_num) + ") = AMP(" + str(amp_num-1) + ")")
-                    else:
-                        res.append(self.get_amplitude_call(amplitude))
+                    else:                       
+                        res.append(self.get_amplitude_call(amplitude) + "\n      WRITE(2,*) '" + self.get_amplitude_call(amplitude) + "'")
         return res
 
 

@@ -1032,6 +1032,7 @@ class Amplitude(base_objects.PhysicsObject):
         checked_list.reverse()    
         for index in checked_list:
             reduced_leglist.pop(index)
+
        
         #In LoopAmplitude the function below is overloaded such that it
         #converts back all DGLoopLegs to Legs. In the default tree-level
