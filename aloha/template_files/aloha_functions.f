@@ -47,10 +47,10 @@ c
       vcl(2) = dcmplx(p(1),p(2))*nsv
 
 c     AW 27/7/2023: set r = (p(0),-p(1-3))
-      rtemp(0) = r(0)
-      rtemp(1) = r(1)
-      rtemp(2) = r(2)
-      rtemp(3) = r(3)
+c      rtemp(0) = r(0)
+c      rtemp(1) = r(1)
+c      rtemp(2) = r(2)
+c      rtemp(3) = r(3)
 C      r(0) = p(0)
 C      r(1) = -p(1)
 C      r(2) = -p(2)
@@ -130,10 +130,10 @@ c nsvhel = -1, i.e. right-chiral (outgoing - hel or incoming + hel)
 c endif for if massive or not
       endif
 c       AW 27/7/2023: set r back to initial vector
-      r(0) = rtemp(0)
-      r(1) = rtemp(1)
-      r(2) = rtemp(2)
-      r(3) = rtemp(3)
+c      r(0) = rtemp(0)
+c      r(1) = rtemp(1)
+c      r(2) = rtemp(2)
+c      r(3) = rtemp(3)
 c
       return
       end
@@ -175,10 +175,10 @@ c
       vcr(2) = dcmplx(p(1),p(2))*nsv
 
 c     AW 27/7/2023: set r = (p(0),-p(1-3))
-      rtemp(0) = r(0)
-      rtemp(1) = r(1)
-      rtemp(2) = r(2)
-      rtemp(3) = r(3)
+c      rtemp(0) = r(0)
+c      rtemp(1) = r(1)
+c      rtemp(2) = r(2)
+c      rtemp(3) = r(3)
 C      r(0) = p(0)
 C      r(1) = -p(1)
 C      r(2) = -p(2)
@@ -254,10 +254,10 @@ c nsvhel = 1, i.e. left-chiral (outgoing + hel or incoming - hel)
 c endif for if massive or not
       endif
 c       AW 27/7/2023: set r back to initial vector
-      r(0) = rtemp(0)
-      r(1) = rtemp(1)
-      r(2) = rtemp(2)
-      r(3) = rtemp(3)
+c      r(0) = rtemp(0)
+c      r(1) = rtemp(1)
+c      r(2) = rtemp(2)
+c      r(3) = rtemp(3)
       return
       end
 c
@@ -434,29 +434,29 @@ c         which occure if pbt(0) is close to -pbt(3).
 
       
 C     EB: version to use helicity decomposition
-      pabs = dsqrt(p(1)**2+p(2)**2+p(3)**2)
+c      pabs = dsqrt(p(1)**2+p(2)**2+p(3)**2)
 c     AL: checked
 
-      lfor = p(0) + pabs
-      lback = (fmass**2)/lfor
-      lback = p(0) - pabs
+c      lfor = p(0) + pabs
+c      lback = (fmass**2)/lfor
+c      lback = p(0) - pabs
 c     AL: checked
 
-      ph(1) = p(1)/pabs
-      ph(2) = p(2)/pabs
-      ph(3) = p(3)/pabs
+c      ph(1) = p(1)/pabs
+c      ph(2) = p(2)/pabs
+c      ph(3) = p(3)/pabs
 c     AL: checked
       
-      pb(0) = lfor*rHalf
-      pb(1) = lfor*rHalf*ph(1)
-      pb(2) = lfor*rHalf*ph(2)
-      pb(3) = lfor*rHalf*ph(3)
+c      pb(0) = lfor*rHalf
+c      pb(1) = lfor*rHalf*ph(1)
+c      pb(2) = lfor*rHalf*ph(2)
+c      pb(3) = lfor*rHalf*ph(3)
 c     AL: checked
 
-      q(0) = lback*rHalf
-      q(1) = -1*lback*rHalf*ph(1)
-      q(2) = -1*lback*rHalf*ph(2)
-      q(3) = -1*lback*rHalf*ph(3)
+c      q(0) = lback*rHalf
+c      q(1) = -1*lback*rHalf*ph(1)
+c      q(2) = -1*lback*rHalf*ph(2)
+c      q(3) = -1*lback*rHalf*ph(3)
 c     AL: checked
 c     EB: end of version for helicity decomposition
 
@@ -495,16 +495,16 @@ c     AL: checked
 
 c     EB: Old version of fmi(3) and fmi(4)
 c        TODO: remove these
-        fmi(3) = (pbbrasq(1))
-        fmi(4) = (pbbrasq(2))
+c        fmi(3) = (pbbrasq(1))
+c        fmi(4) = (pbbrasq(2))
 c     AL: checked
 
 c     EB: Rotation around the x-axis to counter rotation of pbt
-c        fmi(3) = dsqrt(rTwo+rSqrtTwo)*rHalf*pbbrasq(1)-
-c     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*pbbrasq(2)
+        fmi(3) = dsqrt(rTwo+rSqrtTwo)*rHalf*pbbrasq(1)-
+     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*pbbrasq(2)
      
-c        fmi(4) = dsqrt(rTwo+rSqrtTwo)*rHalf*pbbrasq(2)-
-c     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*pbbrasq(1)
+        fmi(4) = dsqrt(rTwo+rSqrtTwo)*rHalf*pbbrasq(2)-
+     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*pbbrasq(1)
  
         
 c       qketan = |q> = (sqrt(q^0+q^3)            ) = (if q^0 = -q^3) (0            ) 
@@ -573,16 +573,16 @@ c     EB: check which representation to use for |pb>
 c     AL: checked
 c     EB: Old version of fmi(5) and fmi(6)
 c        TODO: remove these      
-        fmi(5) = (pbketan(1))
-        fmi(6) = (pbketan(2))
+c        fmi(5) = (pbketan(1))
+c        fmi(6) = (pbketan(2))
 c     AL: checked
 
 c     EB: Rotation around the x-axis to counter rotation of pbt        
-c        fmi(5) = dsqrt(rTwo+rSqrtTwo)*rHalf*(pbketan(1))+
-c     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*(pbketan(2))
+        fmi(5) = dsqrt(rTwo+rSqrtTwo)*rHalf*(pbketan(1))+
+     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*(pbketan(2))
      
-c        fmi(6) = dsqrt(rTwo+rSqrtTwo)*rHalf*(pbketan(2))+
-c     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*(pbketan(1))
+        fmi(6) = dsqrt(rTwo+rSqrtTwo)*rHalf*(pbketan(2))+
+     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*(pbketan(1))
 
 c       qbrasq = [q| = (sqrt(q^0+q^3), (q^1-i*q^2)/sqrt(q^0+q^3))
 c                    = (0,sqrt(q^0-q^3)) if q^3=-q^0
@@ -668,34 +668,35 @@ c         which occure if pbt(0) is close to -pbt(3).
       
 C     EB: version to use helicity decomposition
       
-      pabs = dsqrt(p(1)**2+p(2)**2+p(3)**2)
+c      pabs = dsqrt(p(1)**2+p(2)**2+p(3)**2)
 c     AL: checked
 
-      lfor  = p(0) + pabs
-      lback = p(0) - pabs
+c      lfor  = p(0) + pabs
+c      lback = p(0) - pabs
 c     AL: checked
 
-      ph(1) = p(1)/pabs
-      ph(2) = p(2)/pabs
-      ph(3) = p(3)/pabs
+c      ph(1) = p(1)/pabs
+c      ph(2) = p(2)/pabs
+c      ph(3) = p(3)/pabs
 c     AL: checked
 
-      pb(0) = lfor*rHalf
-      pb(1) = lfor*rHalf*ph(1)
-      pb(2) = lfor*rHalf*ph(2)
-      pb(3) = lfor*rHalf*ph(3)
+c      pb(0) = lfor*rHalf
+c      pb(1) = lfor*rHalf*ph(1)
+c      pb(2) = lfor*rHalf*ph(2)
+c      pb(3) = lfor*rHalf*ph(3)
 c     AL: checked
 
-      q(0) = lback*rHalf
-      q(1) = -1*lback*rHalf*ph(1)
-      q(2) = -1*lback*rHalf*ph(2)
-      q(3) = -1*lback*rHalf*ph(3)
+c      q(0) = lback*rHalf
+c      q(1) = -1*lback*rHalf*ph(1)
+c      q(2) = -1*lback*rHalf*ph(2)
+c      q(3) = -1*lback*rHalf*ph(3)
 c     AL: checked
+
+c     EB: End of version for helicity decomposition
 
       fmo(1) = dcmplx(p(0),p(3))*nsf
       fmo(2) = dcmplx(p(1),p(2))*nsf
 c     AL: checked
-c     EB: End of version for helicity decomposition
 
 c
 c     EB: anti-fermion with positive spin or fermion with negative spin.
@@ -727,16 +728,16 @@ c     AL: checked
 
 c     EB: Old version of fmi(5) and fmi(6)
 c        TODO: remove these 
-        fmo(5) = pbketan(1)
-        fmo(6) = pbketan(2)
+c        fmo(5) = pbketan(1)
+c        fmo(6) = pbketan(2)
 c     AL: checked
 
 c     EB: Rotation around the x-axis to counter rotation of pbt        
-c        fmo(5) = dsqrt(rTwo+rSqrtTwo)*rHalf*(pbketan(1))+
-c     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*(pbketan(2))
+        fmo(5) = dsqrt(rTwo+rSqrtTwo)*rHalf*(pbketan(1))+
+     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*(pbketan(2))
      
-c        fmo(6) = dsqrt(rTwo+rSqrtTwo)*rHalf*(pbketan(2))+
-c     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*(pbketan(1))
+        fmo(6) = dsqrt(rTwo+rSqrtTwo)*rHalf*(pbketan(2))+
+     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*(pbketan(1))
 	
 c       qbrasq = [q| = (sqrt(q^0+q^3), (q^1-i*q^2)/sqrt(q^0+q^3))
 c                    = (0,sqrt(q^0-q^3)) if q^3=-q^0
@@ -806,16 +807,16 @@ c     AL: checked
 
 c     EB: Old version of fmi(3) and fmi(4)
 c        TODO: remove these
-        fmo(3) = pbbrasq(1)
-        fmo(4) = pbbrasq(2)
+c        fmo(3) = pbbrasq(1)
+c        fmo(4) = pbbrasq(2)
 c     AL: checked
 
 c     EB: Rotation around the x-axis to counter rotation of pbt
-c        fmo(3) = dsqrt(rTwo+rSqrtTwo)*rHalf*pbbrasq(1)-
-c     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*pbbrasq(2)
+        fmo(3) = dsqrt(rTwo+rSqrtTwo)*rHalf*pbbrasq(1)-
+     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*pbbrasq(2)
      
-c        fmo(4) = dsqrt(rTwo+rSqrtTwo)*rHalf*pbbrasq(2)-
-c     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*pbbrasq(1)
+        fmo(4) = dsqrt(rTwo+rSqrtTwo)*rHalf*pbbrasq(2)-
+     & IC*dsqrt(rTwo-rSqrtTwo)*rHalf*pbbrasq(1)
 
 c       qketan = |q> = (sqrt(q^0+q^3)            ) = (if q^0 = -q^3) (0            ) 
 c                      ((q^1+i*q^2)/sqrt(q^0+q^3))                   (sqrt(q^0-q^3)) 
