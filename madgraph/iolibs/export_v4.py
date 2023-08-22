@@ -2891,7 +2891,18 @@ CF2PY integer, intent(in) :: new_value
 
         # Extract process info lines
         process_lines = self.get_process_info_lines(matrix_element)
+        
         replace_dict['process_lines'] = process_lines
+        
+        # EB: the string test_lines is a modified version of the process info lines.
+        #     It is used to label and identify the files for the printing of
+        #     all zero valued amps and wfs.
+        temp_test_lines = process_lines.split()
+        test_lines = ''
+        for i in range(len(temp_test_lines)-4):
+        	test_lines += temp_test_lines[i+2] + '_'
+        test_lines = test_lines.replace('>_', '')
+        replace_dict['test_lines'] = test_lines
 
         # Extract number of external particles
         (nexternal, ninitial) = matrix_element.get_nexternal_ninitial()
