@@ -240,14 +240,22 @@ class HelasCallWriter(base_objects.PhysicsObject):
 
         # AW: open file with vanishing AMPs and make sure those calls are not generated here
         # EB: updated to use MG5DIR for file paths.
-        with open(pjoin(MG5DIR,'bin/zeroamps.txt')) as f: 
+        # EB: Updated file paths to be compatible with 
+        #     automated zero_wfs and zero_amp file generation.
+
+        file_name = ''
+        for wf in matrix_element.get('diagrams')[0].get('wavefunctions'):
+            if wf.get('mothers') == []:
+                file_name += wf.get('name') + "_"
+
+        with open(pjoin(MG5DIR,'bin/zero_amps_and_wfs/' + file_name + 'zeroamps.txt')) as f: 
             amps_to_remove = f.readlines()
         f.close()
         zero_amps = []
         for i in range(len(amps_to_remove)):
             zero_amps.append(int(amps_to_remove[i][-5:-1]))
         res = []
-        with open(pjoin(MG5DIR,'bin/zerowfs.txt')) as f: 
+        with open(pjoin(MG5DIR,'bin/zero_amps_and_wfs/' + file_name + 'zerowfs.txt')) as f: 
             wfs_to_remove = f.readlines()
         f.close()
         zero_wfs = []
@@ -269,7 +277,8 @@ class HelasCallWriter(base_objects.PhysicsObject):
                         amp_num = int(self.get_amplitude_call(amplitude).split('(')[-1][:-2])
                         res.append("AMP(" + str(amp_num) + ") = AMP(" + str(amp_num-1) + ")")
                     else:                       
-                        res.append(self.get_amplitude_call(amplitude) + "\n      WRITE(2,*) '" + self.get_amplitude_call(amplitude) + "'")
+                        res.append(self.get_amplitude_call(amplitude))
+                        #res.append(self.get_amplitude_call(amplitude) + "\n      WRITE(2,*) '" + self.get_amplitude_call(amplitude) + "'")
         return res
 
 
