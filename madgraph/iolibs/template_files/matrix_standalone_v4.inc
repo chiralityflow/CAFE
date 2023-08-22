@@ -159,7 +159,7 @@ C     For this reason, we simply remove the filterin when there is only three ex
 		ENDDO
 	  ENDIF
 c AW: remove this later
-      OPEN(1, FILE = '/home/adam/Special_gluons/MadCAFE/bin/testdata.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append') 
+      OPEN(1, FILE = '/home/emil/Desktop/massive_gluons/MadCAFE/bin/testdata.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append') 
       WRITE(1,*) ANS
 	  END
        
@@ -190,8 +190,7 @@ C
 C  
 C ARGUMENTS 
 C  
-      REAL*8 P(0:3,NEXTERNAL)
-      REAL*8 PB(0:3,NEXTERNAL)
+      REAL*8 P(0:3,NEXTERNAL), PB(0:3,NEXTERNAL)
       INTEGER NHEL(NEXTERNAL), IC(NEXTERNAL)
 C  
 C LOCAL VARIABLES 
@@ -199,8 +198,6 @@ C
       INTEGER I,J,ZEROVAMPS,ZEROLRAMPS,TOTAMPS,ZEROWFS,TOTWFS,HELASLOOP,AMPLOOP,WFLOOP
       COMPLEX*16 ZTEMP
       REAL*8 CF(NCOLOR,NCOLOR)
-c AW: 15/06/2023 adding ref vector manually
-      REAL*8 REFVEC1(0:3),REFVEC2(0:3)
       COMPLEX*16 AMP(NGRAPHS), JAMP(NCOLOR), TMP_JAMP(%(nb_temp_jamp)i)
       COMPLEX*16 W(20,NWAVEFUNCS)
       COMPLEX*16 DUM0,DUM1
@@ -224,36 +221,27 @@ C ----------
 C BEGIN CODE
 C ----------
        PB = P
-C       REFVEC1(0) = 500
-C       REFVEC1(1) = -110.92428444383279
-C       REFVEC1(2) = -444.83078948812141
-C       REFVEC1(3) = 199.55292993087872
-C       REFVEC2(0) = 500
-C       REFVEC2(1) = 110.92428444383278
-C       REFVEC2(2) = 444.83078948812135
-C       REFVEC2(3) = -199.55292993087878
-C       DO HELASLOOP = 1,1    
+       DO HELASLOOP = 1,1    
 %(helas_calls)s
-C       ENDDO
-       WRITE(*,*) MDL_MT, MDL_WT
+       ENDDO
        
 C      OPEN(1, FILE = '/home/adam/Special_gluons/MadCAFE/bin/amps.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append')
-       DO AMPLOOP = 1,NGRAPHS
-         WRITE(*,*) AMPLOOP, ABS(AMP(AMPLOOP))   
-       ENDDO       
-      
-C       OPEN(1, FILE = '/home/adam/Special_gluons/MadCAFE/bin/zeroamps.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append')
 C       DO AMPLOOP = 1,NGRAPHS
-C         IF (ABS(AMP(AMPLOOP)).le.1E-15) THEN
-C            WRITE(1,*) AMPLOOP
-C         ENDIF
-C      ENDDO
-C      OPEN(1, FILE = '/home/adam/Special_gluons/MadCAFE/bin/zerowfs.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append')
-C      DO WFLOOP = 1,NWAVEFUNCS
-C         IF (ABS(W(3,WFLOOP)).LE.1E-18.AND.ABS(W(4,WFLOOP)).LE.1E-18.AND.ABS(W(5,WFLOOP)).LE.1E-18.AND.ABS(W(6,WFLOOP)).LE.1E-18) THEN 
-C            WRITE(1,*) WFLOOP
-C         ENDIF
-C      ENDDO
+C         WRITE(1,*) AMPLOOP, ABS(AMP(AMPLOOP))   
+C       ENDDO       
+      
+       OPEN(1, FILE = '/home/emil/Desktop/massive_gluons/MadCAFE/bin/zero_amps_and_wfs/%(test_lines)szeroamps.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append')
+       DO AMPLOOP = 1,NGRAPHS
+         IF (ABS(AMP(AMPLOOP)).le.1E-15) THEN
+            WRITE(1,*) AMPLOOP
+         ENDIF
+      ENDDO
+      OPEN(1, FILE = '/home/emil/Desktop/massive_gluons/MadCAFE/bin/zero_amps_and_wfs/%(test_lines)szerowfs.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append')
+      DO WFLOOP = 1,NWAVEFUNCS
+         IF (ABS(W(3,WFLOOP)).LE.1E-18.AND.ABS(W(4,WFLOOP)).LE.1E-18.AND.ABS(W(5,WFLOOP)).LE.1E-18.AND.ABS(W(6,WFLOOP)).LE.1E-18) THEN 
+            WRITE(1,*) WFLOOP
+         ENDIF
+      ENDDO
 %(jamp_lines)s
 C      WRITE(*,*) 'ZERO V AMPS = ' ,ZEROVAMPS
 C      WRITE(*,*) 'ZERO LRV AMPS = ' ,ZEROLRAMPS
