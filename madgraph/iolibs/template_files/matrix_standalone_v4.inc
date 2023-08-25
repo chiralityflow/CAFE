@@ -162,8 +162,9 @@ c AW: remove this later
       OPEN(1, FILE = '/home/adam/Special_gluons/MadCAFE/bin/testdata.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append') 
       WRITE(1,*) ANS
 	  END
-       
-       
+      
+      
+      
       REAL*8 FUNCTION %(proc_prefix)sMATRIX(P,NHEL,IC)
 C  
 %(info_lines)s
@@ -233,27 +234,30 @@ C       REFVEC2(1) = 110.92428444383278
 C       REFVEC2(2) = 444.83078948812135
 C       REFVEC2(3) = -199.55292993087878
 C       DO HELASLOOP = 1,1    
+       open(2, FILE = '/home/adam/Special_gluons/MadCAFE/bin/testzeros.txt', STATUS = 'old', POSITION= 'append', ACTION= 'write')
+       WRITE(2,*) NHEL
 %(helas_calls)s
+       
 C       ENDDO
-       WRITE(*,*) MDL_MT, MDL_WT
+
        
 C      OPEN(1, FILE = '/home/adam/Special_gluons/MadCAFE/bin/amps.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append')
        DO AMPLOOP = 1,NGRAPHS
          WRITE(*,*) AMPLOOP, ABS(AMP(AMPLOOP))   
        ENDDO       
       
-C       OPEN(1, FILE = '/home/adam/Special_gluons/MadCAFE/bin/zeroamps.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append')
-C       DO AMPLOOP = 1,NGRAPHS
-C         IF (ABS(AMP(AMPLOOP)).le.1E-15) THEN
-C            WRITE(1,*) AMPLOOP
-C         ENDIF
-C      ENDDO
-C      OPEN(1, FILE = '/home/adam/Special_gluons/MadCAFE/bin/zerowfs.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append')
-C      DO WFLOOP = 1,NWAVEFUNCS
-C         IF (ABS(W(3,WFLOOP)).LE.1E-18.AND.ABS(W(4,WFLOOP)).LE.1E-18.AND.ABS(W(5,WFLOOP)).LE.1E-18.AND.ABS(W(6,WFLOOP)).LE.1E-18) THEN 
-C            WRITE(1,*) WFLOOP
-C         ENDIF
-C      ENDDO
+       OPEN(1, FILE = '/home/adam/Special_gluons/MadCAFE/bin/zeroamps.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append')
+       DO AMPLOOP = 1,NGRAPHS
+         IF (ABS(AMP(AMPLOOP)).le.1E-15) THEN
+            WRITE(1,*) AMPLOOP, NHEL
+         ENDIF
+       ENDDO
+       OPEN(1, FILE = '/home/adam/Special_gluons/MadCAFE/bin/zerowfs.txt', STATUS = 'old', ACTION = 'write', POSITION = 'append')
+       DO WFLOOP = 1,NWAVEFUNCS
+         IF (ABS(W(3,WFLOOP)).LE.1E-18.AND.ABS(W(4,WFLOOP)).LE.1E-18.AND.ABS(W(5,WFLOOP)).LE.1E-18.AND.ABS(W(6,WFLOOP)).LE.1E-18) THEN 
+            WRITE(1,*) WFLOOP, NHEL
+         ENDIF
+       ENDDO
 %(jamp_lines)s
 C      WRITE(*,*) 'ZERO V AMPS = ' ,ZEROVAMPS
 C      WRITE(*,*) 'ZERO LRV AMPS = ' ,ZEROLRAMPS
