@@ -245,9 +245,16 @@ class HelasCallWriter(base_objects.PhysicsObject):
 
         file_name = ''
         for wf in matrix_element.get('diagrams')[0].get('wavefunctions'):
+            
             if wf.get('mothers') == []:
-                file_name += wf.get('name') + "_"
-
+                if wf.get('particle').get('pdg_code') in [70001,80001,70002,80002]:
+                    if len(wf.get('name')) == 3:
+                        file_name += wf.get('name')[0:2] + "_"
+                    else:
+                        file_name += wf.get('name') + "~_"
+                else:
+                    file_name += wf.get('name') + "_"
+        
         with open(pjoin(MG5DIR,'bin/zero_amps_and_wfs/' + file_name + 'zeroamps.txt')) as f: 
             amps_to_remove = f.readlines()
         f.close()
