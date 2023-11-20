@@ -286,6 +286,24 @@ class HelasCallWriter(base_objects.PhysicsObject):
                     else:                       
                         res.append(self.get_amplitude_call(amplitude))
                         #res.append(self.get_amplitude_call(amplitude) + "\n      WRITE(2,*) '" + self.get_amplitude_call(amplitude) + "'")
+        # EB: 2023-11-09. Since pb is calculated inside IMXXXX and OMXXXX these subroutines
+        #     needs to be called first if pb is to be used as reference momentum for other particles.
+        numb_external = len(matrix_element.get('processes')[0].get('legs'))
+        external_calls = res[:numb_external]
+        massive_calls = False
+        mass_fermion_calls = []
+        boson_calls = []
+        for external_call in external_calls :
+            if external_call.split(',')[0][5:11] in ['IMXXXX', 'OMXXXX']:
+                massive_calls = True
+                mass_fermion_calls.append(external_call)
+            elif external_call.split(',')[0][5:11] in ['VLXXXX', 'VRXXXX']:
+                boson_calls.append(external_call)
+            elif external_call.split(',')[0][5:11] in ['LXXXXX', 'RXXXXX']:
+                massive_calls = False
+                break 
+        if massive_calls:
+            res = mass_fermion_calls + boson_calls + res[numb_external:]
         return res
 
 
@@ -330,6 +348,9 @@ class HelasCallWriter(base_objects.PhysicsObject):
             if not wavefunction.get('mothers'):
                 call = self.get_chiral_wavefunction_call(wavefunction, call)
             else:
+                # EB: 2023-11-09. Check if internal massive fermion wavefunction.
+                if abs(wavefunction.get('particle').get('pdg_code')) in [6]:
+                    call = self.get_reduced_wfs_call(wavefunction, call)
                 #AW: for getting wavefunctions 
                 call = self.get_internal_wfs(wavefunction, call)
         except KeyError as error:
@@ -340,6 +361,56 @@ class HelasCallWriter(base_objects.PhysicsObject):
             if n:
                 self.width_tchannel_set_tozero = True
         
+        return call
+    
+    # EB: 2023-11-09. Function for updating call if reduced version of massive
+    #     subroutine should be used.
+    def get_reduced_wfs_call(self,wavefunction,call):
+        fermion_mother = wavefunction.get('mothers')[0]
+        boson_mother = wavefunction.get('mothers')[1]
+        use_reduced = False
+        
+        #initial state fermion
+        if fermion_mother.get('leg_state') == False:
+            if fermion_mother.get('particle').get('pdg_code') in [70106, -70106]:
+                if fermion_mother.get('ref_mom') == boson_mother.get('ref_mom')\
+                    and boson_mother.get('particle').get('pdg_code') in [821,80021]:
+                        use_reduced = True
+                elif fermion_mother.get('ref_mom') == boson_mother.get('number')\
+                    and boson_mother.get('particle').get('pdg_code') in [721]:
+                        use_reduced = True
+                if use_reduced:
+                    call = call[0:9] + 'Re34' + call[9:]
+            elif fermion_mother.get('particle').get('pdg_code') in [80106, -80106]:
+                if fermion_mother.get('ref_mom') == boson_mother.get('ref_mom')\
+                    and boson_mother.get('particle').get('pdg_code') in [721,70021]:
+                        use_reduced = True   
+                elif fermion_mother.get('ref_mom') == boson_mother.get('number')\
+                    and boson_mother.get('particle').get('pdg_code') in [821]:
+                        use_reduced = True
+                if use_reduced:
+                    call = call[:9] + 'Re12' + call[9:]
+        #final state fermion
+        elif fermion_mother.get('leg_state') == True:
+            if fermion_mother.get('particle').get('pdg_code') in [70106, -70106]:
+                if fermion_mother.get('ref_mom') == boson_mother.get('ref_mom')\
+                    and boson_mother.get('particle').get('pdg_code') in [721,70021]:
+                        use_reduced = True   
+                elif fermion_mother.get('ref_mom') == boson_mother.get('number')\
+                    and boson_mother.get('particle').get('pdg_code') in [821]:
+                        use_reduced = True
+                if use_reduced:
+                    call = call[:9] + 'Re12' + call[9:]
+            elif fermion_mother.get('particle').get('pdg_code') in [80106, -80106]:
+                if fermion_mother.get('ref_mom') == boson_mother.get('ref_mom')\
+                    and boson_mother.get('particle').get('pdg_code') in [821,80021]:
+                        use_reduced = True
+                elif fermion_mother.get('ref_mom') == boson_mother.get('number')\
+                    and boson_mother.get('particle').get('pdg_code') in [721]:
+                        use_reduced = True
+                if use_reduced:
+                    call = call[0:9] + 'Re34' + call[9:]   
+
         return call
 
     def get_internal_wfs(self, wavefunction, call):
@@ -405,7 +476,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             # insert reference momentum as argument
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
+            call = call_lhs + ',PB(0,' + str(ref_mom) + '),' + call_rhs
             #call = call_lhs + ',REFVEC1(0),' + call_rhs
             #if leg_num == 3:
             #    call = call_lhs + ',REFVEC1(0),' + call_rhs
@@ -420,7 +491,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
             # insert reference momentum as argument
             call_lhs = ','.join(call.split(',')[:-2])
             call_rhs = ','.join(call.split(',')[-2:])
-            call = call_lhs + ',P(0,' + str(ref_mom) + '),' + call_rhs
+            call = call_lhs + ',PB(0,' + str(ref_mom) + '),' + call_rhs
             #call = call_lhs + ',REFVEC2(0),' + call_rhs
             #if leg_num == 3:
             #    call = call_lhs + ',REFVEC1(0),' + call_rhs
