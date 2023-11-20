@@ -3871,22 +3871,31 @@ class HelasMatrixElement(base_objects.PhysicsObject):
         found_left_boson = False
         found_right_boson = False
         found_first_boson = False
+        # EB: 2023-11-09 count number of bosons with each chirality
+        #     in order to know which is the best choice of q for massive fermions.
+        numb_left_boson = 0
+        numb_right_boson = 0
         for leg in legs:
-            if leg.get('id') in [721,70021] and not found_left_boson:
-                left_boson = leg
-                found_left_boson = True
-                if not found_first_boson:
-                    first_boson = leg
-                    found_first_boson = True
+            if leg.get('id') in [721,70021]:
+                numb_left_boson += 1
+                if not found_left_boson:
+                    left_boson = leg
+                    found_left_boson = True
+                    if not found_first_boson:
+                        first_boson = leg
+                        found_first_boson = True
             
-            elif leg.get('id') in [821,80021] and not found_right_boson:
-                right_boson = leg
-                found_right_boson = True
-                if not found_first_boson:
-                    first_boson = leg
-                    found_first_boson = True
-            elif found_left_boson and found_right_boson:
-                break
+            elif leg.get('id') in [821,80021]:
+                numb_right_boson += 1
+                if not found_right_boson:
+                    right_boson = leg
+                    found_right_boson = True
+                    if not found_first_boson:
+                        first_boson = leg
+                        found_first_boson = True
+	    # EB: 2023-11-09. Want to count all bosons, so comment out for now. Remove later.
+            #elif found_left_boson and found_right_boson:
+            #    break
         found_m_fermion = False
         found_p_fermion = False
         for leg in legs:
@@ -3904,11 +3913,18 @@ class HelasMatrixElement(base_objects.PhysicsObject):
             for leg in legs:
                 if leg.get('id') in [721,70021]:
                     ref_moms.append(right_boson.get('number'))
+                    #ref_moms.append(right_ferm.get('number'))
                 elif leg.get('id') in [821,80021]:
                     ref_moms.append(left_boson.get('number'))
+                    #ref_moms.append(left_ferm.get('number'))
                 elif leg.get('id') in [70106, -70106, 80106, -80106]:
                     #ref_moms.append(first_boson.get('number'))
-                    ref_moms.append(3)
+                    #ref_moms.append(2)
+                    #EB: 2023-11-09 setting of fermion/anit-fermion q
+                    if numb_right_boson >= numb_left_boson:
+                        ref_moms.append(left_boson.get('number'))
+                    else:
+                        ref_moms.append(right_boson.get('number'))
                 else:
                     ref_moms.append(-1)
         elif found_m_fermion or found_p_fermion:
@@ -3918,9 +3934,11 @@ class HelasMatrixElement(base_objects.PhysicsObject):
                         ref_moms.append(m_fermion.get('number'))
                     else:
                         ref_moms.append(p_fermion.get('number'))
-                if leg.get('id') in [70106, -70106, 80106, -80106]:
-                    #ref_moms.append(first_boson.get('number'))
-                    ref_moms.append(3)
+                elif leg.get('id') in [70106, -70106, 80106, -80106]:
+                    ref_moms.append(first_boson.get('number'))
+                    #ref_moms.append(2)
+                else:
+                    ref_moms.append(-1)
 
         else:
             for leg in legs:
