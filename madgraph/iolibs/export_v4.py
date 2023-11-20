@@ -3087,27 +3087,30 @@ CF2PY integer, intent(in) :: new_value
         # finds which helicities will contribute non-zero terms to the helicity sum
         # I.e. for a final-state left-handed particle, only terms where the particle
         # has helicity +1 will contribute
+        # EB: 2023-11-09. Since the calls are sorted to have IMXXXX and OMXXXX first in the call
+        #                 list int(helas_calls[k][16])-1 is used to match the correct wavefunction (extracted
+        #                 from the particle momentum) to each helicity in the helicity line.
         for k in range(nexternal):
             #misc.sprint(helas_calls[k])
             if (helas_calls[k][5:11] == 'LXXXXX') or (helas_calls[k][5:11] == 'VLXXXX'):
                 icpos = helas_calls[k].find('*IC(')
                 state_status = helas_calls[k][icpos-2:icpos]
                 if (state_status == '+1'):
-                    plushel_list.append(k)
+                    plushel_list.append(int(helas_calls[k][16])-1)
                 elif (state_status == '-1'):
-                    minushel_list.append(k)
+                    minushel_list.append(int(helas_calls[k][16])-1)
             elif (helas_calls[k][5:11] == 'RXXXXX') or (helas_calls[k][5:11] == 'VRXXXX'):
                 icpos = helas_calls[k].find('*IC(')
                 state_status = helas_calls[k][icpos-2:icpos]
                 if (state_status == '+1'):
-                    minushel_list.append(k)
+                    minushel_list.append(int(helas_calls[k][16])-1)
                 elif (state_status == '-1'):
-                    plushel_list.append(k)
+                    plushel_list.append(int(helas_calls[k][16])-1)
             elif helas_calls[k][5:11] in ['IMXXXX', 'OMXXXX']:
-                if abs(legs[k].get('id')) in [70106]:
-                    plushel_list.append(k)
-                elif abs(legs[k].get('id')) in [80106]:
-                    minushel_list.append(k)
+                if abs(legs[int(helas_calls[k][16])-1].get('id')) in [70106]:
+                    plushel_list.append(int(helas_calls[k][16])-1)
+                elif abs(legs[int(helas_calls[k][16])-1].get('id')) in [80106]:
+                    minushel_list.append(int(helas_calls[k][16])-1)
             #misc.sprint(state_status)
         # ZW: If no chiral particles are found, returns the original helicity_lines
         if (len(plushel_list) == 0) and (len(minushel_list) == 0):
