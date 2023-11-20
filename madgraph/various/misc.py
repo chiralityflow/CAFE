@@ -1692,6 +1692,37 @@ def vertex_replacer(text, vertex):
             + '      F1(6) = DENOM*CI*(P1_21*TEMP3 + P1_22*TEMP4 - M1*TEMP1)\n'
 
         text_copy = text_copy[:linebreaks[-25]+1] + init_replace + text_copy[linebreaks[-25]+1:linebreaks[-18]+1] + FFV1_1_replace + text_copy[linebreaks[-4]+1:]
+        #EB: 2023-11-09. Added the reduced version of the subroutine with TEMP3=TEMP4=0.
+
+        red12_replace = '      SUBROUTINE FFV1Re12_1(F2, V3, COUP, M1, W1, F1)\n'\
+            + text_copy[linebreaks[-35]+1:linebreaks[-25]+1]\
+            + '      COMPLEX*16 TEMP1,TEMP2\n'\
+            + text_copy[linebreaks[-23]-8:linebreaks[-12]+33] + '\n'\
+            + '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
+            + '      F1(3) = DENOM*CI*(P1_11*TEMP1 + P1_21*TEMP2)\n'\
+            + '      F1(4) = DENOM*CI*(P1_12*TEMP1 + P1_22*TEMP2)\n'\
+            + '      F1(5) = DENOM*CI*M1*TEMP2\n'\
+            + '      F1(6) = DENOM*CI*(-M1*TEMP1)\n'\
+            + '      END\n'
+
+        #EB: 2023-11-09. Added the reduced version of the subroutine with TEMP1=TEMP2=0.
+
+        red34_replace = '\n      SUBROUTINE FFV1Re34_1(F2, V3, COUP, M1, W1, F1)\n'\
+            + text_copy[linebreaks[-35]+1:linebreaks[-25]+1]\
+            + '      COMPLEX*16 TEMP3,TEMP4\n'\
+            + text_copy[linebreaks[-23]-8:linebreaks[-13]-28] + '\n'\
+            + '      TEMP3 = (V3(4)*F2(6) - V3(6)*F2(5))\n'\
+            + '      TEMP4 = (V3(5)*F2(5) - V3(3)*F2(6))\n'\
+            + '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
+            + '      F1(3) = DENOM*CI*(-M1*TEMP4)\n'\
+            + '      F1(4) = DENOM*CI*M1*TEMP3\n'\
+            + '      F1(5) = DENOM*CI*(P1_11*TEMP3 + P1_12*TEMP4)\n'\
+            + '      F1(6) = DENOM*CI*(P1_21*TEMP3 + P1_22*TEMP4)\n'\
+            + '      END'
+        
+        text_copy = text_copy + red12_replace + red34_replace
+
+
     
     if vertex == 'FFV1_2':
         init_replace = '      COMPLEX*16 TEMP1,TEMP2,TEMP3,TEMP4\n'\
@@ -1717,6 +1748,37 @@ def vertex_replacer(text, vertex):
             + '      F2(6) = DENOM*CI*(-P2_21*TEMP3 - P2_22*TEMP4 + M2*TEMP1)\n'
         
         text_copy = text_copy[:linebreaks[-25]+1] + init_replace + text_copy[linebreaks[-25]+1:linebreaks[-19]+1] + FFV1_2_replace + text_copy[linebreaks[-4]+1:]
+
+        #EB: 2023-11-09. Added the reduced version of the subroutine with TEMP3=TEMP4=0.
+
+        red12_replace = '      SUBROUTINE FFV1Re12_2(F1, V3, COUP, M2, W2, F2)\n'\
+            + text_copy[linebreaks[-35]+1:linebreaks[-25]+1]\
+            + '      COMPLEX*16 TEMP1,TEMP2\n'\
+            + text_copy[linebreaks[-23]-12:linebreaks[-14]-3] + '\n'\
+            + '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2 - M2 * (M2 -CI * W2))\n'\
+            + '      F2(3) = DENOM*CI*(-P2_11*TEMP1 - P2_21*TEMP2)\n'\
+            + '      F2(4) = DENOM*CI*(-P2_12*TEMP1 - P2_22*TEMP2)\n'\
+            + '      F2(5) = DENOM*CI*(-M2*TEMP2)\n'\
+            + '      F2(6) = DENOM*CI*(M2*TEMP1)\n'\
+            + '      END\n'
+
+        #EB: 2023-11-09. Added the reduced version of the subroutine with TEMP1=TEMP2=0.
+
+        red34_replace = '\n      SUBROUTINE FFV1Re34_2(F1, V3, COUP, M2, W2, F2)\n'\
+            + text_copy[linebreaks[-35]+1:linebreaks[-25]+1]\
+            + '      COMPLEX*16 TEMP3,TEMP4\n'\
+            + text_copy[linebreaks[-23]-12:linebreaks[-15]-20] + '\n'\
+            + '      TEMP3 = (V3(4)*F1(6) - V3(6)*F1(5))\n'\
+            + '      TEMP4 = (V3(5)*F1(5) - V3(3)*F1(6))\n'\
+            + '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2 - M2 * (M2 -CI * W2))\n'\
+            + '      F2(3) = DENOM*CI*(M2*TEMP4)\n'\
+            + '      F2(4) = DENOM*CI*(-M2*TEMP3)\n'\
+            + '      F2(5) = DENOM*CI*(-P2_11*TEMP3 - P2_12*TEMP4)\n'\
+            + '      F2(6) = DENOM*CI*(-P2_21*TEMP3 - P2_22*TEMP4)\n'\
+            + '      END'
+        
+        text_copy = text_copy + red12_replace + red34_replace
+
 
     if vertex == 'FFV1P0_3':
         FFV1P0_3_replace = '      DENOM = 2*COUP/(P3(0)**2-P3(1)**2-P3(2)**2-P3(3)**2 - M3 * (M3 -CI * W3))\n' \
