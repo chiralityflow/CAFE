@@ -1615,6 +1615,18 @@ def vec_p(V,p):
         .format(V,p,p,V,p,p,V,p,p,V,p,p)
     return inprod 
 
+def vec_pv(V1,V2,p):
+    "ZW: vec_v using lightcone coordinates"
+    inprod = '({}(3)*{}M - {}(4)*{}(2) - {}(5)*CONJG({}(2)) + {}(6)*{}P)' \
+        .format(V1,p,V1,V2,V1,V2,V1,p)
+    return inprod
+
+def vec_pvs(V1,V2):
+    "ZW: vec_pv without pre-assigned coordinates"
+    inprod = '({}(3)*(DBLE({}(1)) - DIMAG({}(1))) - {}(4)*{}(2) - {}(5)*CONJG({}(2)) + {}(6)*(DBLE({}(1)) + DIMAG({}(1))))' \
+        .format(V1,V2,V2,V1,V2,V1,V2,V1,V2,V2)
+    return inprod 
+
 def bra_eme_ket(F1,V3,F2):
     "AW: Takes a bra F1, matrix V3, and ket F2 and outputs F1*eps*V3*eps^T*F2"
     inprod = '(({}(4)*{}(3) - {}(3)*{}(4))*{}(6) - ({}(4)*{}(5) - {}(3)*{}(6))*{}(5))' \
@@ -1675,21 +1687,21 @@ def vertex_replacer(text, vertex):
              + FFV1_0_replace + text_copy[linebreaks[-4]+1:]
     if vertex == 'FFV1_1':
         init_replace = '      COMPLEX*16 TEMP1,TEMP2,TEMP3,TEMP4\n'\
-            + '      COMPLEX*16 P1_11, P1_12, P1_21, P1_22\n'
+            + '      COMPLEX*16 P1_11, P1_22\n'
 
         FFV1_1_replace = '      P1_11 = (P1(0)+P1(3))\n'\
-            + '      P1_12 = (P1(1)-CI*P1(2))\n'\
-            + '      P1_21 = (P1(1)+CI*P1(2))\n'\
+            + 'C      P1_12 = (P1(1)-CI*P1(2))\n'\
+            + 'C      P1_21 = (P1(1)+CI*P1(2))\n'\
             + '      P1_22 = (P1(0)-P1(3))\n'\
             + '      TEMP1 = (F2(4)*V3(5) - F2(3)*V3(6))\n'\
             + '      TEMP2 = (F2(3)*V3(4) - F2(4)*V3(3))\n'\
             + '      TEMP3 = (V3(4)*F2(6) - V3(6)*F2(5))\n'\
             + '      TEMP4 = (V3(5)*F2(5) - V3(3)*F2(6))\n\n'\
             + '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
-            + '      F1(3) = DENOM*CI*(P1_11*TEMP1 + P1_21*TEMP2 - M1*TEMP4)\n'\
-            + '      F1(4) = DENOM*CI*(P1_12*TEMP1 + P1_22*TEMP2 + M1*TEMP3)\n'\
-            + '      F1(5) = DENOM*CI*(P1_11*TEMP3 + P1_12*TEMP4 + M1*TEMP2)\n'\
-            + '      F1(6) = DENOM*CI*(P1_21*TEMP3 + P1_22*TEMP4 - M1*TEMP1)\n'
+            + '      F1(3) = DENOM*CI*(P1_11*TEMP1 - F1(2)*TEMP2 - M1*TEMP4)\n'\
+            + '      F1(4) = DENOM*CI*(P1_22*TEMP2 - CONJG(F1(2))*TEMP1 + M1*TEMP3)\n'\
+            + '      F1(5) = DENOM*CI*(P1_11*TEMP3 - CONJG(F1(2))*TEMP4 + M1*TEMP2)\n'\
+            + '      F1(6) = DENOM*CI*(P1_22*TEMP4 - F1(2)*TEMP3 - M1*TEMP1)\n'
 
         text_copy = text_copy[:linebreaks[-25]+1] + init_replace + text_copy[linebreaks[-25]+1:linebreaks[-18]+1] + FFV1_1_replace + text_copy[linebreaks[-4]+1:]
         #EB: 2023-11-09. Added the reduced version of the subroutine with TEMP3=TEMP4=0.
@@ -1697,10 +1709,10 @@ def vertex_replacer(text, vertex):
         red12_replace = '      SUBROUTINE FFV1Re12_1(F2, V3, COUP, M1, W1, F1)\n'\
             + text_copy[linebreaks[-35]+1:linebreaks[-25]+1]\
             + '      COMPLEX*16 TEMP1,TEMP2\n'\
-            + text_copy[linebreaks[-23]-8:linebreaks[-12]+33] + '\n'\
+            + text_copy[linebreaks[-23]-8:linebreaks[-12]+21] + '\n'\
             + '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
-            + '      F1(3) = DENOM*CI*(P1_11*TEMP1 + P1_21*TEMP2)\n'\
-            + '      F1(4) = DENOM*CI*(P1_12*TEMP1 + P1_22*TEMP2)\n'\
+            + '      F1(3) = DENOM*CI*(P1_11*TEMP1 - F1(2)*TEMP2)\n'\
+            + '      F1(4) = DENOM*CI*(P1_22*TEMP2 - CONJG(F1(2))*TEMP1)\n'\
             + '      F1(5) = DENOM*CI*M1*TEMP2\n'\
             + '      F1(6) = DENOM*CI*(-M1*TEMP1)\n'\
             + '      END\n'
@@ -1710,14 +1722,14 @@ def vertex_replacer(text, vertex):
         red34_replace = '\n      SUBROUTINE FFV1Re34_1(F2, V3, COUP, M1, W1, F1)\n'\
             + text_copy[linebreaks[-35]+1:linebreaks[-25]+1]\
             + '      COMPLEX*16 TEMP3,TEMP4\n'\
-            + text_copy[linebreaks[-23]-8:linebreaks[-13]-28] + '\n'\
+            + text_copy[linebreaks[-23]-8:linebreaks[-13]-42] + '\n'\
             + '      TEMP3 = (V3(4)*F2(6) - V3(6)*F2(5))\n'\
             + '      TEMP4 = (V3(5)*F2(5) - V3(3)*F2(6))\n'\
             + '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
             + '      F1(3) = DENOM*CI*(-M1*TEMP4)\n'\
             + '      F1(4) = DENOM*CI*M1*TEMP3\n'\
-            + '      F1(5) = DENOM*CI*(P1_11*TEMP3 + P1_12*TEMP4)\n'\
-            + '      F1(6) = DENOM*CI*(P1_21*TEMP3 + P1_22*TEMP4)\n'\
+            + '      F1(5) = DENOM*CI*(P1_11*TEMP3 - CONJG(F1(2))*TEMP4)\n'\
+            + '      F1(6) = DENOM*CI*(P1_22*TEMP4 - F1(2)*TEMP3)\n'\
             + '      END'
         
         text_copy = text_copy + red12_replace + red34_replace
@@ -1726,11 +1738,11 @@ def vertex_replacer(text, vertex):
     
     if vertex == 'FFV1_2':
         init_replace = '      COMPLEX*16 TEMP1,TEMP2,TEMP3,TEMP4\n'\
-            + '      COMPLEX*16 P2_11, P2_12, P2_21, P2_22\n'
+            + '      COMPLEX*16 P2_11, P2_22\n'
 
         FFV1_2_replace = '      P2_11 = (P2(0)+P2(3))\n'\
-            + '      P2_12 = (P2(1)-CI*P2(2))\n'\
-            + '      P2_21 = (P2(1)+CI*P2(2))\n'\
+            + 'C      P2_12 = (P2(1)-CI*P2(2))\n'\
+            + 'C      P2_21 = (P2(1)+CI*P2(2))\n'\
             + '      P2_22 = (P2(0)-P2(3))\n'\
             + '      TEMP1 = (F1(4)*V3(5) - F1(3)*V3(6))\n'\
             + '      TEMP2 = (F1(3)*V3(4) - F1(4)*V3(3))\n'\
@@ -1742,10 +1754,10 @@ def vertex_replacer(text, vertex):
             + 'c        WRITE(2,*) TEMP1, TEMP2, TEMP3, TEMP4\n'\
             + 'c      ENDIF\n\n'\
             + '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2 - M2 * (M2 -CI * W2))\n'\
-            + '      F2(3) = DENOM*CI*(-P2_11*TEMP1 - P2_21*TEMP2 + M2*TEMP4)\n'\
-            + '      F2(4) = DENOM*CI*(-P2_12*TEMP1 - P2_22*TEMP2 - M2*TEMP3)\n'\
-            + '      F2(5) = DENOM*CI*(-P2_11*TEMP3 - P2_12*TEMP4 - M2*TEMP2)\n'\
-            + '      F2(6) = DENOM*CI*(-P2_21*TEMP3 - P2_22*TEMP4 + M2*TEMP1)\n'
+            + '      F2(3) = DENOM*CI*(-P2_11*TEMP1 + F2(2)*TEMP2 + M2*TEMP4)\n'\
+            + '      F2(4) = DENOM*CI*(CONJG(F2(2))*TEMP1 - P2_22*TEMP2 - M2*TEMP3)\n'\
+            + '      F2(5) = DENOM*CI*(-P2_11*TEMP3 + CONJG(F2(2))*TEMP4 - M2*TEMP2)\n'\
+            + '      F2(6) = DENOM*CI*(F2(2)*TEMP3 - P2_22*TEMP4 + M2*TEMP1)\n'
         
         text_copy = text_copy[:linebreaks[-25]+1] + init_replace + text_copy[linebreaks[-25]+1:linebreaks[-19]+1] + FFV1_2_replace + text_copy[linebreaks[-4]+1:]
 
@@ -1754,10 +1766,10 @@ def vertex_replacer(text, vertex):
         red12_replace = '      SUBROUTINE FFV1Re12_2(F1, V3, COUP, M2, W2, F2)\n'\
             + text_copy[linebreaks[-35]+1:linebreaks[-25]+1]\
             + '      COMPLEX*16 TEMP1,TEMP2\n'\
-            + text_copy[linebreaks[-23]-12:linebreaks[-14]-3] + '\n'\
+            + text_copy[linebreaks[-23]-12:linebreaks[-14]-22] + '\n'\
             + '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2 - M2 * (M2 -CI * W2))\n'\
-            + '      F2(3) = DENOM*CI*(-P2_11*TEMP1 - P2_21*TEMP2)\n'\
-            + '      F2(4) = DENOM*CI*(-P2_12*TEMP1 - P2_22*TEMP2)\n'\
+            + '      F2(3) = DENOM*CI*(-P2_11*TEMP1 + F2(2)*TEMP2)\n'\
+            + '      F2(4) = DENOM*CI*(CONJG(F2(2))*TEMP1 - P2_22*TEMP2)\n'\
             + '      F2(5) = DENOM*CI*(-M2*TEMP2)\n'\
             + '      F2(6) = DENOM*CI*(M2*TEMP1)\n'\
             + '      END\n'
@@ -1767,14 +1779,14 @@ def vertex_replacer(text, vertex):
         red34_replace = '\n      SUBROUTINE FFV1Re34_2(F1, V3, COUP, M2, W2, F2)\n'\
             + text_copy[linebreaks[-35]+1:linebreaks[-25]+1]\
             + '      COMPLEX*16 TEMP3,TEMP4\n'\
-            + text_copy[linebreaks[-23]-12:linebreaks[-15]-20] + '\n'\
+            + text_copy[linebreaks[-23]-12:linebreaks[-15]-34] + '\n'\
             + '      TEMP3 = (V3(4)*F1(6) - V3(6)*F1(5))\n'\
             + '      TEMP4 = (V3(5)*F1(5) - V3(3)*F1(6))\n'\
             + '      DENOM = COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2 - M2 * (M2 -CI * W2))\n'\
             + '      F2(3) = DENOM*CI*(M2*TEMP4)\n'\
             + '      F2(4) = DENOM*CI*(-M2*TEMP3)\n'\
-            + '      F2(5) = DENOM*CI*(-P2_11*TEMP3 - P2_12*TEMP4)\n'\
-            + '      F2(6) = DENOM*CI*(-P2_21*TEMP3 - P2_22*TEMP4)\n'\
+            + '      F2(5) = DENOM*CI*(-P2_11*TEMP3 + CONJG(F2(2))*TEMP4)\n'\
+            + '      F2(6) = DENOM*CI*(F2(2)*TEMP3 - P2_22*TEMP4)\n'\
             + '      END'
         
         text_copy = text_copy + red12_replace + red34_replace
@@ -1861,20 +1873,27 @@ def vertex_replacer(text, vertex):
         + '      COMPLEX*16 TMP6\n' \
         + '      COMPLEX*16 TMP7\n' \
         + '      COMPLEX*16 TMP8\n' \
-        + '      COMPLEX*16 TMP9\n' 
+        + '      COMPLEX*16 TMP9\n' \
+        + '      REAL*8 P1P,P1M,P2P,P2M,P3P,P3M\n'
 
-        VVV1_0_replace = '      TMP1 = {}\n'.format(vec_vec('V1','V2')) \
-        + '      TMP2 = {}\n'.format(vec_p('V3','P1')) \
-        + '      TMP3 = {}\n'.format(vec_p('V3','P2')) \
+        VVV1_0_replace = '      P1P = DBLE(V1(1)) + DIMAG(V1(1))\n' \
+        + '      P1M = DBLE(V1(1)) - DIMAG(V1(1))\n' \
+        + '      P2P = DBLE(V2(1)) + DIMAG(V2(1))\n' \
+        + '      P2M = DBLE(V2(1)) - DIMAG(V2(1))\n' \
+        + '      P3P = DBLE(V3(1)) + DIMAG(V3(1))\n' \
+        + '      P3M = DBLE(V3(1)) - DIMAG(V3(1))\n' \
+        + '      TMP1 = {}\n'.format(vec_vec('V1','V2')) \
+        + '      TMP2 = {}\n'.format(vec_pv('V3','V1','P1')) \
+        + '      TMP3 = {}\n'.format(vec_pv('V3','V2','P2')) \
         + '      TMP4 = {}\n'.format(vec_vec('V2','V3')) \
-        + '      TMP5 = {}\n'.format(vec_p('V1','P2')) \
-        + '      TMP6 = {}\n'.format(vec_p('V1','P3')) \
+        + '      TMP5 = {}\n'.format(vec_pv('V1','V2','P2')) \
+        + '      TMP6 = {}\n'.format(vec_pv('V1','V3','P3')) \
         + '      TMP7 = {}\n'.format(vec_vec('V3','V1')) \
-        + '      TMP8 = {}\n'.format(vec_p('V2','P3')) \
-        + '      TMP9 = {}\n'.format(vec_p('V2','P1')) \
-        + '      VERTEX = COUP*CI*(TMP1*(TMP2 - TMP3) + TMP4*(TMP5 - TMP6) + TMP7*(TMP8 - TMP9))/4\n'
+        + '      TMP8 = {}\n'.format(vec_pv('V2','V3','P3')) \
+        + '      TMP9 = {}\n'.format(vec_pv('V2','V1','P1')) \
+        + '      VERTEX = 0.25*COUP*CI*(TMP1*(TMP2 - TMP3) + TMP4*(TMP5 - TMP6) + TMP7*(TMP8 - TMP9))\n'
         linebreaks = get_symbols(text_copy, '\n')
-        text_copy = text_copy[:linebreaks[12]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[37]+1] + VVV1_0_replace + text_copy[linebreaks[48]+1:]
+        text_copy = text_copy[:linebreaks[9]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[25]+1] + VVV1_0_replace + text_copy[linebreaks[48]+1:]
     
     if (vertex == 'VLVLVL1_0' or vertex == 'VRVRVR1_0'):
         
@@ -1889,11 +1908,11 @@ def vertex_replacer(text, vertex):
         + '      COMPLEX*16 TMP3\n' \
 
         VVV1_0_replace = '      TMP1 = {}\n'.format(vec_vec('V2','V3')) \
-        + '      TMP2 = {}\n'.format(vec_p('V1','P2')) \
-        + '      TMP3 = {}\n'.format(vec_p('V1','P3')) \
-        + '      VERTEX = COUP*CI*(TMP1*(TMP2 - TMP3))/4\n'
+        + '      TMP2 = {}\n'.format(vec_pvs('V1','V2')) \
+        + '      TMP3 = {}\n'.format(vec_pvs('V1','V3')) \
+        + '      VERTEX = 0.25*COUP*CI*(TMP1*(TMP2 - TMP3))\n'
         linebreaks = get_symbols(text_copy, '\n')
-        text_copy = text_copy[:linebreaks[12]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[25]+1] + text_copy[linebreaks[29]+1:linebreaks[37]+1] + VVV1_0_replace + text_copy[linebreaks[48]+1:]
+        text_copy = text_copy[:linebreaks[9]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[25]+1] + VVV1_0_replace + text_copy[linebreaks[48]+1:]
 
     if (vertex == 'VVRVR1_0'):
         # AW: we divide by 4 to take care of some extra factor of 2. Might be the *2 from LRV_3 in d d~ to g g
@@ -1904,16 +1923,19 @@ def vertex_replacer(text, vertex):
         + '      COMPLEX*16 TMP4\n' \
         + '      COMPLEX*16 TMP5\n' \
         + '      COMPLEX*16 TMP6\n' \
+        + '      REAL*8 P1P,P1M' 
 
-        VVRVR1_0_replace = '      TMP1 = {}\n'.format(vec_vec('V1','V2')) \
-        + '      TMP2 = {}\n'.format(vec_p('V3','P1')) \
-        + '      TMP3 = {}\n'.format(vec_p('V3','P2')) \
+        VVRVR1_0_replace = '      P1P = DBLE(V1(1)) + DIMAG(V1(1))\n' \
+        + '      P1M = DBLE(V1(1)) - DIMAG(V1(1))\n' \
+        + '      TMP1 = {}\n'.format(vec_vec('V1','V2')) \
+        + '      TMP2 = {}\n'.format(vec_pv('V3','V1','P1')) \
+        + '      TMP3 = {}\n'.format(vec_pvs('V3','V2')) \
         + '      TMP4 = {}\n'.format(vec_vec('V3','V1')) \
-        + '      TMP5 = {}\n'.format(vec_p('V2','P3')) \
-        + '      TMP6 = {}\n'.format(vec_p('V2','P1')) \
-        + '      VERTEX = COUP*CI*(TMP1*(TMP2 - TMP3) + TMP4*(TMP5 - TMP6))/4\n'
+        + '      TMP5 = {}\n'.format(vec_pvs('V2','V3')) \
+        + '      TMP6 = {}\n'.format(vec_pv('V2','V1','P1')) \
+        + '      VERTEX = 0.25*COUP*CI*(TMP1*(TMP2 - TMP3) + TMP4*(TMP5 - TMP6))\n'
         linebreaks = get_symbols(text_copy, '\n')
-        text_copy = text_copy[:linebreaks[12]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[37]+1] + VVRVR1_0_replace + text_copy[linebreaks[48]+1:]
+        text_copy = text_copy[:linebreaks[12]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[25]+1] + VVRVR1_0_replace + text_copy[linebreaks[48]+1:]
 
     if (vertex == 'VVLVL1_0'):
         # AW: we divide by 4 to take care of some extra factor of 2. Might be the *2 from LRV_3 in d d~ to g g
@@ -1924,16 +1946,19 @@ def vertex_replacer(text, vertex):
         + '      COMPLEX*16 TMP4\n' \
         + '      COMPLEX*16 TMP5\n' \
         + '      COMPLEX*16 TMP6\n' \
+        + '      REAL*8 P1P,P1M\n' 
 
-        VVLVL1_0_replace = '      TMP1 = {}\n'.format(vec_vec('V1','V2')) \
-        + '      TMP2 = {}\n'.format(vec_p('V3','P1')) \
-        + '      TMP3 = {}\n'.format(vec_p('V3','P2')) \
+        VVLVL1_0_replace = '      P1P = DBLE(V1(1)) + DIMAG(V1(1))\n' \
+        + '      P1M = DBLE(V1(1)) - DIMAG(V1(1))\n' \
+        + '      TMP1 = {}\n'.format(vec_vec('V1','V2')) \
+        + '      TMP2 = {}\n'.format(vec_pv('V3','V1','P1')) \
+        + '      TMP3 = {}\n'.format(vec_pvs('V3','V2')) \
         + '      TMP4 = {}\n'.format(vec_vec('V3','V1')) \
-        + '      TMP5 = {}\n'.format(vec_p('V2','P3')) \
-        + '      TMP6 = {}\n'.format(vec_p('V2','P1')) \
-        + '      VERTEX = COUP*CI*(TMP1*(TMP2 - TMP3) + TMP4*(TMP5 - TMP6))/4\n'
+        + '      TMP5 = {}\n'.format(vec_pvs('V2','V3')) \
+        + '      TMP6 = {}\n'.format(vec_pv('V2','V1','P1')) \
+        + '      VERTEX = 0.25*COUP*CI*(TMP1*(TMP2 - TMP3) + TMP4*(TMP5 - TMP6))\n'
         linebreaks = get_symbols(text_copy, '\n')
-        text_copy = text_copy[:linebreaks[12]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[37]+1] + VVLVL1_0_replace + text_copy[linebreaks[48]+1:]
+        text_copy = text_copy[:linebreaks[9]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[25]+1] + VVLVL1_0_replace + text_copy[linebreaks[48]+1:]
 
 
     if (vertex == 'VLVLVR1_0'):
@@ -1945,16 +1970,19 @@ def vertex_replacer(text, vertex):
         + '      COMPLEX*16 TMP4\n' \
         + '      COMPLEX*16 TMP5\n' \
         + '      COMPLEX*16 TMP6\n' \
+        + '      REAL*8 P3P,P3M\n' 
 
-        VVV1_0_replace = '      TMP1 = {}\n'.format(vec_vec('V2','V3')) \
-        + '      TMP2 = {}\n'.format(vec_p('V1','P2')) \
-        + '      TMP3 = {}\n'.format(vec_p('V1','P3')) \
+        VVV1_0_replace = '      P3P = DBLE(V3(1)) + DIMAG(V3(1))\n' \
+        + '      P3M = DBLE(V3(1)) - DIMAG(V3(1))\n' \
+        + '      TMP1 = {}\n'.format(vec_vec('V2','V3')) \
+        + '      TMP2 = {}\n'.format(vec_pvs('V1','V2')) \
+        + '      TMP3 = {}\n'.format(vec_pv('V1','V3','P3')) \
         + '      TMP4 = {}\n'.format(vec_vec('V3','V1')) \
-        + '      TMP5 = {}\n'.format(vec_p('V2','P3')) \
-        + '      TMP6 = {}\n'.format(vec_p('V2','P1')) \
-        + '      VERTEX = COUP*CI*(TMP1*(TMP2 - TMP3) + TMP4*(TMP5 - TMP6))/4\n'
+        + '      TMP5 = {}\n'.format(vec_pv('V2','V3','P3')) \
+        + '      TMP6 = {}\n'.format(vec_pvs('V2','V1')) \
+        + '      VERTEX = 0.25*COUP*CI*(TMP1*(TMP2 - TMP3) + TMP4*(TMP5 - TMP6))\n'
         linebreaks = get_symbols(text_copy, '\n')
-        text_copy = text_copy[:linebreaks[12]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[37]+1] + VVV1_0_replace + text_copy[linebreaks[48]+1:]
+        text_copy = text_copy[:linebreaks[9]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[25]+1] + VVV1_0_replace + text_copy[linebreaks[48]+1:]
     if (vertex == 'VLVRVR1_0'):
         # AW: we divide by 4 to take care of some extra factor of 2. Might be the *2 from LRV_3 in d d~ to g g
         # and u u~ to d d~ g
@@ -1964,54 +1992,79 @@ def vertex_replacer(text, vertex):
         + '      COMPLEX*16 TMP4\n' \
         + '      COMPLEX*16 TMP5\n' \
         + '      COMPLEX*16 TMP6\n' \
+        + '      REAL*8 P1P,P1M\n' 
  
-        VLVRVR1_0_replace = '      TMP1 = {}\n'.format(vec_vec('V1','V2')) \
-        + '      TMP2 = {}\n'.format(vec_p('V3','P1')) \
-        + '      TMP3 = {}\n'.format(vec_p('V3','P2')) \
+        VLVRVR1_0_replace = '      P1P = DBLE(V1(1)) + DIMAG(V1(1))\n' \
+        + '      P1M = DBLE(V1(1)) - DIMAG(V1(1))\n' \
+        + '      TMP1 = {}\n'.format(vec_vec('V1','V2')) \
+        + '      TMP2 = {}\n'.format(vec_pv('V3','V1','P1')) \
+        + '      TMP3 = {}\n'.format(vec_pvs('V3','V2')) \
         + '      TMP4 = {}\n'.format(vec_vec('V3','V1')) \
-        + '      TMP5 = {}\n'.format(vec_p('V2','P3')) \
-        + '      TMP6 = {}\n'.format(vec_p('V2','P1')) \
-        + '      VERTEX = COUP*CI*(TMP1*(TMP2 - TMP3) + TMP4*(TMP5 - TMP6))/4\n'
+        + '      TMP5 = {}\n'.format(vec_pvs('V2','V3')) \
+        + '      TMP6 = {}\n'.format(vec_pv('V2','V1','P1')) \
+        + '      VERTEX = 0.25*COUP*CI*(TMP1*(TMP2 - TMP3) + TMP4*(TMP5 - TMP6))\n'
         linebreaks = get_symbols(text_copy, '\n')
-        text_copy = text_copy[:linebreaks[12]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[37]+1] + VLVRVR1_0_replace + text_copy[linebreaks[48]+1:]
+        text_copy = text_copy[:linebreaks[9]+1] + TMP_replace + text_copy[linebreaks[21]+1:linebreaks[25]+1] + VLVRVR1_0_replace + text_copy[linebreaks[48]+1:]
     if (vertex == 'VVV1P0_1'):
         # AW: we only divide by 2 here, could it be because we dont have the factor *2 from LRV_3 in g g to d d~ ?
         TMP_replace = '      COMPLEX*16 TMP0\n' \
         + '      COMPLEX*16 TMP1\n' \
         + '      COMPLEX*16 TMP2\n' \
         + '      COMPLEX*16 TMP3\n' \
-        + '      COMPLEX*16 TMP4\n'
+        + '      COMPLEX*16 TMP4\n' \
+        + '      REAL*8 P1P,P1M,P2P,P2M,P3P,P3M\n'
 
-        VVV1P0_1_replace = '      DENOM = 0.5*COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
-        + '      TMP0 = {}\n'.format(vec_p('V3','P1')) \
-        + '      TMP1 = {}\n'.format(vec_p('V3','P2')) \
-        + '      TMP2 = {}\n'.format(vec_p('V2','P3')) \
-        + '      TMP3 = {}\n'.format(vec_p('V2','P1')) \
+        VVV1P0_1_replace = '      V1(1) = +V2(1)+V3(1)\n' \
+        + '      V1(2) = +V2(2)+V3(2)\n' \
+        + '      P1(0) = -DBLE(V1(1))\n' \
+        + '      P1(1) = -DBLE(V1(2))\n' \
+        + '      P1(2) = -DIMAG(V1(2))\n' \
+        + '      P1(3) = -DIMAG(V1(1))\n' \
+        + '      DENOM = 0.5*COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
+        + '      P1P = P1(0) + P1(3)\n' \
+        + '      P1M = P1(0) - P1(3)\n' \
+        + '      P2P = DBLE(V2(1)) + DIMAG(V2(1))\n' \
+        + '      P2M = DBLE(V2(1)) - DIMAG(V2(1))\n' \
+        + '      P3P = DBLE(V3(1)) + DIMAG(V3(1))\n' \
+        + '      P3M = DBLE(V3(1)) - DIMAG(V3(1))\n' \
+        + '      TMP0 = {}\n'.format(vec_pv('V3','V1','P1')) \
+        + '      TMP1 = {}\n'.format(vec_pv('V3','V2','P2')) \
+        + '      TMP2 = {}\n'.format(vec_pv('V2','V3','P3')) \
+        + '      TMP3 = {}\n'.format(vec_pv('V2','V1','P1')) \
         + '      TMP4 = {}\n'.format(vec_vec('V2','V3')) \
-        + '      V1(3) = -DENOM*CI*((TMP0 - TMP1)*V2(3) + (TMP2 - TMP3)*V3(3) + TMP4*(P2(0)-P3(0)+P2(3)-P3(3)))\n' \
-        + '      V1(4) = -DENOM*CI*((TMP0 - TMP1)*V2(4) + (TMP2 - TMP3)*V3(4) + TMP4*(P2(1)-P3(1)-CI*P2(2)+CI*P3(2)))\n' \
-        + '      V1(5) = -DENOM*CI*((TMP0 - TMP1)*V2(5) + (TMP2 - TMP3)*V3(5) + TMP4*(P2(1)-P3(1)+CI*P2(2)-CI*P3(2)))\n' \
-        + '      V1(6) = -DENOM*CI*((TMP0 - TMP1)*V2(6) + (TMP2 - TMP3)*V3(6) + TMP4*(P2(0)-P3(0)-P2(3)+P3(3)))\n'   
+        + '      V1(3) = -DENOM*CI*((TMP0 - TMP1)*V2(3) + (TMP2 - TMP3)*V3(3) - TMP4*(P2P - P3P))\n' \
+        + '      V1(4) = -DENOM*CI*((TMP0 - TMP1)*V2(4) + (TMP2 - TMP3)*V3(4) - TMP4*(CONJG(V2(2) - V3(2))))\n' \
+        + '      V1(5) = -DENOM*CI*((TMP0 - TMP1)*V2(5) + (TMP2 - TMP3)*V3(5) - TMP4*(V2(2) - V3(2)))\n' \
+        + '      V1(6) = -DENOM*CI*((TMP0 - TMP1)*V2(6) + (TMP2 - TMP3)*V3(6) - TMP4*(P2M - P3M))\n'   
         linebreaks = get_symbols(text_copy, '\n')
-        text_copy = text_copy[:linebreaks[13]+1] + TMP_replace + text_copy[linebreaks[18]+1:linebreaks[37]+1] + VVV1P0_1_replace + text_copy[linebreaks[52]+1:]
+        text_copy = text_copy[:linebreaks[13]+1] + TMP_replace + text_copy[linebreaks[18]+1:linebreaks[23]+1] + VVV1P0_1_replace + text_copy[linebreaks[52]+1:]
     
     if (vertex == 'VLVLVL1P0_1'):
         # AW: we only divide by 2 here, could it be because we dont have the factor *2 from LRV_3 in g g to d d~ ?
         TMP_replace = '      COMPLEX*16 TMP0\n' \
         + '      COMPLEX*16 TMP1\n' \
         + '      COMPLEX*16 TMP2\n' \
-        + '      COMPLEX*16 TMP3\n'
-        VLVLVL1P0_1_replace = '      DENOM = 0.5*COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
-        + '      TMP0 = {}\n'.format(vec_p('V3','P1')) \
-        + '      TMP1 = {}\n'.format(vec_p('V3','P2')) \
-        + '      TMP2 = {}\n'.format(vec_p('V2','P3')) \
-        + '      TMP3 = {}\n'.format(vec_p('V2','P1')) \
+        + '      COMPLEX*16 TMP3\n' \
+        + '      REAL*8 P1P,P1M\n'
+        VLVLVL1P0_1_replace = '      V1(1) = +V2(1)+V3(1)\n' \
+        + '      V1(2) = +V2(2)+V3(2)\n' \
+        + '      P1(0) = -DBLE(V1(1))\n' \
+        + '      P1(1) = -DBLE(V1(2))\n' \
+        + '      P1(2) = -DIMAG(V1(2))\n' \
+        + '      P1(3) = -DIMAG(V1(1))\n' \
+        + '      DENOM = 0.5*COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
+        + '      P1P = P1(0) + P1(3)\n' \
+        + '      P1M = P1(0) - P1(3)\n' \
+        + '      TMP0 = {}\n'.format(vec_pv('V3','V1','P1')) \
+        + '      TMP1 = {}\n'.format(vec_pvs('V3','V2')) \
+        + '      TMP2 = {}\n'.format(vec_pvs('V2','V3')) \
+        + '      TMP3 = {}\n'.format(vec_pv('V2','V1','P1')) \
         + '      V1(3) = -DENOM*CI*((TMP0 - TMP1)*V2(3) + (TMP2 - TMP3)*V3(3))\n' \
         + '      V1(4) = -DENOM*CI*((TMP0 - TMP1)*V2(4) + (TMP2 - TMP3)*V3(4))\n' \
         + '      V1(5) = -DENOM*CI*((TMP0 - TMP1)*V2(5) + (TMP2 - TMP3)*V3(5))\n' \
         + '      V1(6) = -DENOM*CI*((TMP0 - TMP1)*V2(6) + (TMP2 - TMP3)*V3(6))\n'   
         linebreaks = get_symbols(text_copy, '\n')
-        text_copy = text_copy[:linebreaks[13]+1] + TMP_replace + text_copy[linebreaks[18]+1:linebreaks[37]+1] + VLVLVL1P0_1_replace + text_copy[linebreaks[52]+1:]
+        text_copy = text_copy[:linebreaks[13]+1] + TMP_replace + text_copy[linebreaks[18]+1:linebreaks[23]+1] + VLVLVL1P0_1_replace + text_copy[linebreaks[52]+1:]
 
     if (vertex == 'VLVLVL1P0_2') or (vertex == 'VRVRVR1P0_2'):
         # AW: we only divide by 2 here, could it be because we dont have the factor *2 from LRV_3 in g g to d d~ ?
@@ -2019,13 +2072,22 @@ def vertex_replacer(text, vertex):
         TMP_replace = '      COMPLEX*16 TMP0\n' \
         + '      COMPLEX*16 TMP1\n' \
         + '      COMPLEX*16 TMP2\n' \
-        + '      COMPLEX*16 TMP3\n'
+        + '      COMPLEX*16 TMP3\n' \
+        + '      REAL*8 P2P,P2M\n'
 
-        VLVLVL1P0_1_replace = '      DENOM = 0.5*COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2 - M2 * (M2 -CI * W2))\n'\
-        + '      TMP0 = {}\n'.format(vec_p('V3','P2')) \
-        + '      TMP1 = {}\n'.format(vec_p('V3','P1')) \
-        + '      TMP2 = {}\n'.format(vec_p('V1','P3')) \
-        + '      TMP3 = {}\n'.format(vec_p('V1','P2')) \
+        VLVLVL1P0_1_replace = '      V2(1) = +V1(1)+V3(1)\n' \
+        + '      V2(2) = +V1(2)+V3(2)\n' \
+        + '      P2(0) = -DBLE(V2(1))\n' \
+        + '      P2(1) = -DBLE(V2(2))\n' \
+        + '      P2(2) = -DIMAG(V2(2))\n' \
+        + '      P2(3) = -DIMAG(V2(1))\n' \
+        + '      DENOM = 0.5*COUP/(P2(0)**2-P2(1)**2-P2(2)**2-P2(3)**2 - M2 * (M2 -CI * W2))\n'\
+        + '      P2P = P2(0) + P2(3)\n' \
+        + '      P2M = P2(0) - P2(3)\n' \
+        + '      TMP0 = {}\n'.format(vec_pv('V3','V2','P2')) \
+        + '      TMP1 = {}\n'.format(vec_pvs('V3','V1')) \
+        + '      TMP2 = {}\n'.format(vec_pvs('V1','V3')) \
+        + '      TMP3 = {}\n'.format(vec_pv('V1','V2','P2')) \
         + '      V2(3) = DENOM*CI*((TMP0 - TMP1)*V1(3) + (TMP2 - TMP3)*V3(3))\n' \
         + '      V2(4) = DENOM*CI*((TMP0 - TMP1)*V1(4) + (TMP2 - TMP3)*V3(4))\n' \
         + '      V2(5) = DENOM*CI*((TMP0 - TMP1)*V1(5) + (TMP2 - TMP3)*V3(5))\n' \
@@ -2038,19 +2100,28 @@ def vertex_replacer(text, vertex):
         TMP_replace = '      COMPLEX*16 TMP0\n' \
         + '      COMPLEX*16 TMP1\n' \
         + '      COMPLEX*16 TMP2\n' \
-        + '      COMPLEX*16 TMP3\n'
+        + '      COMPLEX*16 TMP3\n' \
+        + '      REAL*8 P1P,P1M\n'
 
-        VRVRVR1P0_1_replace = '      DENOM = 0.5*COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
-        + '      TMP0 = {}\n'.format(vec_p('V3','P1')) \
-        + '      TMP1 = {}\n'.format(vec_p('V3','P2')) \
-        + '      TMP2 = {}\n'.format(vec_p('V2','P3')) \
-        + '      TMP3 = {}\n'.format(vec_p('V2','P1')) \
+        VRVRVR1P0_1_replace = '      V1(1) = +V2(1)+V3(1)\n' \
+        + '      V1(2) = +V2(2)+V3(2)\n' \
+        + '      P1(0) = -DBLE(V1(1))\n' \
+        + '      P1(1) = -DBLE(V1(2))\n' \
+        + '      P1(2) = -DIMAG(V1(2))\n' \
+        + '      P1(3) = -DIMAG(V1(1))\n' \
+        + '      DENOM = 0.5*COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2 - M1 * (M1 -CI * W1))\n'\
+        + '      P1P = P1(0) + P1(3)\n' \
+        + '      P1M = P1(0) - P1(3)\n' \
+        + '      TMP0 = {}\n'.format(vec_pv('V3','V1','P1')) \
+        + '      TMP1 = {}\n'.format(vec_pvs('V3','V2')) \
+        + '      TMP2 = {}\n'.format(vec_pvs('V2','V3')) \
+        + '      TMP3 = {}\n'.format(vec_pv('V2','V1','P1')) \
         + '      V1(3) = -DENOM*CI*((TMP0 - TMP1)*V2(3) + (TMP2 - TMP3)*V3(3))\n' \
         + '      V1(4) = -DENOM*CI*((TMP0 - TMP1)*V2(4) + (TMP2 - TMP3)*V3(4))\n' \
         + '      V1(5) = -DENOM*CI*((TMP0 - TMP1)*V2(5) + (TMP2 - TMP3)*V3(5))\n' \
         + '      V1(6) = -DENOM*CI*((TMP0 - TMP1)*V2(6) + (TMP2 - TMP3)*V3(6))\n'   
         linebreaks = get_symbols(text_copy, '\n')
-        text_copy = text_copy[:linebreaks[13]+1] + TMP_replace + text_copy[linebreaks[18]+1:linebreaks[37]+1] + VRVRVR1P0_1_replace + text_copy[linebreaks[52]+1:]
+        text_copy = text_copy[:linebreaks[13]+1] + TMP_replace + text_copy[linebreaks[18]+1:linebreaks[23]+1] + VRVRVR1P0_1_replace + text_copy[linebreaks[52]+1:]
 
     if (vertex == 'VVVV1_0' or vertex == 'VLVRVRVR1_0' or vertex == 'VLVLVLVR1_0'):
         # AW:
