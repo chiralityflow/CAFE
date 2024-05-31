@@ -3660,14 +3660,14 @@ class Process(PhysicsObject):
         identical_indices = collections.defaultdict(int)
         for leg in final_legs:
             key = (leg.get('id'), tuple(leg.get('polarization')))
-            if (key[0] == 90003):
-                key = (90001,key[1])
-            if (key[0] == -90003):
-                key = (-90001,key[1])
-            if (key[0] == 90007):
-                key = (90005,key[1])
-            if (key[0] == -90007):
-                key = (-90005,key[1])
+            if (key[0] == 80011):
+                key = (70011,key[1])
+            if (key[0] == -80011):
+                key = (-70011,key[1])
+            if (key[0] == 80013):
+                key = (70013,key[1])
+            if (key[0] == -80013):
+                key = (-70013,key[1])
             if (key[0] == 90024):
                 key = (90023,key[1])
             identical_indices[key] += 1

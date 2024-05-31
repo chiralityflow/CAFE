@@ -66,7 +66,7 @@ aR = Particle(pdg_code = 90024,
 
 # Chiral Leptons
 
-eL__minus__ = Particle(pdg_code = 90001,
+eL__minus__ = Particle(pdg_code = 70011,
                       name = 'eL-',
                       antiname = 'eL+',
                       spin = 2,
@@ -84,7 +84,7 @@ eL__minus__ = Particle(pdg_code = 90001,
 eL__plus__ = eL__minus__.anti()
 
 
-eR__minus__ = Particle(pdg_code = 90003,
+eR__minus__ = Particle(pdg_code = 80011,
                       name = 'eR-',
                       antiname = 'eR+',
                       spin = 2,
@@ -101,7 +101,7 @@ eR__minus__ = Particle(pdg_code = 90003,
 
 eR__plus__ = eR__minus__.anti()
 
-muL__minus__ = Particle(pdg_code = 90005,
+muL__minus__ = Particle(pdg_code = 70013,
                        name = 'muL-',
                        antiname = 'muL+',
                        spin = 2,
@@ -118,7 +118,7 @@ muL__minus__ = Particle(pdg_code = 90005,
                        
 muL__plus__ = muL__minus__.anti()
 
-muR__minus__ = Particle(pdg_code = 90007,
+muR__minus__ = Particle(pdg_code = 80013,
                        name = 'muR-',
                        antiname = 'muR+',
                        spin = 2,
@@ -137,7 +137,7 @@ muR__plus__ = muR__minus__.anti()
 
 # W boson included since MadEvent relies on its mass to determine couplings
 
-W__plus__ = Particle(pdg_code = 24,
+W__plus__ = Particle(pdg_code = 90025,
                      name = 'W+',
                      antiname = 'W-',
                      spin = 3,
@@ -151,3 +151,69 @@ W__plus__ = Particle(pdg_code = 24,
                      LeptonNumber = 0,
                      Y = 0)
 
+W__minus__ = W__plus__.anti()
+
+
+veL = Particle(pdg_code = 70012,
+              name = 'veL',
+              antiname = 'veL~',
+              spin = 2,
+              color = 1,
+              mass = Param.ZERO,
+              width = Param.ZERO,
+              texname = 'veL',
+              antitexname = 'veL~',
+              charge = 0,
+              GhostNumber = 0,
+              LeptonNumber = 1,
+              Y = 0)
+
+veL__tilde__ = veL.anti()
+
+veR = Particle(pdg_code = 80012,
+              name = 'veR',
+              antiname = 'veR~',
+              spin = 2,
+              color = 1,
+              mass = Param.ZERO,
+              width = Param.ZERO,
+              texname = 'veR',
+              antitexname = 'veR~',
+              charge = 0,
+              GhostNumber = 0,
+              LeptonNumber = 1,
+              Y = 0)
+
+veR__tilde__ = veR.anti()
+
+vmL = Particle(pdg_code = 70014,
+              name = 'vmL',
+              antiname = 'vmL~',
+              spin = 2,
+              color = 1,
+              mass = Param.ZERO,
+              width = Param.ZERO,
+              texname = 'vmL',
+              antitexname = 'vmL~',
+              charge = 0,
+              GhostNumber = 0,
+              LeptonNumber = 1,
+              Y = 0)
+
+vmL__tilde__ = vmL.anti()
+
+vmR = Particle(pdg_code = 80014,
+              name = 'vmR',
+              antiname = 'vmR~',
+              spin = 2,
+              color = 1,
+              mass = Param.ZERO,
+              width = Param.ZERO,
+              texname = 'vmR',
+              antitexname = 'vmR~',
+              charge = 0,
+              GhostNumber = 0,
+              LeptonNumber = 1,
+              Y = 0)
+
+vmR__tilde__ = vmR.anti()

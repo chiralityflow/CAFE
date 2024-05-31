@@ -95,3 +95,27 @@ V_12 = Vertex(name = 'V_12',
               color = [ '1' ],
               lorentz = [ L.LRV1 ],
               couplings = {(0,0):C.GC_3})
+
+V_14 = Vertex(name = 'V_13',
+               particles = [ P.eR__plus__, P.veL, P.W__minus__ ],
+               color = [ '1' ],
+               lorentz = [ L.RLV2 ],
+               couplings = {(0,0):C.GC_40})
+
+V_16 = Vertex(name = 'V_14',
+               particles = [ P.muR__plus__, P.vmL, P.W__minus__ ],
+               color = [ '1' ],
+               lorentz = [ L.RLV2 ],
+               couplings = {(0,0):C.GC_40})
+
+V_18 = Vertex(name = 'V_15',
+                particles = [ P.veR__tilde__, P.eL__minus__, P.W__plus__ ],
+                color = [ '1' ],
+                lorentz = [ L.RLV2 ],
+                couplings={(0,0):C.GC_40})
+
+V_20 = Vertex(name = 'V_26',
+                particles = [ P.vmR__tilde__, P.muL__minus__, P.W__plus__ ],
+                color = [ '1' ],
+                lorentz = [ L.RLV2 ],
+                couplings={(0,0):C.GC_40})

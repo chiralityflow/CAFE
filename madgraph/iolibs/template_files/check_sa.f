@@ -71,22 +71,22 @@ c
          ENDIF
       ENDIF
 
-      call printout()
+      ! call printout()
 
       CALL GET_MOMENTA(SQRTS,PMASS,P)	
 c
 c	  write the information on the four momenta 
 c
-      write (*,*)
-      write (*,*) " Phase space point:"
-      write (*,*)
-      write (*,*) "-----------------------------------------------------------------------------"
-      write (*,*)  "n        E             px             py              pz               m "
-      do i=1,nexternal
-         write (*,'(i2,1x,5e15.7)') i, P(0,i),P(1,i),P(2,i),P(3,i), 
-     .dsqrt(dabs(DOT(p(0,i),p(0,i))))
-      enddo
-      write (*,*) "-----------------------------------------------------------------------------"
+!       write (*,*)
+!       write (*,*) " Phase space point:"
+!       write (*,*)
+!       write (*,*) "-----------------------------------------------------------------------------"
+!       write (*,*)  "n        E             px             py              pz               m "
+!       do i=1,nexternal
+!          write (*,'(i2,1x,5e15.7)') i, P(0,i),P(1,i),P(2,i),P(3,i), 
+!      .dsqrt(dabs(DOT(p(0,i),p(0,i))))
+!       enddo
+!       write (*,*) "-----------------------------------------------------------------------------"
 
 c     
 c     Now we can call the matrix element!
@@ -94,8 +94,9 @@ c
       CALL SMATRIX(P,MATELEM)
 c
 
-      write (*,*) "Matrix element = ", MATELEM, " GeV^",-(2*nexternal-8)	
-      write (*,*) "-----------------------------------------------------------------------------"
+      write (*,*) MATELEM, " GeV^",-(2*nexternal-8)	
+      ! write (*,*) "Matrix element = ", MATELEM, " GeV^",-(2*nexternal-8)	
+      ! write (*,*) "-----------------------------------------------------------------------------"
 
 
 cc
@@ -163,7 +164,7 @@ C         LOCAL
          mom=dsqrt(mom)
          e1=DSQRT(mom**2+m1**2)
          e2=DSQRT(mom**2+m2**2)
-         write (*,*) e1+e2,mom
+      !    write (*,*) e1+e2,mom
 
          if(nincoming.eq.2) then
 

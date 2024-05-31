@@ -32,6 +32,22 @@ RRV1 = Lorentz(name = 'RRV1',
                spins = [ 2, 2, 3],
                structure = 'Gamma(3,2,-1)*ProjP(-1,1)' )
 
+LRV2 = Lorentz(name = 'LRV2',
+               spins = [ 2, 2, 3 ],
+               structure = 'Gamma(3,2,-1)*ProjM(-1,1)')
+
+RLV2 = Lorentz(name = 'RLV2',
+               spins = [ 2, 2, 3 ],
+               structure = 'Gamma(3,2,-1)*ProjM(-1,1)')
+
+LLV2 = Lorentz(name = 'LRV2',
+               spins = [ 2, 2, 3 ],
+               structure = 'Gamma(3,2,-1)*ProjM(-1,1)')
+
+
+RRV2 = Lorentz(name = 'RRV2',
+               spins = [ 2, 2, 3 ],
+               structure = 'Gamma(3,2,-1)*ProjM(-1,1)')
 
 
 

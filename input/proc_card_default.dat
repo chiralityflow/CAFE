@@ -24,6 +24,10 @@ define e- = el- er-
 define e+ = el+ er+
 define mu- = mul- mur-
 define mu+ = mul+ mur+
+define ve = vel ver
+define ve~ = vel~ ver~
+define vm = vml vmr
+define vm~ = vml~ vmr~
 # Specify process(es) to run
 ##generate p p > e- ve~ @1
 #add process p p > e- ve~ j @2

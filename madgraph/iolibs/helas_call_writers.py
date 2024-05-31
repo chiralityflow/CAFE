@@ -311,7 +311,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
         ref_mom = wavefunction.get('ref_mom')
         
         # AL: update LH spinor wavefunction
-        if pdg_code in [90001, 90005]:
+        if pdg_code in [70012, 70014, 70011, 70013]:
             # Change in/out label to left label
             call = call[:5] + 'L' + call[6:]
             
@@ -325,7 +325,7 @@ class HelasCallWriter(base_objects.PhysicsObject):
                 call = call.replace(io_old, io_new)
         
         # AL: update RH spinor wavefunction
-        elif pdg_code in [90003, 90007]:
+        elif pdg_code in [80012, 80014, 80011, 80013]:
             # Change in/out label to right label            
             call = call[:5] + 'R' + call[6:]
         

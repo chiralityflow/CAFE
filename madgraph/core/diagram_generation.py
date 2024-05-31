@@ -718,22 +718,22 @@ class Amplitude(base_objects.PhysicsObject):
             # AL: TODO: Update this to write a function which automatically finds 
             # all chiral particles and changes the ref_dict_to0 for them
             # AL: TODO: make this only occur if it's chirality flow? Or will this not affect normal madgraph?
-            ref_dict_to0.pop((90001,-90001),None)
-            ref_dict_to0[(90001,-90003)] = [0]
-            ref_dict_to0.pop((-90001,90001),None)
-            ref_dict_to0[(-90001,90003)] = [0]
-            ref_dict_to0.pop((90003,-90003),None)
-            ref_dict_to0[(90003,-90001)] = [0]
-            ref_dict_to0.pop((-90003,90003),None)
-            ref_dict_to0[(-90003,90001)] = [0]
-            ref_dict_to0.pop((90005,-90005),None)
-            ref_dict_to0[(90005,-90007)] = [0]
-            ref_dict_to0.pop((-90005,90005),None)
-            ref_dict_to0[(-90005,90007)] = [0]
-            ref_dict_to0.pop((90007,-90007),None)
-            ref_dict_to0[(90007,-90005)] = [0]
-            ref_dict_to0.pop((-90007,90007),None)
-            ref_dict_to0[(-90007,90005)] = [0]
+            ref_dict_to0.pop((70011,-70011),None)
+            ref_dict_to0[(70011,-80011)] = [0]
+            ref_dict_to0.pop((-70011,70011),None)
+            ref_dict_to0[(-70011,80011)] = [0]
+            ref_dict_to0.pop((80011,-80011),None)
+            ref_dict_to0[(80011,-70011)] = [0]
+            ref_dict_to0.pop((-80011,80011),None)
+            ref_dict_to0[(-80011,70011)] = [0]
+            ref_dict_to0.pop((70013,-70013),None)
+            ref_dict_to0[(70013,-80013)] = [0]
+            ref_dict_to0.pop((-70013,70013),None)
+            ref_dict_to0[(-70013,80013)] = [0]
+            ref_dict_to0.pop((80013,-80013),None)
+            ref_dict_to0[(80013,-70013)] = [0]
+            ref_dict_to0.pop((-80013,80013),None)
+            ref_dict_to0[(-80013,70013)] = [0]
 
             reduced_leglist = self.reduce_leglist(leglist,
                                                   max_multi_to1,
@@ -1024,14 +1024,14 @@ class Amplitude(base_objects.PhysicsObject):
         found_left_ferm = False
         found_right_ferm = False
         for leg in ext_legs:
-            if abs(leg.get('id')) in [90001, 90005] and not found_left_ferm:
+            if abs(leg.get('id')) in [70011, 70013] and not found_left_ferm:
                 left_ferm = copy.copy(leg)
                 # if incoming particle, flip to outgoing id
                 if left_ferm.get('state') == False:
                     left_ferm['id'] = -left_ferm['id']
                 found_left_ferm = True
         
-            elif abs(leg.get('id')) in [90003, 90007] and not found_right_ferm:
+            elif abs(leg.get('id')) in [80011, 80013] and not found_right_ferm:
                 right_ferm = copy.copy(leg)
                 # if incoming particle, flip to outgoing id
                 if right_ferm.get('state') == False:
@@ -1387,22 +1387,22 @@ class Amplitude(base_objects.PhysicsObject):
                     reduced_list.append([l[0] for l in new_leg_vert_ids])
      
                     # AL: change left <-> right for chiral particles
-                    if new_leg_vert_ids[0][0]['id'] == -90003: 
-                        new_leg_vert_ids[0][0]['id'] = -90001
-                    elif new_leg_vert_ids[0][0]['id'] == -90001: 
-                        new_leg_vert_ids[0][0]['id'] = -90003
-                    elif new_leg_vert_ids[0][0]['id'] == 90003: 
-                        new_leg_vert_ids[0][0]['id'] = 90001
-                    elif new_leg_vert_ids[0][0]['id'] == 90001: 
-                        new_leg_vert_ids[0][0]['id'] = 90003
-                    elif new_leg_vert_ids[0][0]['id'] == -90005: 
-                        new_leg_vert_ids[0][0]['id'] = -90007
-                    elif new_leg_vert_ids[0][0]['id'] == -90007: 
-                        new_leg_vert_ids[0][0]['id'] = -90005
-                    elif new_leg_vert_ids[0][0]['id'] == 90005: 
-                        new_leg_vert_ids[0][0]['id'] = 90007
-                    elif new_leg_vert_ids[0][0]['id'] == 90007: 
-                        new_leg_vert_ids[0][0]['id'] = 90005
+                    if new_leg_vert_ids[0][0]['id'] == -70011: 
+                        new_leg_vert_ids[0][0]['id'] = -80011
+                    elif new_leg_vert_ids[0][0]['id'] == -80011: 
+                        new_leg_vert_ids[0][0]['id'] = -70011
+                    elif new_leg_vert_ids[0][0]['id'] == 70011: 
+                        new_leg_vert_ids[0][0]['id'] = 80011
+                    elif new_leg_vert_ids[0][0]['id'] == 80011: 
+                        new_leg_vert_ids[0][0]['id'] = 70011
+                    elif new_leg_vert_ids[0][0]['id'] == -70013: 
+                        new_leg_vert_ids[0][0]['id'] = -80013
+                    elif new_leg_vert_ids[0][0]['id'] == -80013: 
+                        new_leg_vert_ids[0][0]['id'] = -70013
+                    elif new_leg_vert_ids[0][0]['id'] == 70013: 
+                        new_leg_vert_ids[0][0]['id'] = 80013
+                    elif new_leg_vert_ids[0][0]['id'] == 80013: 
+                        new_leg_vert_ids[0][0]['id'] = 70013
 
                     
                     # Create and add the corresponding vertex
