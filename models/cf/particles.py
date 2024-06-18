@@ -153,6 +153,19 @@ W__plus__ = Particle(pdg_code = 90025,
 
 W__minus__ = W__plus__.anti()
 
+Z = Particle(pdg_code = 90026,
+             name = 'Z',
+             antiname = 'Z',
+             spin = 3,
+             color = 1,
+             mass = Param.MZ,
+             width = Param.WZ,
+             texname = 'Z',
+             antitexname = 'Z',
+             charge = 0,
+             GhostNumber = 0,
+             LeptonNumber = 0,
+             Y = 0)
 
 veL = Particle(pdg_code = 70012,
               name = 'veL',
