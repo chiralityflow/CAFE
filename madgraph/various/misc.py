@@ -1589,25 +1589,25 @@ def vertex_replacer(text, vertex):
     #sprint("Replaced some files")
     text_copy = text
     linebreaks = get_symbols(text_copy, '\n')
-    if (vertex == 'LRV1_0') or (vertex == 'LRV2_0'):
+    if (vertex == 'LRV1_0') or (vertex == 'LRV2_0') or (vertex == 'LRV4_0'):
         equality = get_symbols(text_copy, '=')
         LRV1_0_replace = '      VERTEX = -COUP*{}*{}\n'.format(left_prod('F1','V3'),right_prod('V3','F2'))
         text_copy = text_copy[:linebreaks[-10]+1] + text_copy[linebreaks[-9]+1:linebreaks[-7]+1]\
              + LRV1_0_replace + text_copy[linebreaks[-4]+1:]
-    if (vertex == 'RLV1_0') or (vertex == 'RLV2_0'):
+    if (vertex == 'RLV1_0') or (vertex == 'RLV2_0') or (vertex == 'RLV4_0'):
         equality = get_symbols(text_copy, '=')
         RLV1_0_replace = '      VERTEX = -COUP*{}*{}\n'.format(left_prod('F2','V3'),right_prod('V3','F1'))
         text_copy = text_copy[:linebreaks[-10]+1] + text_copy[linebreaks[-9]+1:linebreaks[-7]+1]\
              + RLV1_0_replace + text_copy[linebreaks[-4]+1:]
-    if (vertex == 'LRV1P0_3') or (vertex == 'LRV2_3'):
-        LRV1P0_3_replace = '      V3(3) = 2*DENOM*F1(4)\n'\
-            + '      V3(4) = -2*DENOM*F1(3)\n'\
+    if (vertex == 'LRV1P0_3') or (vertex == 'LRV2_3') or (vertex == 'LRV4_3'):
+        LRV1P0_3_replace = '      V3(3) = 2.*DENOM*F1(4)\n'\
+            + '      V3(4) = -2.*DENOM*F1(3)\n'\
             + '      V3(5) = F2(6)\n'\
-            + '      V3(6) = -1*F2(5)\n'
+            + '      V3(6) = -1.*F2(5)\n'
         text_copy = text_copy[:linebreaks[-8]+1] + LRV1P0_3_replace + text_copy[linebreaks[-4]+1:]
-    if (vertex == 'RLV1P0_3') or (vertex == 'RLV2_3'):
-        RLV1P0_3_replace = '      V3(3) = 2*DENOM*F2(4)\n'\
-            + '      V3(4) = -2*DENOM*F2(3)\n'\
+    if (vertex == 'RLV1P0_3') or (vertex == 'RLV2_3') or (vertex == 'RLV4_3'):
+        RLV1P0_3_replace = '      V3(3) = 2.*DENOM*F2(4)\n'\
+            + '      V3(4) = -2.*DENOM*F2(3)\n'\
             + '      V3(5) = F1(6)\n'\
             + '      V3(6) = -1*F1(5)\n'
         text_copy = text_copy[:linebreaks[-8]+1] + RLV1P0_3_replace + text_copy[linebreaks[-4]+1:]
@@ -1669,7 +1669,7 @@ def postex_vertex_replacer(working_dir):
     # open and rewrite the file using vertex_replacer
     vertex_list = [ 'LRV1_0.f', 'RLV1_0.f', 'LRV1_3.f', 'RLV1_3.f',\
         'LRV1P0_3.f', 'RLV1P0_3.f', 'LLV1_1.f', 'LLV1_2.f', 'RRV1_1.f', 'RRV1_2.f',\
-        'LRV2_0.f', 'RLV2_0.f', 'LRV2_3.f', 'RLV2_3.f']
+        'LRV2_0.f', 'RLV2_0.f', 'LRV2_3.f', 'RLV2_3.f', 'LRV4_0.f', 'RLV4_0.f', 'LRV4_3.f', 'RLV4_3.f']
     onlyfiles = [f for f in os.listdir(write_dir) if os.path.isfile(os.path.join(write_dir, f))]
     konlyfiles = [f[:4] + f[-4:] for f in onlyfiles]
     for vertex in vertex_list:

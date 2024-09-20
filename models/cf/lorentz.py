@@ -32,9 +32,13 @@ RRV1 = Lorentz(name = 'RRV1',
                spins = [ 2, 2, 3],
                structure = 'Gamma(3,2,-1)*ProjP(-1,1)' )
 
+# ZW: Note -- mathematically LRV2/RLV2 and LRV4/RLV4 are equal to  LRV1/RLV1, 
+# (up to a normalisation), but we keep the name here to clarify
+# their correspondence to upstream MG HELAS routines, where FFV2 through FFV5 are used for EW interactions
+# Maybe combinations later can be used for simplifications, but for now we keep them separate
 LRV2 = Lorentz(name = 'LRV2',
                spins = [ 2, 2, 3 ],
-               structure = 'Gamma(3,2,-1)*ProjM(-1,1)')
+               structure = 'Gamma(3,2,-1)*ProjP(-1,1)')
 
 RLV2 = Lorentz(name = 'RLV2',
                spins = [ 2, 2, 3 ],
@@ -42,11 +46,11 @@ RLV2 = Lorentz(name = 'RLV2',
 
 LRV4 = Lorentz(name = 'LRV4',
                spins = [ 2, 2, 3 ],
-               structure = 'Gamma(3,2,-1)*ProjM(-1,1) + 2*Gamma(3,2,-1)*ProjP(-1,1)')
+               structure = '2*Gamma(3,2,-1)*ProjP(-1,1)')
 
 RLV4 = Lorentz(name = 'RLV4',
                spins = [ 2, 2, 3 ],
-               structure = 'Gamma(3,2,-1)*ProjM(-1,1) + 2*Gamma(3,2,-1)*ProjP(-1,1)')
+               structure = '2*Gamma(3,2,-1)*ProjM(-1,1)')
 
 LLV2 = Lorentz(name = 'LRV2',
                spins = [ 2, 2, 3 ],

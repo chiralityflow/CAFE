@@ -209,6 +209,14 @@ GC_50 = Coupling(name = 'GC_50',
                  value = '-(cw*ee*complex(0,1))/(2.*sw)',
                  order = {'QED':1})
 
+# ZW: EW couplings normalised to chiF have 200 added to their value, to ensure they
+# do not overlap with original MG couplings
+# ZW: GC_250 is technically GC50 + GC59, not just a chiF-normalised GC50
+# times an additional factor sqrt(2) to normalise to chiF
+GC_250 = Coupling(name = 'GC_250',
+                 value = '-(cw*ee*complex(0,1))/(cmath.sqrt(2)*sw) + (ee*complex(0,1)*sw)/(cmath.sqrt(2)*cw)',
+                 order = {'QED':1})
+
 GC_51 = Coupling(name = 'GC_51',
                  value = '(cw*ee*complex(0,1))/(2.*sw)',
                  order = {'QED':1})
@@ -243,6 +251,11 @@ GC_58 = Coupling(name = 'GC_58',
 
 GC_59 = Coupling(name = 'GC_59',
                  value = '(ee*complex(0,1)*sw)/(2.*cw)',
+                 order = {'QED':1})
+
+# ZW: GC_259 is technically 2*sqrt(2)*GC59, i.e a chiF normalised version of GC59
+GC_259 = Coupling(name = 'GC_259',
+                 value = '(cmath.sqrt(2)*ee*complex(0,1)*sw)/(cw)',
                  order = {'QED':1})
 
 GC_60 = Coupling(name = 'GC_60',

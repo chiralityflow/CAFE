@@ -96,6 +96,8 @@ V_12 = Vertex(name = 'V_12',
               lorentz = [ L.LRV2 ],
               couplings = {(0,0):C.GC_3})
 
+# ZW: Note -- W bosons only couple by RLV vertices, since the LRV vertices are proportional to
+# the P_R projection, which has coupling 0 to the W boson
 V_13 = Vertex(name = 'V_13',
                particles = [ P.eR__plus__, P.veL, P.W__minus__ ],
                color = [ '1' ],
@@ -103,91 +105,55 @@ V_13 = Vertex(name = 'V_13',
                couplings = {(0,0):C.GC_40})
 
 V_14 = Vertex(name = 'V_14',
-               particles = [ P.eL__plus__, P.veR, P.W__minus__ ],
-               color = [ '1' ],
-               lorentz = [ L.LRV2 ],
-               couplings = {(0,0):C.GC_40})
-
-V_15 = Vertex(name = 'V_15',
                particles = [ P.muR__plus__, P.vmL, P.W__minus__ ],
                color = [ '1' ],
                lorentz = [ L.RLV2 ],
                couplings = {(0,0):C.GC_40})
 
-V_16 = Vertex(name = 'V_16',
-               particles = [ P.muL__plus__, P.vmR, P.W__minus__ ],
-               color = [ '1' ],
-               lorentz = [ L.LRV2 ],
-               couplings = {(0,0):C.GC_40})
-
-V_17 = Vertex(name = 'V_17',
+V_15 = Vertex(name = 'V_15',
                 particles = [ P.veR__tilde__, P.eL__minus__, P.W__plus__ ],
                 color = [ '1' ],
                 lorentz = [ L.RLV2 ],
                 couplings={(0,0):C.GC_40})
 
-V_18 = Vertex(name = 'V_18',
-                particles = [ P.veL__tilde__, P.eR__minus__, P.W__plus__ ],
-                color = [ '1' ],
-                lorentz = [ L.LRV2 ],
-                couplings={(0,0):C.GC_40})
-
-V_29 = Vertex(name = 'V_19',
+V_16 = Vertex(name = 'V_16',
                 particles = [ P.vmR__tilde__, P.muL__minus__, P.W__plus__ ],
                 color = [ '1' ],
                 lorentz = [ L.RLV2 ],
                 couplings={(0,0):C.GC_40})
 
-V_20 = Vertex(name = 'V_20',
-                particles = [ P.vmL__tilde__, P.muR__minus__, P.W__plus__ ],
-                color = [ '1' ],
-                lorentz = [ L.LRV2 ],
-                couplings={(0,0):C.GC_40})
-
-V_21 = Vertex(name = 'V_21',
+V_17 = Vertex(name = 'V_17',
                particles = [ P.veR__tilde__, P.veL, P.Z ],
                color = [ '1' ],
                lorentz = [ L.RLV2 ],
                couplings = {(0,0):C.GC_62})
 
-V_22 = Vertex(name = 'V_22',
-               particles = [ P.veL__tilde__, P.veR, P.Z ],
-               color = [ '1' ],
-               lorentz = [ L.LRV2 ],
-               couplings = {(0,0):C.GC_62})
-            
-V_23 = Vertex(name = 'V_23',
+V_18 = Vertex(name = 'V_18',
                particles = [ P.vmR__tilde__, P.vmL, P.Z ],
                color = [ '1' ],
                lorentz = [ L.RLV2 ],
                couplings = {(0,0):C.GC_62})
 
-V_24 = Vertex(name = 'V_24',
-               particles = [ P.vmL__tilde__, P.vmR, P.Z ],
-               color = [ '1' ],
-               lorentz = [ L.LRV2 ],
-               couplings = {(0,0):C.GC_62})
-
-V_25 = Vertex(name = 'V_25',
+V_19 = Vertex(name = 'V_19',
                particles = [ P.eL__plus__, P.eR__minus__, P.Z ],
                color = [ '1' ],
-               lorentz = [ L.LRV2, L.LRV4 ],
-               couplings = {(0,0):C.GC_50,(0,1):C.GC_59})
+               lorentz = [ L.LRV4 ],
+               couplings = {(0,0):C.GC_250})
             
-V_26 = Vertex(name = 'V_26',
+V_20 = Vertex(name = 'V_20',
                particles = [ P.eR__plus__, P.eL__minus__, P.Z ],
                color = [ '1' ],
-               lorentz = [ L.RLV2, L.RLV4 ],
-               couplings = {(0,0):C.GC_50,(0,1):C.GC_59})
+               lorentz = [ L.RLV4 ],
+               couplings = {(0,0):C.GC_259})
 
-V_27 = Vertex(name = 'V_27',
+V_21 = Vertex(name = 'V_27',
                particles = [ P.muL__plus__, P.muR__minus__, P.Z ],
                color = [ '1' ],
-               lorentz = [ L.LRV2, L.LRV4 ],
-               couplings = {(0,0):C.GC_50,(0,1):C.GC_59})
+               lorentz = [ L.LRV4 ],
+               couplings = {(0,0):C.GC_250})
 
-V_28 = Vertex(name = 'V_28',
+V_22 = Vertex(name = 'V_28',
                particles = [ P.muR__plus__, P.muL__minus__, P.Z ],
                color = [ '1' ],
-               lorentz = [ L.RLV2, L.RLV4 ],
-               couplings = {(0,0):C.GC_50,(0,1):C.GC_59})
+               lorentz = [ L.RLV4 ],
+               couplings = {(0,0):C.GC_259})
