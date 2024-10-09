@@ -126,13 +126,13 @@ V_17 = Vertex(name = 'V_17',
                particles = [ P.veR__tilde__, P.veL, P.Z ],
                color = [ '1' ],
                lorentz = [ L.RLV2 ],
-               couplings = {(0,0):C.GC_62})
+               couplings = {(0,0):C.GC_262})
 
 V_18 = Vertex(name = 'V_18',
                particles = [ P.vmR__tilde__, P.vmL, P.Z ],
                color = [ '1' ],
                lorentz = [ L.RLV2 ],
-               couplings = {(0,0):C.GC_62})
+               couplings = {(0,0):C.GC_262})
 
 V_19 = Vertex(name = 'V_19',
                particles = [ P.eL__plus__, P.eR__minus__, P.Z ],

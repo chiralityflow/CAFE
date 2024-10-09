@@ -270,6 +270,16 @@ GC_62 = Coupling(name = 'GC_62',
                  value = '(cw*ee*complex(0,1))/(2.*sw) + (ee*complex(0,1)*sw)/(2.*cw)',
                  order = {'QED':1})
 
+#GC_262 = Coupling(name = 'GC_262',
+#                 value = '(cw*ee*complex(0,1))/(cmath.sqrt(2)*sw) + (ee*complex(0,1)*sw)/(cmath.sqrt(2)*cw)',
+#                 order = {'QED':1})
+
+
+# AW: testing replacement coupling for GC_62 in CF 
+GC_262 = Coupling(name = 'GC_262',
+                 value = '(cw*ee*complex(0,1))/(2.*sw) + (ee*complex(0,1)*sw)/(2.*cw)',
+                 order = {'QED':1})
+
 GC_63 = Coupling(name = 'GC_63',
                  value = '(cw*ee**2*complex(0,1))/sw - (ee**2*complex(0,1)*sw)/cw',
                  order = {'QED':2})

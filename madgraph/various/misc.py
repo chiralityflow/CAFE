@@ -1605,12 +1605,21 @@ def vertex_replacer(text, vertex):
             + '      V3(5) = F2(6)\n'\
             + '      V3(6) = -1.*F2(5)\n'
         text_copy = text_copy[:linebreaks[-8]+1] + LRV1P0_3_replace + text_copy[linebreaks[-4]+1:]
-    if (vertex == 'RLV1P0_3') or (vertex == 'RLV2_3') or (vertex == 'RLV4_3'):
+    if (vertex == 'RLV1P0_3') or (vertex == 'RLV2_3'):
         RLV1P0_3_replace = '      V3(3) = 2.*DENOM*F2(4)\n'\
             + '      V3(4) = -2.*DENOM*F2(3)\n'\
             + '      V3(5) = F1(6)\n'\
-            + '      V3(6) = -1*F1(5)\n'
+            + '      V3(6) = -1.*F1(5)\n'
         text_copy = text_copy[:linebreaks[-8]+1] + RLV1P0_3_replace + text_copy[linebreaks[-4]+1:]
+        sprint(text_copy)
+    if (vertex == 'RLV4_3'):
+        sprint(text_copy)
+        RLV1P0_3_replace = '      V3(3) = 2.*DENOM*F2(4)\n'\
+            + '      V3(4) = -2.*DENOM*F2(3)\n'\
+            + '      V3(5) = F1(6)\n'\
+            + '      V3(6) = -1.*F1(5)\n'
+        text_copy = text_copy[:linebreaks[-11]+1] + RLV1P0_3_replace + text_copy[linebreaks[-4]+1:]
+        sprint(text_copy)
     if (vertex == 'LLV1_1'): 
         spinor = pbar_ket('V3','(-1)*P1')
         LLV1_1_replace = '      DENOM = COUP/(P1(0)**2-P1(1)**2-P1(2)**2-P1(3)**2)\n'\
