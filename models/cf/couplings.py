@@ -169,6 +169,10 @@ GC_40 = Coupling(name = 'GC_40',
                  value = '(ee*complex(0,1))/(sw*cmath.sqrt(2))',
                  order = {'QED':1})
 
+GC_240 = Coupling(name = 'GC_240',
+                 value = '(ee)/(sw*cmath.sqrt(2))',
+                 order = {'QED':1})
+
 GC_41 = Coupling(name = 'GC_41',
                  value = '(CKM1x1*ee*complex(0,1))/(sw*cmath.sqrt(2))',
                  order = {'QED':1})

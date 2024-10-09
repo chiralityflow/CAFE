@@ -102,25 +102,25 @@ V_13 = Vertex(name = 'V_13',
                particles = [ P.eR__plus__, P.veL, P.W__minus__ ],
                color = [ '1' ],
                lorentz = [ L.RLV2 ],
-               couplings = {(0,0):C.GC_40})
+               couplings = {(0,0):C.GC_240})
 
 V_14 = Vertex(name = 'V_14',
                particles = [ P.muR__plus__, P.vmL, P.W__minus__ ],
                color = [ '1' ],
                lorentz = [ L.RLV2 ],
-               couplings = {(0,0):C.GC_40})
+               couplings = {(0,0):C.GC_240})
 
 V_15 = Vertex(name = 'V_15',
                 particles = [ P.veR__tilde__, P.eL__minus__, P.W__plus__ ],
                 color = [ '1' ],
                 lorentz = [ L.RLV2 ],
-                couplings={(0,0):C.GC_40})
+                couplings={(0,0):C.GC_240})
 
 V_16 = Vertex(name = 'V_16',
                 particles = [ P.vmR__tilde__, P.muL__minus__, P.W__plus__ ],
                 color = [ '1' ],
                 lorentz = [ L.RLV2 ],
-                couplings={(0,0):C.GC_40})
+                couplings={(0,0):C.GC_240})
 
 V_17 = Vertex(name = 'V_17',
                particles = [ P.veR__tilde__, P.veL, P.Z ],
